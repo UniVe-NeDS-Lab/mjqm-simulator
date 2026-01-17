@@ -218,7 +218,7 @@ from_toml(const fs::path& input_file, const std::vector<std::multimap<std::strin
 Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.classes.size())) {
     this->n = static_cast<int>(conf.cores);
     this->w = conf.policy->get_w(); // TODO should transform all branches that need it here into methods of the policies
-    this->rep_free_servers_distro = std::vector<double>(conf.cores + 1);
+    // this->rep_free_servers_distro = std::vector<double>(conf.cores + 1);
     this->fel.resize(nclasses * 2);
     this->job_fel.resize(nclasses * 2);
     this->jobs_inservice.resize(nclasses);

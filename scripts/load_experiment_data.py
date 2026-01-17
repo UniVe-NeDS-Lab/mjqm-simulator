@@ -52,9 +52,7 @@ policies_wins = {
 
 
 ################################ PANDAS CONFIGS ################################
-policies_dtype = pd.api.types.CategoricalDtype(
-    categories=policies_keys, ordered=True
-)
+policies_dtype = pd.api.types.CategoricalDtype(categories=policies_keys, ordered=True)
 stability_check_mapping = {
     "0": True,
     "1": False,
@@ -228,9 +226,7 @@ def compute_utilisation(dfs, Ts, exp, n_cores=None):
                 f"{Fore.YELLOW}{Style.BRIGHT}Instability region not reached for {idx} with maximum arrival rate tested: {max_arrival_rates[idx]}"
             )
 
-    actual_util = pd.Series(
-        pd.NA, index=asymptotes.index, name="system_utilisation"
-    )
+    actual_util = pd.Series(pd.NA, index=asymptotes.index, name="system_utilisation")
     for idx, df_select in dfs.groupby(level=exp):
         summ_util = 0
         asymptote = asymptotes[idx]
@@ -309,10 +305,14 @@ def load_experiment_data(folder, n_cores=None):
     return dfs, Ts, exp, asymptotes, actual_util
 
 
-if __name__ == "__main__":
+def main():
     folder = select_experiment(sys.argv[1] if len(sys.argv) > 1 else None)
     if not folder:
         exit(0)
-    dfs, Ts, exp, asymptotes, actual_util = load_experiment_data(
-        folder, n_cores=2048
-    )
+    dfs, Ts, exp, asymptotes, actual_util = load_experiment_data(folder, n_cores=2048)
+
+    return dfs, Ts, exp, asymptotes, actual_util
+
+
+if __name__ == "__main__":
+    main()

@@ -1,6 +1,6 @@
 # MJQM simulator
 
-Simulator for Multiserver Job Queuing Model (MJQM)
+Simulator for Multiserver Job Queueing Model (MJQM)
 
 ## Prerequisites
 

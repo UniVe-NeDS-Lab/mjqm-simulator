@@ -171,11 +171,9 @@ app.layout = [
                     "border": "thin lightgrey solid",
                     "overflowX": "scroll",
                     "margin": "0 .5em",
-                    "flex": "1 0 100%"
+                    "flex": "1 0 100%",
                 },
-                parent_style={
-                    "flex": "1 0 50%"
-                },
+                parent_style={"flex": "1 0 50%"},
             ),
             dcc.Tabs(
                 id="y-axis-group",
@@ -214,11 +212,9 @@ app.layout = [
                     "border": "thin lightgrey solid",
                     "overflowX": "scroll",
                     "margin": "0 .5em",
-                    "flex": "1 0 100%"
+                    "flex": "1 0 100%",
                 },
-                parent_style={
-                    "flex": "1 0 50%"
-                },
+                parent_style={"flex": "1 0 50%"},
             ),
         ],
         target_components={
@@ -253,11 +249,7 @@ app.layout = [
                 ),
                 responsive=True,
                 mathjax=True,
-                style={
-                    "width": "100%",
-                    "height": "550px",
-                    "flex": "1 0 100%"
-                },
+                style={"width": "100%", "height": "550px", "flex": "1 0 100%"},
             ),
             # html.Br(),
             # dcc.Clipboard(target_id="structure"),

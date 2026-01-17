@@ -38,8 +38,11 @@ cols = [
     "purple",
     "darkgreen",
     "pink",
+    "brown",
+    "gray",
+    "orange",
 ]
-markers = ["P", "o", "v", "s", "X", "D", "H", "<", ">"]
+markers = ["P", "o", "v", "s", "X", "D", "H", "<", ">", "x", "p"]
 markers_plotly = [
     "cross",
     "circle",
@@ -50,6 +53,8 @@ markers_plotly = [
     "triangle-up",
     "triangle-left",
     "triangle-right",
+    "star",
+    "star-triangle-up",
 ]
 styles = ["solid", "dashdot", "dotted", "dashed", (0, (3, 5, 1, 5, 1, 5))]
 

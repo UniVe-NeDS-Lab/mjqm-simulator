@@ -66,8 +66,8 @@ public:
             e = 0;
         for (auto& e : preemption)
             e = 0;
-        for (auto& e : rep_free_servers_distro)
-            e = 0;
+        // for (auto& e : rep_free_servers_distro)
+        //     e = 0;
         for (auto& e : fel)
             e -= simtime;
 
@@ -355,9 +355,9 @@ public:
         }
 
         // outputFile.close();
-        for (auto& x : rep_free_servers_distro) {
-            x /= simtime;
-        }
+        // for (auto& x : rep_free_servers_distro) {
+        //     x /= simtime;
+        // }
 
         /*    std::ofstream outFree("freeserversDistro-nClasses" + std::to_string(this->nclasses) + "-N" +
            std::to_string(this->n) + "-Win" + std::to_string(this->w) + ".csv", std::ios::app);
@@ -411,7 +411,7 @@ private:
     double simtime = 0.0;
 
     // overall statistics
-    std::vector<double> rep_free_servers_distro;
+    // std::vector<double> rep_free_servers_distro;
 
     // statistics for single run
     std::vector<double> occupancy_buf;
@@ -709,7 +709,7 @@ private:
         }
         waste += (n - occ) * delta;
         viol += policy->get_violations_counter() * delta;
-        rep_free_servers_distro[policy->get_free_ser()] += delta;
+        // rep_free_servers_distro[policy->get_free_ser()] += delta;
 
         windowSize.push_back(policy->get_window_size() * delta);
     }

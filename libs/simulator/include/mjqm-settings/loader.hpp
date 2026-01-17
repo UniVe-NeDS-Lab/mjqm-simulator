@@ -141,7 +141,7 @@ inline Simulator::Simulator(const std::vector<double>& l, const std::vector<doub
         }
     }
     this->w = w;
-    this->rep_free_servers_distro = std::vector<double>(servers + 1);
+    // this->rep_free_servers_distro = std::vector<double>(servers + 1);
     this->fel.resize(sizes.size() * 2);
     this->job_fel.resize(sizes.size() * 2);
     this->jobs_inservice.resize(sizes.size());

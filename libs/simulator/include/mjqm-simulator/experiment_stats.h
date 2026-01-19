@@ -154,6 +154,7 @@ public:
     CollectedStat timings_tot{"Run Duration", true};
     CollectedStat phase_two_dur{"Phase Two Duration", true};
     CollectedStat phase_three_dur{"Phase Three Duration", true};
+    CollectedStat idle_period_prob{"Idle Period Probability", true};
     Stat warnings{"Stability Check", false};
     Stat lambda{"lambda", false};
 
@@ -171,6 +172,7 @@ public:
         editor(timings_tot);
         editor(phase_two_dur);
         editor(phase_three_dur);
+        editor(idle_period_prob);
         editor(warnings);
         editor(lambda);
         for (auto& cs : class_stats) {
@@ -191,6 +193,7 @@ public:
         visitor(timings_tot);
         visitor(phase_two_dur);
         visitor(phase_three_dur);
+        visitor(idle_period_prob);
         visitor(warnings);
         visitor(lambda);
         for (auto& cs : class_stats) {

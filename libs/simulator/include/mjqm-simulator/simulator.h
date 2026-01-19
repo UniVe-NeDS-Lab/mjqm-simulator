@@ -98,6 +98,7 @@ public:
         windowSize.clear();
         phase_two_duration = 0;
         phase_three_duration = 0;
+        idle_period = 0;
         viol_ctr = policy->get_violations_counter();
     }
 
@@ -161,6 +162,7 @@ public:
 
         stats->phase_two_dur.collect((phase_two_duration * 1.0) / simtime);
         stats->phase_three_dur.collect((phase_three_duration * 1.0) / job_seq_amount[1]);
+        stats->idle_period_prob.collect((idle_period * 1.0) / simtime);
     }
 
     void simulate(unsigned long nevents, unsigned int repetitions = 1) {
@@ -169,6 +171,7 @@ public:
         for (int i = 0; i < nclasses; ++i) {
             ClassStats& res = stats->class_stats.at(i);
             double lambda = 1. / this->arr_time_samplers[i]->get_mean();
+            lambda = l[i];
             res.lambda = lambda;
             tot_lambda += lambda;
         }
@@ -263,8 +266,7 @@ public:
                 }
             }
 
-            if (rep>0)
-                collect_run_statistics();
+            collect_run_statistics();
 
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
@@ -326,6 +328,7 @@ private:
     std::vector<std::list<double>> rawResponseTime;
 
     std::list<double> windowSize;
+    double idle_period;
 
     int viol_ctr;
 
@@ -505,9 +508,16 @@ private:
             completion[pos]++;
 
         double delta = fel[pos] - simtime;
+        int jobs_tot = 0;
         for (int i = 0; i < nclasses; i++) {
-            occupancy_buf[i] += policy->get_state_buf()[i] * delta;
-            occupancy_ser[i] += policy->get_state_ser()[i] * delta;
+            int state_buf = policy->get_state_buf()[i];
+            int state_ser = policy->get_state_ser()[i];
+            occupancy_buf[i] += state_buf * delta;
+            occupancy_ser[i] += state_ser * delta;
+            jobs_tot += state_buf + state_ser;
+        }
+        if (jobs_tot == 0) {
+            idle_period += delta;
         }
         unsigned int occ = 0;
         for (int i = 0; i < nclasses; i++) {

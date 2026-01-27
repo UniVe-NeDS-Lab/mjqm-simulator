@@ -17,7 +17,7 @@ from load_experiment_data import (
     load_experiment_data,
     load_experiments_list,
 )
-from plot_cells import prepare_cosmetics
+from plot_experiment import prepare_cosmetics
 
 base, available_experiments = load_experiments_list()
 
@@ -419,13 +419,29 @@ def show_main_plot(experiment, y_axis, y_group, selected_class):
         },
         template="plotly_white",
     )
+    # Merge legend items: set legendgroup and ensure names include utilisation percentage
     for idx in asymptotes.index:
-        fig.add_vline(
-            asymptotes[idx],
-            name=f"{actual_util[idx]:.1f}%",
-            legend="legend2",
+        pct_label = f"{actual_util[idx]:.1f}%"
+        # Update matching line traces to include percentage and group together
+        for tr in fig.data:
+            if tr.name == str(idx):
+                tr.legendgroup = str(idx)
+                tr.name = f"({pct_label}) {tr.name}"
+                tr.showlegend = True
+    y_min = dfs[dfs["stable"]][col].min()
+    y_max = dfs[dfs["stable"]][col].max()
+    # Add asymptote lines grouped with their corresponding policy traces, without separate legend items
+    for idx in asymptotes.index:
+        pct_label = f"{actual_util[idx]:.1f}%"
+        fig.add_scatter(
+            x=[asymptotes[idx], asymptotes[idx]],
+            y=[y_min, y_max],
+            mode="lines",
+            name=f"({pct_label}) {str(idx)}",
+            legendgroup=str(idx),
             line=dict(dash="dot", width=1, color=colors[idx]),
-            showlegend=True,
+            showlegend=False,
+            hoverinfo="skip",
         )
     fig.update_layout(
         title=dict(xanchor="center", x=0.5, yanchor="top"),
@@ -435,13 +451,7 @@ def show_main_plot(experiment, y_axis, y_group, selected_class):
             xanchor="left",
             x=0.01,
             title=None,
-        ),
-        legend2=dict(
-            yanchor="top",
-            y=0.99,
-            xanchor="center",
-            x=0.99,
-            title=None,
+            groupclick="togglegroup",
         ),
         hoversubplots="axis",
         hovermode="x unified",

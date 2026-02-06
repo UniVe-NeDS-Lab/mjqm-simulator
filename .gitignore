@@ -83,6 +83,7 @@ docs/generated/
 .venv/
 .ruff_cache/
 .spyproject/
+__pycache__/
 
 # NodeJS
 node_modules/

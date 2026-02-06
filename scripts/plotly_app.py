@@ -36,6 +36,12 @@ y_axis_mappings = dict(
         uom=" [s]",
         per_class=True,
     ),
+    power=dict(
+        column="Power",
+        label="Power (Knee)",
+        uom="",
+        per_class=False,
+    ),
     # run_duration=dict(
     #     column="Run Duration",
     #     label="Simulation Run Duration",
@@ -112,6 +118,13 @@ app.layout = [
                 id="display-data-table",
                 on=False,
                 label="Show data table",
+                labelPosition="top",
+                style=dict(margin="0 .5em"),
+            ),
+            daq.BooleanSwitch(
+                id="display-only-stable",
+                on=True,
+                label="Show only stable experiments",
                 labelPosition="top",
                 style=dict(margin="0 .5em"),
             ),
@@ -363,12 +376,13 @@ def only_overall_value(experiment, y_axis):
     Input("y-axis-value", "value"),
     Input("y-axis-group", "value"),
     Input("custom-class-selection", "value"),
+    Input("display-only-stable", "on"),
     running=[
         (Output("experiment-selection", "disabled"), True, False),
         (Output("custom-class-selection", "disabled"), True, False),
     ],
 )
-def show_main_plot(experiment, y_axis, y_group, selected_class):
+def show_main_plot(experiment, y_axis, y_group, selected_class, plot_stable):
     global dfs, Ts, exp, asymptotes, actual_util
     if experiment is None:
         return None, dict(visibility="hidden")
@@ -394,8 +408,14 @@ def show_main_plot(experiment, y_axis, y_group, selected_class):
 
     colors, marks, marks_plotly = prepare_cosmetics(dfs, exp)
     dfs.set_index(["label"], drop=False, inplace=True)
+    df_plot = dfs[dfs["stable"]] if plot_stable else dfs
+    no_stable = False
+    if plot_stable and df_plot.empty:
+        # Fallback when no stable rows are present for the current selection
+        df_plot = dfs
+        no_stable = True
     fig = px.line(
-        dfs[dfs["stable"]],
+        df_plot,
         "arrival.rate",
         col,
         color="label",
@@ -428,16 +448,14 @@ def show_main_plot(experiment, y_axis, y_group, selected_class):
                 tr.legendgroup = str(idx)
                 tr.name = f"({pct_label}) {tr.name}"
                 tr.showlegend = True
-    y_min = dfs[dfs["stable"]][col].min()
-    y_max = dfs[dfs["stable"]][col].max()
+    y_min = df_plot[col].min()
+    y_max = df_plot[col].max()
     # Add asymptote lines grouped with their corresponding policy traces, without separate legend items
     for idx in asymptotes.index:
-        pct_label = f"{actual_util[idx]:.1f}%"
         fig.add_scatter(
             x=[asymptotes[idx], asymptotes[idx]],
             y=[y_min, y_max],
             mode="lines",
-            name=f"({pct_label}) {str(idx)}",
             legendgroup=str(idx),
             line=dict(dash="dot", width=1, color=colors[idx]),
             showlegend=False,
@@ -456,6 +474,16 @@ def show_main_plot(experiment, y_axis, y_group, selected_class):
         hoversubplots="axis",
         hovermode="x unified",
     )
+    if no_stable and plot_stable:
+        fig.add_annotation(
+            text="No stable data available for current selection. Showing all data.",
+            xref="paper",
+            yref="paper",
+            x=0.5,
+            y=1.05,
+            showarrow=False,
+            font=dict(color="red", size=12),
+        )
     return fig, dict(visibility="visible", display="flex")
 
 

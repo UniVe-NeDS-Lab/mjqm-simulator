@@ -30,7 +30,7 @@ policies_labels = [
     "First-In First-Out",
     "Most Server First",
     "Server Filling",
-    "Server Filling",
+    "Server Filling MEM",
     "Back Filling",
     "Quick Swap (l = {0})",
     "First-Fit",
@@ -52,7 +52,9 @@ policies_wins = {
 
 
 ################################ PANDAS CONFIGS ################################
-policies_dtype = pd.api.types.CategoricalDtype(categories=policies_keys, ordered=True)
+policies_dtype = pd.api.types.CategoricalDtype(
+    categories=policies_keys, ordered=True
+)
 stability_check_mapping = {
     "0": True,
     "1": False,
@@ -91,7 +93,11 @@ required_columns = set(["arrival.rate", "Utilisation"])
 
 
 def read_csv(f: Path):
-    df = pd.read_csv(f, delimiter=";")
+    try:
+        df = pd.read_csv(f, delimiter=";")
+    except Exception as e:
+        print(f"Error reading {f}: {e}", file=sys.stderr)
+        return None
     if df.empty:
         return None
     win = None
@@ -179,27 +185,46 @@ def clean_dfs(dfs):
     return dfs, Ts, exp
 
 
-def compute_stability(dfs, exp):
-    arr_rate_increase = dfs.groupby(level=exp)["arrival.rate"].transform(
-        lambda x: x.rolling(2).sem()
-    )
-    util_increase = dfs.groupby(level=exp)["Utilisation"].transform(
-        lambda x: x.rolling(2).sem()
-    )
-    util_increase_ratio = arr_rate_increase / util_increase
-    util_increase_ratio.name = "Utilisation Increase Ratio"
-    dfs = pd.concat([dfs, util_increase_ratio], axis=1)
-    divergence = dfs.groupby(level=exp)["Utilisation Increase Ratio"].transform(
-        lambda x: (
-            x.rolling(2)
-            .apply(lambda x: abs(1.0 - x.iloc[1] / x.iloc[0]))
-            .fillna(0)
-            .cummax()
-        )
-    )
-    stable = dfs["Stability Check"] & (divergence < 0.01)
-    stable.name = "stable"
-    dfs = pd.concat([dfs, stable], axis=1)
+def compute_stability(dfs, exp, response_col="RespTime Total"):
+    """
+    Identifies stability using Kleinrock's Power Metric (The Knee).
+
+    Stability is defined as the operating range up to the point of
+    maximum system power (Throughput / Response Time).
+
+    Logic:
+    1. Calculate Power = Arrival Rate / Response Time.
+    2. Find the arrival rate that maximizes Power (The Knee).
+    3. Mark all arrival rates <= Knee as 'stable'.
+    """
+
+    # 1. Calculate Kleinrock's Power
+    # We use 'arrival.rate' as a proxy for Throughput in the stable regime.
+    # Power represents the "Goodness" of the system state.
+    dfs["Power"] = dfs["arrival.rate"] / dfs[response_col]
+
+    # 2. Define the Knee detection logic
+    def apply_knee_detection(group):
+        # Find the index of the row with the maximum Power
+        knee_idx = group["Power"].idxmax()
+
+        # Get the arrival rate at the knee
+        knee_lambda = group.loc[knee_idx, "arrival.rate"]
+
+        # Propagate stability:
+        # Anything with load <= knee_lambda is stable (Pre-knee + Knee).
+        # Anything with load > knee_lambda is considered saturated/unstable.
+        group["stable"] = group["arrival.rate"] <= knee_lambda
+
+        return group
+
+    # We use apply() to handle the per-experiment masking
+    dfs = dfs.groupby(level=exp, group_keys=False).apply(apply_knee_detection)
+
+    # Optional: Combine with previous checks if they exist
+    if "Stability Check" in dfs.columns:
+        dfs["stable"] = dfs["stable"] & dfs["Stability Check"]
+
     return dfs
 
 
@@ -226,7 +251,9 @@ def compute_utilisation(dfs, Ts, exp, n_cores=None):
                 f"{Fore.YELLOW}{Style.BRIGHT}Instability region not reached for {idx} with maximum arrival rate tested: {max_arrival_rates[idx]}"
             )
 
-    actual_util = pd.Series(pd.NA, index=asymptotes.index, name="system_utilisation")
+    actual_util = pd.Series(
+        pd.NA, index=asymptotes.index, name="system_utilisation"
+    )
     for idx, df_select in dfs.groupby(level=exp):
         summ_util = 0
         asymptote = asymptotes[idx]
@@ -309,7 +336,9 @@ def main():
     folder = select_experiment(sys.argv[1] if len(sys.argv) > 1 else None)
     if not folder:
         exit(0)
-    dfs, Ts, exp, asymptotes, actual_util = load_experiment_data(folder, n_cores=2048)
+    dfs, Ts, exp, asymptotes, actual_util = load_experiment_data(
+        folder, n_cores=2048
+    )
 
     return dfs, Ts, exp, asymptotes, actual_util
 

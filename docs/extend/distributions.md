@@ -33,7 +33,7 @@ The interface expects the following methods to be implemented:
 
 The interface offers the following protected method to be used by the implementing classes:
 
-- `double randU01()` that generates a random number following the uniform distribution between 0 and 1.
+- `double randU01()` that generates a random number following the uniform distribution between 0 and 1. Internally this uses L'Ecuyer's MRG32k3a generator, which provides independent streams per experiment run. [L'Ecuyer, 1999](https://doi.org/10.1287/opre.47.1.159); [L'Ecuyer et al., 2002](https://doi.org/10.1287/opre.50.6.1073.358)
 
 > [!Note]
   In order to achieve a more cohesive library, we define some good practices to follow when implementing a new distribution. Those will be discussed in each appropriate section using boxes like this one.

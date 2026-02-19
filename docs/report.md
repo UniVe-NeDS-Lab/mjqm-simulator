@@ -14,15 +14,18 @@ Both visualization methods share some common elements:
 - **X-axis**: System arrival rate on a logarithmic scale
 - **Y-axis**: Performance metric (response time, waiting time) on a logarithmic scale
 - **Policies**: Consistent colors/markers pairs represent different scheduling policies
-- **Asymptotes**: Vertical dotted lines show the maximum stable arrival rate that was simulated for each policy
-- **Utilization**: Percentage values showing system utilization at stability limit
+- **Stability boundaries**: Vertical dotted lines show the maximum stable arrival rate for each policy (identified using Kleinrock's Power Metric)
+- **Utilization**: Percentage values showing system utilization at the stability boundary
 
 The plots help identify:
 
 1. **Policy Efficiency**: Which policies perform better at different load levels
 2. **Fairness**: How different job classes are treated by each policy
-3. **System Stability**: At what arrival rate each policy makes the system unstable
+3. **Stability Boundaries**: The arrival rate beyond which each policy becomes unstable (exhibits super-linear response time growth)
 4. **Scalability**: How performance changes as system load increases
+
+> [!Note]
+> For comprehensive guidance on interpreting these metrics, understanding stability boundaries, and comparing policies systematically, see the [Policy Comparison Guide](policy-comparison.md).
 
 ## Static Charts
 
@@ -111,20 +114,48 @@ The dashboard provides the following features:
 2. **Core Configuration**: Set the number of simulated cores
 3. **Data Table**: View and sort raw simulation data (can be hidden)
 4. **Y-Axis Selection**: Choose which metric to display:
-   - Response Time
-   - Waiting Time
-   - Wasted Servers
+   - **Response Time**: Total time from arrival to completion (waiting + service)
+   - **Waiting Time**: Time spent in queue before service (most sensitive to policy differences)
+   - **Wasted Servers**: Idle server capacity (indicates fragmentation)
 5. **Class Selection**: Choose which job class to analyze:
-   - Overall metrics
-   - Smallest class metrics
-   - Biggest class metrics
-   - Select a specific class
+   - **Overall metrics**: System-wide averages (aggregate performance)
+   - **Smallest class metrics**: Performance for jobs requiring fewest servers
+   - **Biggest class metrics**: Performance for jobs requiring most servers
+   - **Select a specific class**: Per-class fairness analysis
 6. **Interactive Plot**: A log-log plot displaying the selected metric against arrival rate
    - Different colors for each policy
    - Hover information for precise values
-   - Vertical dotted lines showing asymptotic limits
+   - Vertical dotted lines showing stability boundaries
    - Downloadable as PNG
 
+> [!Tip]
+> Use per-class selection to assess fairness: compare waiting times for smallest vs biggest classes. Large disparities indicate uneven treatment. See [Fairness quantification](policy-comparison.md#fairness-quantification) in the Policy Comparison Guide.
+
+
+## Development and Custom Analysis
+
+## Understanding stability boundaries
+
+The vertical dotted lines on plots indicate each policy's **stability boundary**: the maximum arrival rate at which the policy maintains stable operation. Beyond this point, waiting times and queue lengths grow super-linearly, indicating the system cannot keep up with the offered load.
+
+### Kleinrock's Power Metric
+
+Stability boundaries are identified using **Kleinrock's Power Metric**:
+
+$$P(\lambda) = \frac{X(\lambda)}{R(\lambda)}$$
+
+where $X(\lambda)$ is throughput and $R(\lambda)$ is mean response time at arrival rate $\lambda$.
+
+The power metric balances throughput against delay. The arrival rate $\lambda^*$ that maximises power represents the operational stability boundary: beyond this point, throughput grows slowly while delay grows super-linearly.
+
+**How it appears in visualizations**:
+- Vertical lines mark where power metric peaks for each policy
+- Utilization percentages show server occupancy at that boundary
+- Policies with higher utilization at stability can handle more load
+
+**Key insight**: Different policies have different stability boundaries depending on workload characteristics. Comparing boundaries across policies is one of the primary uses of this visualisation.
+
+For detailed explanation of stability analysis and policy comparison methodology, see the [Policy Comparison Guide](policy-comparison.md#identifying-stability-boundaries).
 
 ## Development and Custom Analysis
 

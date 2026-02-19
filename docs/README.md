@@ -2,6 +2,16 @@
 
 Simulator for Multiserver Job Queueing Model (MJQM)
 
+A high-performance discrete-event simulator for analyzing scheduling policies in multiserver queueing systems with heterogeneous job requirements. Supports multiple policies (FIFO, SMASH, Back Filling, Most Server First, and more), diverse workload configurations, and comprehensive performance analysis.
+
+## Quick links
+
+- **[Running simulations](run.md)**: Configuration syntax and policy reference
+- **[Policy comparison guide](policy-comparison.md)**: Systematic methodology for comparing scheduling policies
+- **[Configuration examples](examples/simple-heterogeneous.md)**: Ready-to-use experiment templates
+- **[Result analysis](report.md)**: Visualization and interpretation tools
+- **[Extending the simulator](extend/index.md)**: Implementing custom policies and distributions
+
 ## Prerequisites
 
 Depending on your system, different commands can be used to install the required tools. We'll use just Ubuntu and MacOS as examples.
@@ -49,7 +59,7 @@ We recommend using [`uv`](https://docs.astral.sh/uv/) as Python package manager,
 To prepare and compile the project with `cmake`, use the following command from the project root directory:
 
 ```sh
-./configure [--debug] [--clean] [--test] [--no-build]
+./configure [--debug] [--clean] [--no-build] [--only-build] [--no-uv] [--help]
 ```
 
 This will create an executable named `<file>` for each configured `<file>.cpp` in the root directory.
@@ -57,11 +67,12 @@ It will also prepare the Python environment with `uv`, installing it for the cur
 
 The additional parameters work as such:
 
-- `--debug` to build with debug symbols (useful for IDEs).
-- `--clean` to remove the cmake directory before configuring the project, effectively doing a _full fresh restart_.
-- `--test` to also run tests.
-- `--no-build` to only configure the project without building it.
+- `--debug` / `-d` to build with debug symbols (useful for IDEs).
+- `--clean` / `-c` to remove the cmake directory before configuring the project, effectively doing a _full fresh restart_.
+- `--build` / `-b` (`--no-build`) to toggle building on or off. Building is on by default.
+- `--only-build` to skip configuration entirely (both CMake and uv) and proceed straight to building.
 - `--no-uv` to skip the installation of `uv` and the Python environment.
+- `--help` / `-h` to print usage information.
 
 > [!Note]
   To dig deeper into the details, in the output of the `configure` script you can find the actual commands used to configure and build the project, prepended with `+`.

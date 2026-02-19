@@ -31,8 +31,14 @@ void ServerFilling::departure(int c, int size, long int id) {
 }
 void ServerFilling::addToMset(const std::tuple<int, int, long int>& e) {
     auto it = mset.begin();
+    int positions_skipped = 0;
     while (it != mset.end() && std::get<1>(e) <= std::get<1>(*it)) {
         ++it;
+        ++positions_skipped;
+    }
+    // Track FIFO violations: this job is being placed ahead of positions_skipped jobs
+    if (positions_skipped > 0) {
+        violations_counter += positions_skipped;
     }
     mset.insert(it, e);
 }

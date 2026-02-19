@@ -21,7 +21,7 @@ public:
     int get_free_ser() override { return freeservers; }
     int get_window_size() override { return mset.size(); }
     int get_w() const override { return w; }
-    int get_violations_counter() override { return 0; }
+    int get_violations_counter() override { return violations_counter; }
     void insert_completion(int size, double completion) override {}
     bool fit_jobs(std::unordered_map<long int, double> holdTime, double simTime) override { return false; }
     bool prio_big() override { return false; }
@@ -47,6 +47,7 @@ private:
     int freeservers;
     int servers;
     const int w;
+    int violations_counter = 0;
 
     void addToMset(const std::tuple<int, int, long int>& e);
     void flush_buffer() override;

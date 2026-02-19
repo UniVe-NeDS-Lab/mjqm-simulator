@@ -33,6 +33,12 @@ void MostServerFirst::flush_buffer() {
         for (long i = state_buf.size() - 1; i >= 0; --i) {
             auto it = stopped_jobs[i].begin();
             while (state_buf[i] != 0 && sizes[i] <= freeservers) {
+                // Track FIFO violations: count waiting jobs in smaller classes
+                for (long j = 0; j < i; ++j) {
+                    if (state_buf[j] > 0) {
+                        violations_counter += state_buf[j];
+                    }
+                }
                 state_buf[i]--;
                 state_ser[i]++;
                 ongoing_jobs[i].push_back(*it);

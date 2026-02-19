@@ -36,6 +36,13 @@ y_axis_mappings = dict(
         uom=" [s]",
         per_class=True,
     ),
+    throughput=dict(
+        column="Throughput Total",
+        label="Throughput",
+        class_column="T{} Throughput",
+        uom="",
+        per_class=True,
+    ),
     power=dict(
         column="Power",
         label="Power (Knee)",

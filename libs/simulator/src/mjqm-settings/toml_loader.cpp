@@ -263,6 +263,11 @@ Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.cl
     preemption.resize(nclasses);
     rawWaitingTime.resize(nclasses);
     rawResponseTime.resize(nclasses);
+    autocorr_phase_times.resize(8);
+    autocorr_phases.resize(8);
+    autocorr_phase_time_list.resize(8);
+    autocorr_residuals.resize(8);
+    autocorr_residual_list.resize(8);
     waste = 0;
     viol = 0;
     occ = 0;

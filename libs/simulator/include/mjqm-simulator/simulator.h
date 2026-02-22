@@ -17,6 +17,7 @@
 #include <utility>
 #include <vector>
 #include <random>
+#include <fstream>
 
 #include <mjqm-math/confidence_intervals.h>
 #include <mjqm-math/mean_var.h>
@@ -49,6 +50,17 @@ public:
             e = 0;
         for (auto& e : occupancy_buf)
             e = 0;
+        for (auto& e : autocorr_phase_times)
+            e = 0;
+        for (auto& e : autocorr_residuals)
+            e = 0;
+        small_switch = 0;
+        big_switch = 0;
+        cycle_count = 0;
+        //for (auto& e : autocorr_phase_time_list)
+            //e.clear();
+        //for (auto& e : autocorr_residual_list)
+            //e.clear();
         for (auto& e : rawWaitingTime)
             e.clear();
         for (auto& e : rawResponseTime)
@@ -88,6 +100,7 @@ public:
 
         phase_two_start -= simtime;
         phase_three_start -= simtime;
+        start_phase -= simtime;
 
         policy->reset_completion(simtime);
 
@@ -163,6 +176,21 @@ public:
         stats->phase_two_dur.collect((phase_two_duration * 1.0) / simtime);
         stats->phase_three_dur.collect((phase_three_duration * 1.0) / job_seq_amount[1]);
         stats->idle_period_prob.collect((idle_period * 1.0) / simtime);
+
+        stats->p0.collect((autocorr_phase_times[0] * 1.0) / cycle_count);
+        stats->p1.collect((autocorr_phase_times[1] * 1.0) / cycle_count);
+        stats->p2.collect((autocorr_phase_times[4] * 1.0) / cycle_count);
+        stats->p3.collect((autocorr_phase_times[5] * 1.0) / cycle_count);
+        stats->p0a.collect((autocorr_phase_times[2] * 1.0) / cycle_count);
+        stats->p1a.collect((autocorr_phase_times[3] * 1.0) / cycle_count);
+        stats->p2a.collect((autocorr_phase_times[6] * 1.0) / cycle_count);
+        stats->p3a.collect((autocorr_phase_times[7] * 1.0) / cycle_count);
+        stats->small_srv_switch.collect((small_switch*1.0)/cycle_count);
+        stats->big_srv_switch.collect((big_switch*1.0)/cycle_count);
+        stats->p0_res.collect((autocorr_residuals[0] * 1.0) / cycle_count);
+        stats->p1_res.collect((autocorr_residuals[1] * 1.0) / cycle_count);
+        stats->p2_res.collect((autocorr_residuals[4] * 1.0) / cycle_count);
+        stats->p3_res.collect((autocorr_residuals[5] * 1.0) / cycle_count);
     }
 
     void simulate(unsigned long nevents, unsigned int repetitions = 1) {
@@ -279,6 +307,70 @@ public:
         for (auto& x : rep_free_servers_distro) {
             x /= simtime;
         }
+
+        /*std::ofstream output_file("autocorr/p0_"+std::to_string(l[0])+".txt");
+        
+        for (double x : autocorr_phase_time_list[0]) {
+            output_file << x << '\n';
+        }
+
+        output_file.close();
+
+        std::ofstream output_file_1("autocorr/p1_"+std::to_string(l[0])+".txt");
+        
+        for (double x : autocorr_phase_time_list[1]) {
+            output_file_1 << x << '\n';
+        }
+
+        output_file_1.close();
+
+        std::ofstream output_file_2("autocorr/p2_"+std::to_string(l[0])+".txt");
+        
+        for (double x : autocorr_phase_time_list[4]) {
+            output_file_2 << x << '\n';
+        }
+
+        output_file_2.close();
+
+        std::ofstream output_file_3("autocorr/p3_"+std::to_string(l[0])+".txt");
+        
+        for (double x : autocorr_phase_time_list[5]) {
+            output_file_3 << x << '\n';
+        }
+
+        output_file_3.close();
+
+        std::ofstream output_file_res("autocorr/p0_res_"+std::to_string(l[0])+".txt");
+        
+        for (double x : autocorr_residual_list[0]) {
+            output_file_res << x << '\n';
+        }
+
+        output_file_res.close();
+
+        std::ofstream output_file_res_1("autocorr/p1_res_"+std::to_string(l[0])+".txt");
+        
+        for (double x : autocorr_residual_list[1]) {
+            output_file_res_1 << x << '\n';
+        }
+
+        output_file_res_1.close();
+
+        std::ofstream output_file_res_2("autocorr/p2_res_"+std::to_string(l[0])+".txt");
+        
+        for (double x : autocorr_residual_list[4]) {
+            output_file_res_2 << x << '\n';
+        }
+
+        output_file_res_2.close();
+
+        std::ofstream output_file_res_3("autocorr/p3_res_"+std::to_string(l[0])+".txt");
+        
+        for (double x : autocorr_residual_list[5]) {
+            output_file_res_3 << x << '\n';
+        }
+
+        output_file_res_3.close();*/
     }
 
     void produce_statistics(ExperimentStats& stats, const double confidence = 0.05) const {
@@ -329,6 +421,18 @@ private:
 
     std::list<double> windowSize;
     double idle_period;
+
+    std::vector<double> autocorr_phase_times;
+    std::vector<std::list<double>> autocorr_phase_time_list;
+    std::vector<bool> autocorr_phases;
+    std::vector<double> autocorr_residuals;
+    std::vector<std::list<double>> autocorr_residual_list;
+    int autocorr_last_phase = 0;
+    int last_srv = 0;
+    int small_switch;
+    int big_switch;
+    int cycle_count;
+    double start_phase = 0.0;
 
     int viol_ctr;
 
@@ -416,10 +520,6 @@ private:
                         } else { // or they are just new jobs about to be served for the first time: add them with new
                                  // service time
                             double sampled = ser_time_samplers[i]->sample();
-                            //if (i == 1) {
-                               // std::cout << "BIG JOB IN " << simtime << std::endl;
-                                //std::cout << "---------------"<< std::endl;
-                            //}
                             jobs_inservice[i][job_id] = sampled + simtime;
                             // rawWaitingTime[i].push_back(simtime-arrTime[job_id]);
                             // arrTime.erase(*job_id); //update waitingTime
@@ -519,6 +619,140 @@ private:
         if (jobs_tot == 0) {
             idle_period += delta;
         }
+        
+        // autocorr
+        /*auto state_ser = policy->get_state_ser();
+        int state_ser_small = state_ser[0];
+        int state_ser_big = state_ser[1];
+        auto state_buf = policy->get_state_buf();
+        int state_buf_small = state_buf[0];
+        int state_buf_big = state_buf[1];
+        if (state_ser_small > 0) {
+            //reset cycle
+            if (last_srv == 1) {
+                for (int i = 0; i < 8; i++) {
+                    autocorr_phases[i] = false;
+                }
+                cycle_count += 1;
+            }
+
+            if (pos < nclasses) {
+                autocorr_phase_times[autocorr_last_phase] += delta;
+            } else {
+                if (pos-nclasses == 0) { // small arrival
+                    if (autocorr_phases[1] == false) {
+                        autocorr_phases[0] = true;
+                        autocorr_phase_times[0] += delta;
+                        if (autocorr_last_phase != 0){
+                            small_switch += 1;
+                            if (autocorr_last_phase == 5) {
+                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
+                                autocorr_residual_list[autocorr_last_phase].push_back(state_ser_small);
+                                autocorr_residuals[autocorr_last_phase] += state_ser_small;
+                            }
+                            start_phase = fel[pos];
+                        }
+                        autocorr_last_phase = 0;
+                    } else if (autocorr_phases[1] == true) {
+                        autocorr_phases[2] = true;
+                        autocorr_phase_times[2] += delta;
+                        if (autocorr_last_phase != 2){
+                            small_switch += 1;
+                            if (autocorr_last_phase == 1) {
+                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
+                            }
+                            start_phase = fel[pos];
+                        }
+                        autocorr_last_phase = 2;
+                    }
+                } else if (pos-nclasses == 1) { // big arrival
+                    if (autocorr_phases[2] == false) {
+                        autocorr_phases[0] = true;
+                        autocorr_phases[1] = true;
+                        autocorr_phase_times[1] += delta;
+                        if (autocorr_last_phase != 1){
+                            small_switch += 1;
+                            if (autocorr_last_phase == 0) {
+                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
+                                autocorr_residual_list[autocorr_last_phase].push_back(state_ser_small);
+                                autocorr_residuals[autocorr_last_phase] += state_ser_small;
+                            }
+                            start_phase = fel[pos];
+                        }
+                        autocorr_last_phase = 1;
+                    } else if (autocorr_phases[2] == true) {
+                        autocorr_phases[3] = true;
+                        autocorr_phase_times[3] += delta;
+                         if (autocorr_last_phase != 3){
+                            small_switch += 1;
+                            start_phase = fel[pos];
+                        }
+                        autocorr_last_phase = 3;
+                    }
+                }
+            }
+            last_srv = 0;
+        } else if (state_ser_big > 0) {
+            if (pos < nclasses) {
+                autocorr_phase_times[autocorr_last_phase] += delta;
+            } else {
+                if (pos-nclasses == 1) { // big arrival
+                    if (autocorr_phases[5] == false) {
+                        autocorr_phases[4] = true;
+                        autocorr_phase_times[4] += delta;
+                        if (autocorr_last_phase != 4){
+                            big_switch += 1;
+                            if (autocorr_last_phase == 1) {
+                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
+                                autocorr_residual_list[autocorr_last_phase].push_back(state_buf_big);
+                                autocorr_residuals[autocorr_last_phase] += state_buf_big;
+                            }
+                            start_phase = fel[pos];
+                        }
+                        autocorr_last_phase = 4;
+                    } else if (autocorr_phases[5] == true) {
+                        autocorr_phases[6] = true;
+                        autocorr_phase_times[6] += delta;
+                        if (autocorr_last_phase != 6){
+                            big_switch += 1;
+                            if (autocorr_last_phase == 5) {
+                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
+                            }
+                            start_phase = fel[pos];
+                        }
+                        autocorr_last_phase = 6;
+                    }
+                } else if (pos-nclasses == 0) { // small arrival
+                    if (autocorr_phases[6] == false) {
+                        autocorr_phases[4] = true;
+                        autocorr_phases[5] = true;
+                        autocorr_phase_times[5] += delta;
+                        if (autocorr_last_phase != 5){
+                            big_switch += 1;
+                            if (autocorr_last_phase == 4) {
+                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
+                                autocorr_residual_list[autocorr_last_phase].push_back(state_buf_big);
+                                autocorr_residuals[autocorr_last_phase] += state_buf_big;
+                            }
+                            start_phase = fel[pos];
+                        }
+                        autocorr_last_phase = 5;
+                    } else if (autocorr_phases[6] == true) {
+                        autocorr_phases[7] = true;
+                        autocorr_phase_times[7] += delta;
+                         if (autocorr_last_phase != 7){
+                            big_switch += 1;
+                            start_phase = fel[pos];
+                        }
+                        autocorr_last_phase = 7;
+                    }
+                }
+            }
+            last_srv = 1;
+        } else { // idle period include?
+            autocorr_phase_times[autocorr_last_phase] += delta;
+        }*/
+        //
         unsigned int occ = 0;
         for (int i = 0; i < nclasses; i++) {
             occ += policy->get_state_ser()[i] * sizes[i];

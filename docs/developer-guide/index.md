@@ -1,3 +1,9 @@
+---
+title: Extending the Simulator
+tags:
+  - developer-guide
+---
+
 # Extending the simulator
 
 The MJQM simulator is designed as an extensible framework that allows users to customize and enhance its functionality without modifying core code. The modular architecture enables independent development of scheduling policies, probability distributions, and analysis tools.
@@ -6,11 +12,11 @@ The MJQM simulator is designed as an extensible framework that allows users to c
 
 Before implementing extensions, familiarize yourself with the simulator's architecture:
 
-**[Project structure](extend/structure.md)**: Overview of the codebase organization, library dependencies, and key architectural components. Essential reading before making modifications.
+**[Project structure](structure.md)**: Overview of the codebase organization, library dependencies, and key architectural components. Essential reading before making modifications.
 
 ## Main extension points
 
-### [Policies](extend/policies.md)
+### [Policies](policies.md)
 
 Implement custom scheduling policies to test new algorithms or domain-specific strategies.
 
@@ -20,7 +26,7 @@ Implement custom scheduling policies to test new algorithms or domain-specific s
 
 **Guide includes**: Complete implementation walkthrough using SMASH as example, interface documentation, loader configuration, and best practices.
 
-### [Distributions](extend/distributions.md)
+### [Distributions](distributions.md)
 
 Add probability distributions for service times and inter-arrival times.
 
@@ -64,11 +70,11 @@ Create custom plots and interactive dashboards for result analysis.
 
 ## Quick reference
 
-- **Adding a policy**: See [Policies guide](extend/policies.md)
-- **Adding a distribution**: See [Distributions guide](extend/distributions.md)
-- **Architecture overview**: See [Project structure](extend/structure.md)
-- **Configuration syntax**: See [Running experiments](../run.md)
-- **Result analysis**: See [Result analysis](../report.md)
+- **Adding a policy**: See [Policies guide](policies.md)
+- **Adding a distribution**: See [Distributions guide](distributions.md)
+- **Architecture overview**: See [Project structure](structure.md)
+- **Configuration syntax**: See [Running experiments](../user-guide/running.md)
+- **Result analysis**: See [Result analysis](../user-guide/result-analysis.md)
 
 ## Community and contributions
 

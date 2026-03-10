@@ -11,6 +11,6 @@ Started by NeDS-Lab at Ca' Foscari University of Venice.
 
 ## Getting Started
 
-Refer to the [documentation](https://neds-lab.github.io/mjqm-simulator/) for detailed instructions on building, configuring and [running](https://neds-lab.github.io/mjqm-simulator/#/run) simulations.
+Refer to the [documentation](https://unive-neds-lab.github.io/mjqm-simulator/) for detailed instructions on building, configuring and [running](https://unive-neds-lab.github.io/mjqm-simulator/user-guide/running) simulations.
 
 <!-- TBD: License, bibtex/doi references -->

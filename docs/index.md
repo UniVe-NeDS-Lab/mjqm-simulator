@@ -1,3 +1,9 @@
+---
+title: MJQM Simulator
+tags:
+  - home
+---
+
 # MJQM simulator
 
 Simulator for Multiserver Job Queueing Model (MJQM)
@@ -6,11 +12,11 @@ A high-performance discrete-event simulator for analyzing scheduling policies in
 
 ## Quick links
 
-- **[Running simulations](run.md)**: Configuration syntax and policy reference
-- **[Policy comparison guide](policy-comparison.md)**: Systematic methodology for comparing scheduling policies
+- **[Running simulations](user-guide/running.md)**: Configuration syntax and policy reference
+- **[Policy comparison guide](user-guide/policy-comparison.md)**: Systematic methodology for comparing scheduling policies
 - **[Configuration examples](examples/simple-heterogeneous.md)**: Ready-to-use experiment templates
-- **[Result analysis](report.md)**: Visualization and interpretation tools
-- **[Extending the simulator](extend/index.md)**: Implementing custom policies and distributions
+- **[Result analysis](user-guide/result-analysis.md)**: Visualisation and interpretation tools
+- **[Extending the simulator](developer-guide/index.md)**: Implementing custom policies and distributions
 
 ## Prerequisites
 
@@ -26,9 +32,9 @@ brew install gcc # MacOS
 ```
 
 > [!Note]
-  On MacOS, if in the past you run the `xcode-select --install` command, you will find two versions of the compiler installed. \
-  To manually use the standard `gcc` version, you can refer to the `g++-{main-version}` binary. \
-  Using the `configure` and `rebuild` scripts, we try to select the correct version.
+> On MacOS, if in the past you run the `xcode-select --install` command, you will find two versions of the compiler installed.
+> To manually use the standard `gcc` version, you can refer to the `g++-{main-version}` binary.
+> Using the `configure` and `rebuild` scripts, we try to select the correct version.
 
 ### CMake
 
@@ -50,7 +56,7 @@ brew install boost # MacOS
 
 ### Python3
 
-To run the tests, you need to have `Python3` installed on your system, in addition to the previous requirements.
+To run scripts, you need to have `Python3` installed on your system, in addition to the previous requirements.
 
 We recommend using [`uv`](https://docs.astral.sh/uv/) as Python package manager, for which we provide the pyproject.toml configuration file.
 
@@ -75,33 +81,18 @@ The additional parameters work as such:
 - `--help` / `-h` to print usage information.
 
 > [!Note]
-  To dig deeper into the details, in the output of the `configure` script you can find the actual commands used to configure and build the project, prepended with `+`.
+> To dig deeper into the details, in the output of the `configure` script you can find the actual commands used to configure and build the project, prepended with `+`.
 
 ### Rebuild
 
 If you change some code and want to rebuild the project, you can use the `rebuild` script:
 
 ```sh
-./rebuild [--debug] [--clean] [--test]
+./rebuild [--debug] [--clean]
 ```
 
 The additional parameters work as such:
 
 - `--debug` to rebuild with debug symbols (you need to have configured the project with the `--debug` parameter already).
 - `--clean` to add the `--clean-first` parameter to cmake, that will remove all prebuilt symbols and objects before rebuilding the project, without doing a _full fresh restart_.
-- `--test` to also run tests.
 
-## Test
-
-> [!Note]
-  The test suite will be completely reworked soon.
-
-To run the test suite, use the following command after configuration is done:
-
-```sh
-cmake --build . --preset test
-```
-
-This will run all the simulation tests for which results are available in the `test/expected` folder.
-
-Their run parameters are configured in the `CMakeLists.txt` file.

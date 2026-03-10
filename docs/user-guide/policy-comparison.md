@@ -1,3 +1,10 @@
+---
+title: Policy Comparison Guide
+tags:
+  - user-guide
+  - policies
+---
+
 # Policy Comparison Guide
 
 This guide explains how to systematically compare scheduling policies, interpret performance metrics, and conduct rigorous analysis of simulation results.
@@ -487,6 +494,6 @@ Policies on the frontier are optimal for some trade-off preference; interior poi
 
 # Further reading
 
-- `docs/run.md`: Policy configuration reference
-- `docs/extend/policies.md`: Implementing custom policies
-- `docs/report.md`: Result analysis and visualization tools
+- [Running an experiment](running.md): Policy configuration reference
+- [Implementing policies](../developer-guide/policies.md): Implementing custom policies
+- [Result analysis](result-analysis.md): Result analysis and visualisation tools

@@ -1,6 +1,12 @@
+---
+title: Result Analysis
+tags:
+  - user-guide
+---
+
 # Result Analysis
 
-After running simulations with the MJQM simulator, you'll find data files in the `Results` directory, in a subdirectory with the [name](./#/run?id=simulation-parameters) of your simulation. We provide two main ways to visualize and analyze these results:
+After running simulations with the MJQM simulator, you'll find data files in the `Results` directory, in a subdirectory with the [name](running.md#simulation-parameters) of your simulation. We provide two main ways to visualize and analyze these results:
 
 1. **Static Plots**: Generate publication-quality charts using `plot_experiment.py`
 2. **Interactive Dashboard**: Explore results dynamically with the Plotly-based web application

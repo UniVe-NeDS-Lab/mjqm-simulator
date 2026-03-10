@@ -1,3 +1,9 @@
+---
+title: High-Utilization Workload
+tags:
+  - examples
+---
+
 # High-utilization workload
 
 Configuration for testing Back Filling under high load with heterogeneous job classes.

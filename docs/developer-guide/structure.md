@@ -1,3 +1,9 @@
+---
+title: Project Structure
+tags:
+  - developer-guide
+---
+
 # Project structure
 
 The simulator is organized as a modular C++ project with clear separation of concerns. New policies and distributions can be added without modifying core code.

@@ -1,8 +1,15 @@
+---
+title: Implementing Policies
+tags:
+  - developer-guide
+  - policies
+---
+
 # Policies
 
 New policy implementations need two parts: the policy class and the loader.
 
-The policy class implements the scheduling logic and manages job queues and server state. It needs to be located in the [`mjqm-policies`](https://github.com/NeDS-Lab/mjqm-simulator/tree/main/libs/policies/include/mjqm-policies) folder of the `policies` library. The class consists of a header file (`.h`) defining the interface and a corresponding implementation file (`.cpp`) in the `src` directory.
+The policy class implements the scheduling logic and manages job queues and server state. It needs to be located in the [`mjqm-policies`](https://github.com/unive-neds-lab/mjqm-simulator/tree/main/libs/policies/include/mjqm-policies) folder of the `policies` library. The class consists of a header file (`.h`) defining the interface and a corresponding implementation file (`.cpp`) in the `src` directory.
 
 The loader is a function to read the policy parameters from the [TOML](https://toml.io/en/) configuration file and creates the policy object. It is split into two parts: the declaration in `mjqm-settings/toml_policies_loaders.h` and the implementation in `mjqm-settings/toml_policies_loaders.cpp`. Additionally, the loader needs to be added to the `policy_builders` map at the end of the header file.
 
@@ -19,7 +26,7 @@ Let's see an example of how to add a new policy to the simulator. We'll take the
 
 ## `Policy` interface
 
-[policy.h](https://raw.githubusercontent.com/NeDS-Lab/mjqm-simulator/refs/heads/main/libs/policies/include/mjqm-policies/policy.h ":include :type=code cpp")
+See [`policy.h`](https://github.com/unive-neds-lab/mjqm-simulator/blob/main/libs/policies/include/mjqm-policies/policy.h) for the full source.
 
 The interface expects the following methods to be implemented:
 
@@ -344,4 +351,4 @@ When implementing a new scheduling policy, follow these guidelines:
 
 7. **Configuration**: Always update `conf.toml` with the policy name and parameters for reproducibility.
 
-8. **Documentation**: Add your policy to `docs/run.md` with a brief description of its behaviour and parameters.
+8. **Documentation**: Add your policy to `docs/user-guide/running.md` with a brief description of its behaviour and parameters.

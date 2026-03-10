@@ -1,3 +1,9 @@
+---
+title: Simple Heterogeneous Workload
+tags:
+  - examples
+---
+
 # Simple heterogeneous workload
 
 A basic example with 4 job classes requiring different numbers of cores, useful for initial testing and understanding policy behaviour.

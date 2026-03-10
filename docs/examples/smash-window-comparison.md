@@ -1,3 +1,9 @@
+---
+title: SMASH Window Size Comparison
+tags:
+  - examples
+---
+
 # SMASH window size comparison
 
 Compare SMASH behaviour across different window sizes.

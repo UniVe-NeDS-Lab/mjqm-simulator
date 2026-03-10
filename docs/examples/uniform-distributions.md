@@ -1,3 +1,9 @@
+---
+title: Uniform Service Time Distributions
+tags:
+  - examples
+---
+
 # Uniform service time distributions
 
 Example using uniform service time distributions instead of exponential, with varied server requirements.

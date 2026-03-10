@@ -1,3 +1,9 @@
+---
+title: Multi-Policy Comparison
+tags:
+  - examples
+---
+
 # Multi-policy comparison
 
 Side-by-side comparison of six scheduling policies on the same workload.

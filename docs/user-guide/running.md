@@ -1,3 +1,9 @@
+---
+title: Running an Experiment
+tags:
+  - user-guide
+---
+
 # Running an experiment
 
 After compiling the project, you can run an experiment by executing the `simulator_toml` binary with the name of the configuration file as the only argument.
@@ -124,7 +130,7 @@ Each set is defined by a `[[pivot]]` header, and then you can define the values 
 > This pivot will generate 9 different configurations, with all the possible combinations of the default arrival rate, and the SMASH window size.
 
 ## Output columns
-You can find more information about the output columns in the [output_columns](output_columns.md) page.
+You can find more information about the output columns in the [output columns](output-columns.md) page.
 
 ## Available distributions
 
@@ -190,7 +196,9 @@ If `mean` is defined, the `min` and `max` will be calculated as $0.5 \times \mu$
 
 The following sections describe configuration syntax and basic behaviour for each policy. For detailed performance comparisons, stability analysis, and guidance on choosing the right policy for your workload, see the [Policy Comparison Guide](policy-comparison.md).
 
-For complete configuration examples demonstrating policy usage, see the [Examples](examples/simple-heterogeneous.md) section.
+
+
+For complete configuration examples demonstrating policy usage, see the [Examples](../examples/simple-heterogeneous.md) section.
 
 ### FIFO
 - `policy = "fifo"`

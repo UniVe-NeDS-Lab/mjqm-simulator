@@ -1,0 +1,66 @@
+identifier = "killsmart"
+events = 100000
+repetitions = 20
+cores = 32
+policy.name = "smash"
+policy.window = 1
+
+arrival.distribution = "exponential"
+
+service.distribution = "exponential"
+
+
+[[class]]
+cores = 1
+arrival.prob = 0.9
+service.mean = 1
+
+[[class]]
+cores = 32
+arrival.prob = 0.1
+service.mean = 1
+
+
+[[pivot]]
+policy = [
+#    "fifo",
+#    "back filling",
+#    "most server first",
+#    "server filling memoryful",
+#    { name ="quick swap", threshold = 1 },
+#    { name ="quick swap", threshold = 32 },
+#    "first fit",
+#    "adaptive msf",
+#    "static msf",
+#    { name = "smash", window = 2 },
+#    { name = "smash", window = 5 },
+#    { name = "smash", window = 10 },
+     { name = "kill smart", k = 32, v = 1},
+     { name = "kill smart", k = 5, v = 1},
+     { name = "kill smart", k = 5, v = 5},
+     { name = "kill smart", k = 5, v = 16},
+     { name = "kill smart", k = 5, v = 32},
+]
+
+arrival.rate = [
+    0.1,
+    0.30526315789473685,
+    0.5105263157894737,
+    0.7157894736842105,
+    0.9210526315789473,
+    1.1263157894736842,
+    1.331578947368421,
+    1.5368421052631578,
+    1.7421052631578946,
+    1.9473684210526314,
+    2.152631578947368,
+    2.357894736842105,
+    2.563157894736842,
+    2.768421052631579,
+    2.973684210526316,
+    3.1789473684210525,
+    3.384210526315789,
+    3.589473684210526,
+    3.7947368421052633,
+    4.0,
+]

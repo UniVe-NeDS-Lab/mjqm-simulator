@@ -2,19 +2,22 @@
 // Created by Adityo Anggraito on 21/01/25.
 //
 
-#ifndef ADAPTIVEMSF_H
-#define ADAPTIVEMSF_H
+#ifndef KILLSMART_H
+#define KILLSMART_H
 
 #include <map>
+#include <unordered_set>
 
 #include <mjqm-policies/policy.h>
 #include <mjqm-utils/string.hpp>
 
-class AdaptiveMSF final : public Policy {
+class KillSmart final : public Policy {
 public:
-    AdaptiveMSF(const int w, const int servers, const int classes, const std::vector<unsigned int>& sizes) :
+    KillSmart(const int w, const int servers, const int classes, const std::vector<unsigned int>& sizes, const int k, const int kill_threshold) :
         state_buf(classes), state_ser(classes), stopped_jobs(classes), ongoing_jobs(classes), freeservers(servers),
-        servers(servers), w(w), sizes(sizes), violations_counter(0), switching_time(false) {}
+        servers(servers), w(w), sizes(sizes), violations_counter(0), service_jobs(0), waiting_jobs(0),
+        stopped_size(0), max_stopped_size((k)*kill_threshold), after_kill(false), reach_max_stopped_size(false), kill_threshold(kill_threshold),
+        max_kill_cycle(k-1), kill_cycle(0), no_killing(false), original_k(k), big_phase(0) {}
     void arrival(int c, int size, long int id) override;
     void departure(int c, int size, long int id) override;
     bool fit_jobs(std::unordered_map<long int, double> holdTime, double simTime) override { return false; };
@@ -31,17 +34,18 @@ public:
     void reset_completion(double simtime) override {};
     bool prio_big() override { return false; }
     int get_state_ser_small() override { return -1; }
-    ~AdaptiveMSF() override = default;
+    ~KillSmart() override = default;
     std::unique_ptr<Policy> clone() const override {
-        return std::make_unique<AdaptiveMSF>(w, servers, state_buf.size(), sizes);
+        return std::make_unique<KillSmart>(w, servers, state_buf.size(), sizes, original_k, kill_threshold);
     }
     explicit operator std::string() const override {
-        return "AdaptiveMSF(servers=" + std::to_string(servers) + ", classes=" + std::to_string(state_buf.size()) +
-            ", sizes=(" + join(sizes.begin(), sizes.end()) + "))";
+        return "KillSmart(servers=" + std::to_string(servers) + ", classes=" + std::to_string(state_buf.size()) +
+            ", sizes=(" + join(sizes.begin(), sizes.end()) + "), k="+ std::to_string(max_kill_cycle) +", v="+ std::to_string(kill_threshold) +")";
     }
 
 private:
     std::list<std::tuple<int, int, long int>> buffer;
+    std::unordered_set<long> restarted_jobs;
     std::list<std::tuple<int, int, long int>> mset; // list of jobs in service
     std::vector<int> state_buf;
     std::vector<int> state_ser;
@@ -54,10 +58,21 @@ private:
     std::map<double, int> completion_time;
     int violations_counter;
 
-    bool switching_time;
+    int service_jobs;
+    int waiting_jobs;
+    bool after_kill;
+    int stopped_size;
+    int max_stopped_size;
+    bool reach_max_stopped_size;
+    int kill_threshold;
+    int max_kill_cycle;
+    int kill_cycle;
+    bool no_killing;
+    int original_k;
+    int big_phase;
 
+    void put_jobs_normally(bool treat_as_restart); 
     void flush_buffer() override;
-    bool check_condition();
 };
 
-#endif // ADAPTIVEMSF_H
+#endif // KILLSMART_H

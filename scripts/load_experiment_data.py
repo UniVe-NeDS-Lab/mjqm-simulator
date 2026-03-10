@@ -20,6 +20,7 @@ policies_keys = [
     "server filling",
     "server filling memoryful",
     "back filling",
+    "kill smart",
     "quick swap",
     "first fit",
     "adaptive msf",
@@ -32,6 +33,7 @@ policies_labels = [
     "Server Filling",
     "Server Filling",
     "Back Filling",
+    "Kill Smart (k = {0}, v = {1})",
     "Quick Swap (l = {0})",
     "First-Fit",
     "Adaptive MSF",
@@ -44,6 +46,7 @@ policies_wins = {
     -1: "server filling",
     -2: "server filling memoryful",
     -3: "back filling",
+    -16: "kill smart",
     -4: "quick swap",
     -14: "first fit",
     -7: "adaptive msf",
@@ -85,6 +88,9 @@ def row_label(row, win):
             return policies[row["policy"]].format(row["policy.threshold"])
         else:
             return policies[row["policy"]].format(1)
+    elif row["policy"] == "kill smart":
+        print(policies)
+        return policies[row["policy"]].format(row["policy.k"],row["policy.v"])
     else:
         return policies[row["policy"]]
 
@@ -156,6 +162,8 @@ def clean_dfs(dfs):
             and "Unnamed" not in column
             and not column.endswith(".window")
             and not column.endswith(".threshold")
+            and not column.endswith(".k")
+            and not column.endswith(".v")
         ):
             types[column] = float
         else:

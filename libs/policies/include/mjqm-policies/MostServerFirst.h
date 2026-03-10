@@ -23,8 +23,9 @@ public:
     int get_window_size() override { return 0; }
     int get_w() const override { return w; }
     int get_violations_counter() override { return violations_counter; }
-    void insert_completion(int size, double completion) override {}
+    void insert_completion(int size, double completion, long int id) override {}
     bool fit_jobs(std::unordered_map<long int, double> holdTime, double simTime) override { return false; }
+    double get_overest_max() override { return 1.0; }
     bool prio_big() override { return false; }
     int get_state_ser_small() override;
     void reset_completion(double simtime) override {}

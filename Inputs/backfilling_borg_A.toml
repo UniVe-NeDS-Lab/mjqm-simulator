@@ -1,0 +1,181 @@
+identifier = "backfilling_borg_A"
+events = 30000000
+repetitions = 30
+cores = 4096
+
+arrival.distribution = "exponential"
+
+service.distribution = "exponential"
+
+
+[[class]]
+cores = 1
+arrival.prob = 0.9396353658169432
+service.mean = 2.1409873469099194
+
+[[class]]
+cores = 2
+arrival.prob = 0.021369679192454423
+service.mean = 3.106702185711682
+
+[[class]]
+cores = 3
+arrival.prob = 0.003654943722124495
+service.mean = 12.102343780345203
+
+[[class]]
+cores = 4
+arrival.prob = 0.0020326269746717305
+service.mean = 64.05097202037886
+
+[[class]]
+cores = 5
+arrival.prob = 0.0028506668616428755
+service.mean = 11.618184870384368
+
+[[class]]
+cores = 6
+arrival.prob = 0.0006029925980723161
+service.mean = 17.03883005514975
+
+[[class]]
+cores = 7
+arrival.prob = 0.00025203542258942744
+service.mean = 79.64336897163261
+
+[[class]]
+cores = 8
+arrival.prob = 0.00009290042880429407
+service.mean = 385.76513177377205
+
+[[class]]
+cores = 9
+arrival.prob = 0.004762007165375667
+service.mean = 0.5470902404688687
+
+[[class]]
+cores = 10
+arrival.prob = 0.0006812698112314898
+service.mean = 86.27105520108734
+
+[[class]]
+cores = 11
+arrival.prob = 0.00009634118542667532
+service.mean = 2.5884924020086015
+
+[[class]]
+cores = 14
+arrival.prob = 0.0009745943132894924
+service.mean = 0.139611087640828
+
+[[class]]
+cores = 18
+arrival.prob = 0.009185099803446778
+service.mean = 0.4457132862310415
+
+[[class]]
+cores = 20
+arrival.prob = 0.00029332450205800257
+service.mean = 98.60385027798739
+
+[[class]]
+cores = 24
+arrival.prob = 0.00006021324089167208
+service.mean = 20.574291256495883
+
+[[class]]
+cores = 27
+arrival.prob = 0.0058914355266723156
+service.mean = 0.31099659656152046
+
+[[class]]
+cores = 28
+arrival.prob = 0.001886394818220527
+service.mean = 0.0966073795915248
+
+[[class]]
+cores = 30
+arrival.prob = 0.00005247153849131424
+service.mean = 19.774441312571042
+
+[[class]]
+cores = 38
+arrival.prob = 0.0011053430649399804
+service.mean = 0.21811895778670848
+
+[[class]]
+cores = 40
+arrival.prob = 0.0026356195727440463
+service.mean = 1.3794496495169697
+
+[[class]]
+cores = 42
+arrival.prob = 0.0009393265579100845
+service.mean = 0.16284454785860503
+
+[[class]]
+cores = 50
+arrival.prob = 0.00042579363201968116
+service.mean = 25.46456835583003
+
+[[class]]
+cores = 60
+arrival.prob = 0.000057632673424886133
+service.mean = 25.934993843534098
+
+[[class]]
+cores = 80
+arrival.prob = 0.0000335473770682173
+service.mean = 15.237804559560923
+
+[[class]]
+cores = 98
+arrival.prob = 0.00012730799502810668
+service.mean = 0.3764618474083978
+
+[[class]]
+cores = 100
+arrival.prob = 0.000049030781868932984
+service.mean = 7.159567431399696
+
+[[class]]
+cores = 120
+arrival.prob = 0.000030966809601431354
+service.mean = 0.04927775594923228
+
+[[class]]
+cores = 498
+arrival.prob = 0.00019182218169775533
+service.mean = 0.4807384773220182
+
+[[class]]
+cores = 2998
+arrival.prob = 0.000029246431290240725
+service.mean = 0.325075486127068
+
+
+[[pivot]]
+policy = [
+    { name = "back filling imperfect", overest = 0.1},
+    { name = "back filling imperfect", overest = 1.0},
+]
+
+arrival.rate = [
+    7.0800,
+    43.1753,
+    79.2705,
+    115.3658,
+    151.4611,
+    187.5563,
+    223.6516,
+    259.7468,
+    295.8421,
+    331.9374,
+    368.0326,
+    404.1279,
+    440.2232,
+    476.3184,
+    512.4137,
+    548.5089,
+    584.6042,
+]

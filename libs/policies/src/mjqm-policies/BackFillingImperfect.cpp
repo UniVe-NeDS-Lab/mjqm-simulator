@@ -4,15 +4,15 @@
 
 #include <iostream>
 
-#include <mjqm-policies/BackFilling.h>
+#include <mjqm-policies/BackFillingImperfect.h>
 
-void BackFilling::arrival(int c, int size, long int id) {
+void BackFillingImperfect::arrival(int c, int size, long int id) {
     std::tuple<int, int, long int> e(c, size, id);
     this->buffer.push_back(e);
     state_buf[std::get<0>(e)]++;
     flush_buffer();
 }
-void BackFilling::departure(int c, int size, long int id) {
+void BackFillingImperfect::departure(int c, int size, long int id) {
     std::tuple<int, int, long int> e(c, size, id);
     state_ser[std::get<0>(e)]--;
     freeservers += std::get<1>(e);
@@ -25,20 +25,26 @@ void BackFilling::departure(int c, int size, long int id) {
         ++it;
     }
 
-    // std::cout << completion_time.size() << std::endl;
-    if (!completion_time.empty()) {
-        completion_time.erase(completion_time.begin());
-    } else {
-        std::cout << "empty completion_time?" << std::endl;
-        violations_counter++;
+    // erase completion time
+    auto it_real = completion_time_real.find(id);
+    if (it_real != completion_time_real.end()) {
+        double time = it_real->second;
+
+        // Step 2: erase from the map using the completion time
+        completion_time.erase(time);
+
+        // Step 3: erase from the unordered_map
+        completion_time_real.erase(it_real);
     }
+
+
     // remove departing jobs
     this->ongoing_jobs[std::get<0>(e)].remove(std::get<2>(e));
     /*auto dep_job = std::find(ongoing_jobs.begin(), ongoing_jobs.end(), std::get<2>(e));
     this->ongoing_jobs.erase(dep_job);*/
     flush_buffer();
 }
-bool BackFilling::fit_jobs(std::unordered_map<long int, double> holdTime, double simTime) {
+bool BackFillingImperfect::fit_jobs(std::unordered_map<long int, double> holdTime, double simTime) {
     bool added = false;
     ongoing_jobs.clear();
     ongoing_jobs.resize(state_buf.size());
@@ -69,15 +75,18 @@ bool BackFilling::fit_jobs(std::unordered_map<long int, double> holdTime, double
     }
     return added;
 }
-void BackFilling::insert_completion(int size, double completion, long int id) { completion_time[completion] = size; }
-void BackFilling::reset_completion(double simtime) {
+void BackFillingImperfect::insert_completion(int size, double completion, long int id) { 
+    completion_time[completion] = size;
+    completion_time_real[id] = completion;
+}
+void BackFillingImperfect::reset_completion(double simtime) {
     std::map<double, int> new_completion_time;
     for (const auto& ctime : completion_time) {
         new_completion_time[ctime.first - simtime] = ctime.second; // Modify the value associated with each key
     }
     completion_time = new_completion_time;
 }
-double BackFilling::schedule_next() const {
+double BackFillingImperfect::schedule_next() const {
     auto next_job = buffer.front();
     int next_job_size = std::get<1>(next_job);
     int temp_freeservers = freeservers;
@@ -93,7 +102,7 @@ double BackFilling::schedule_next() const {
     }
     return -1;
 }
-void BackFilling::flush_buffer() {
+void BackFillingImperfect::flush_buffer() {
 
     ongoing_jobs.clear();
     ongoing_jobs.resize(state_buf.size());

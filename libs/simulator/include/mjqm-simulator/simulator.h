@@ -16,6 +16,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <random>
 
 #include <mjqm-math/confidence_intervals.h>
 #include <mjqm-math/mean_var.h>
@@ -81,6 +82,10 @@ public:
             arrTime[job_id->first] -= simtime;
         }
 
+        for (auto job_id = startSer.begin(); job_id != startSer.end(); ++job_id) {
+            startSer[job_id->first] -= simtime;
+        }
+
         phase_two_start -= simtime;
         phase_three_start -= simtime;
 
@@ -141,7 +146,7 @@ public:
         stats->window_size.collect(std::accumulate(windowSize.begin(), windowSize.end(), 0.0) / simtime);
 
         stats->wasted.collect(waste / simtime);
-        stats->violations.collect(viol / simtime);
+        stats->violations.collect(policy->get_violations_counter());
         stats->utilisation.collect(utilisation / n);
         stats->occupancy_tot.collect(totq);
 
@@ -154,7 +159,7 @@ public:
         stats->resp_var_tot.collect(rt_mean_var.second);
 
         stats->phase_two_dur.collect((phase_two_duration * 1.0) / job_seq_amount[0]);
-        stats->phase_three_dur.collect((phase_three_duration * 1.0) / job_seq_amount[0]);
+        stats->phase_three_dur.collect((phase_three_duration * 1.0) / job_seq_amount[1]);
     }
 
     void simulate(unsigned long nevents, unsigned int repetitions = 1) {
@@ -168,61 +173,9 @@ public:
         }
         stats->lambda = tot_lambda;
 
-        // std::string out_filename = "Results/logfile_N" + std::to_string(n) + "_" + std::to_string(tot_lambda) + "_W"
-        // +
-        //     std::to_string(w) + ".csv";
-        // remove(out_filename.c_str());
-        // std::ofstream outputFile_rep(out_filename, std::ios::app);
-        // std::vector<std::string> headers_rep;
-        // headers_rep = {"Repetition"};
-        // for (int ts : sizes) {
-        //     headers_rep.push_back("T" + std::to_string(ts) + " Queue");
-        //     headers_rep.push_back("T" + std::to_string(ts) + " MQL");
-        // }
-        //
-        // headers_rep.push_back("Total Queue");
-        // headers_rep.push_back("Total MQL");
-        //
-        // if (outputFile_rep.tellp() == 0) {
-        //     // Write the headers to the CSV file
-        //     for (const std::string& header : headers_rep) {
-        //         outputFile_rep << header << ";";
-        //     }
-        //     outputFile_rep << "\n";
-        // }
-        // outputFile_rep.close();
-        // std::vector<std::string> headers;
-        // headers = {"Repetition", "Event"};
-        // for (int ts : sizes) {
-        //     headers.push_back("T" + std::to_string(ts) + " Queue");
-        //     headers.push_back("T" + std::to_string(ts) + " Service");
-        // }
-        //
-        // headers.push_back("Total Queue");
-        // headers.push_back("Total Service");
-        //
-        // for (size_t i = 0; i < sizes.size(); ++i) {
-        //     headers.push_back("Fel" + std::to_string(i));
-        // }
-        //
-        // for (size_t i = 0; i < sizes.size(); ++i) {
-        //     headers.push_back("Fel" + std::to_string(i + sizes.size()));
-        // }
-        //
-        // headers.push_back("Simtime");
-        //
-        // {
-        //     remove(logfile_name.c_str());
-        //     std::ofstream outputFile(logfile_name, std::ios::app);
-        //     if (outputFile.tellp() == 0) {
-        //         // Write the headers to the CSV file
-        //         for (const std::string& header : headers) {
-        //             outputFile << header << ";";
-        //         }
-        //         outputFile << "\n";
-        //     }
-        //     outputFile.close();
-        // }
+        std::random_device rd;                  // Seed (non-deterministic if available)
+        std::mt19937 gen(rd());                 // Mersenne Twister generator
+        auto dist = std::uniform_real_distribution<double>(0.0, policy->get_overest_max());
 
         for (unsigned int rep = 0; rep < repetitions; rep++) {
             /*int buf_size = std::reduce(policy->get_state_buf().begin(), policy->get_state_buf().end());
@@ -246,10 +199,15 @@ public:
                     rawWaitingTime[pos].push_back(waitTime[job_fel[pos]]);
                     rawResponseTime[pos].push_back(waitTime[job_fel[pos]] + holdTime[job_fel[pos]]);
                     arrTime.erase(job_fel[pos]);
+                    startSer.erase(job_fel[pos]);
                     waitTime.erase(job_fel[pos]);
                     holdTime.erase(job_fel[pos]);
+                    holdTimeDeclared.erase(job_fel[pos]);
                     // std::cout << "before dep" << std::endl;
 
+                    //if (pos == 1) {
+                    //    std::cout << "BIG JOB OUT " << *itmin << std::endl;
+                    //}
                     policy->departure(pos, sizes[pos], job_fel[pos]);
                     // std::cout << "dep" << std::endl;
                 } else {
@@ -257,6 +215,12 @@ public:
                     if (this->w == -3) {
                         holdTime[job_id] = ser_time_samplers[pos - nclasses]->sample();
                         // std::cout << holdTime[job_id] << std::endl;
+                    } else if (this->w == -13) {
+                        double hold = ser_time_samplers[pos - nclasses]->sample();
+                        holdTime[job_id] = hold;
+                        double overest = (ser_time_samplers[pos - nclasses]->sample())*policy->get_overest_max();
+                        holdTimeDeclared[job_id] = hold + overest;
+                        //std::cout << holdTime[job_id] << " " << holdTimeDeclared[job_id] << std::endl;
                     }
                     policy->arrival(pos - nclasses, sizes[pos - nclasses], job_id);
                     arrTime[job_id] = *itmin;
@@ -268,118 +232,42 @@ public:
                 resample();
                 // std::cout << "resample" << std::endl;
                 if (this->w == -3) {
-                    // std::cout << policy->get_state_buf()[0] << " " << simtime << std::endl;
                     bool added;
                     added = policy->fit_jobs(holdTime, simtime);
                     resample();
                     int idx = 0;
                     while (added) {
-                        // std::cout << idx << " " << simtime << std::endl;
                         added = policy->fit_jobs(holdTime, simtime);
-                        // std::cout << "added" << std::endl;
                         resample();
-                        // std::cout << "resample" << std::endl;
                         idx += 1;
                     }
-                    // std::cout << "out" << std::endl;
+                } else if (this->w == -13) {
+                    bool added;
+                    added = policy->fit_jobs(holdTimeDeclared, simtime);
+                    resample();
+                    int idx = 0;
+                    while (added) {
+                        added = policy->fit_jobs(holdTimeDeclared, simtime);
+                        resample();
+                        idx += 1;
+                    }
                 }
-                /*if (k % 1000 == 0) {
-                    std::ofstream outputFile(logfile_name, std::ios::out);
-                    for (const std::string& header : headers) {
-                        outputFile << header << ";";
-                    }
-                    outputFile << "\n";
-                    outputFile << rep << ";";
-                    outputFile << k << ";";
-                    auto state_buf = policy->get_state_buf();
-                    auto state_ser = policy->get_state_ser();
-                    for (size_t i=0; i<occupancy_buf.size(); i++) {
-                        outputFile << state_buf[i] << ";";
-                        outputFile << state_ser[i] << ";";
-                    }
-                    outputFile << std::accumulate(state_buf.begin(), state_buf.end(), 0.0) << ";";
-                    outputFile << std::accumulate(state_ser.begin(), state_ser.end(), 0.0) << ";";
-                    for (size_t i=0; i<fel.size(); i++) {
-                        outputFile << fel[i] << ";";
-                    }
-                    outputFile << simtime << ";";
-                    outputFile << "\n";
-                    outputFile.close();
-                    //std::cout << "logs" << std::endl;
-                }*/ /*else if ( std::chrono::steady_clock::now() - last_dep >= std::chrono::minutes(1) ) {
-                    std::ofstream outputFile(logfile_name, std::ios::out);
-                    for (const std::string& header : headers) {
-                        outputFile << header << ";";
-                    }
-                    outputFile << "\n";
-                    outputFile << rep << ";";
-                    outputFile << k << ";";
-                    auto state_buf = policy->get_state_buf();
-                    auto state_ser = policy->get_state_ser();
-                    for (size_t i=0; i<occupancy_buf.size(); i++) {
-                        outputFile << state_buf[i] << ";";
-                        outputFile << state_ser[i] << ";";
-                    }
-                    outputFile << std::accumulate(state_buf.begin(), state_buf.end(), 0.0) << ";";
-                    outputFile << std::accumulate(state_ser.begin(), state_ser.end(), 0.0) << ";";
-                    outputFile << "\n";
-                    outputFile.close();
-                    last_dep = std::chrono::steady_clock::now();
-                }*/
             }
 
-            collect_run_statistics();
+            if (rep>0)
+                collect_run_statistics();
 
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
             stats->timings_tot.collect(duration);
 
             std::cout << "Repetition " << std::to_string(rep) << " Done" << std::endl;
-            // this->reset_data();
-            /*auto sb = policy->get_state_buf();
-            for (size_t i = 0; i<sb.size(); ++i) {
-                std::cout << sb[i] << ", ";
-            }
-            std::cout << std::endl;*/
-            // std::ofstream outputFile(out_filename, std::ios::app);
-            // outputFile << rep << ";";
-            // auto state_buf = policy->get_state_buf();
-            // for (size_t i = 0; i < occupancy_buf.size(); i++) {
-            //     outputFile << state_buf[i] << ";";
-            //     outputFile << occupancy_buf[i] << ";";
-            // }
-            // outputFile << std::accumulate(state_buf.begin(), state_buf.end(), 0.0) << ";";
-            // outputFile << std::accumulate(occupancy_buf.begin(), occupancy_buf.end(), 0.0) << ";";
-            // outputFile << "\n";
-            // outputFile.close();
         }
 
         // outputFile.close();
-        // for (auto& x : rep_free_servers_distro) {
-        //     x /= simtime;
-        // }
-
-        /*    std::ofstream outFree("freeserversDistro-nClasses" + std::to_string(this->nclasses) + "-N" +
-           std::to_string(this->n) + "-Win" + std::to_string(this->w) + ".csv", std::ios::app);
-           double lambda = std::accumulate(this->l.begin(), this->l.end(), 0.0);
-
-            if (outFree.tellp() == 0) {
-                // Write the headers to the CSV file
-                outFree << "Arrival Rate" << ";";
-                for (size_t i = 0; i < rep_free_servers_distro.size(); ++i) {
-                    outFree << i << ";";
-                }
-                outFree << "\n";
-            }
-            outFree << lambda << ";";
-
-            for (size_t i = 0; i <= rep_free_servers_distro.size(); i++) {
-
-                    outFree << rep_free_servers_distro[i] << ";";
-
-            }
-            outFree << "\n";
-            outFree.close();*/
+        for (auto& x : rep_free_servers_distro) {
+            x /= simtime;
+        }
     }
 
     void produce_statistics(ExperimentStats& stats, const double confidence = 0.05) const {
@@ -398,6 +286,7 @@ private:
     ExperimentStats* stats;
     const int nclasses;
     std::vector<double> l;
+    std::vector<double> u;
     std::vector<std::unique_ptr<DistributionSampler>> ser_time_samplers;
     std::vector<std::unique_ptr<DistributionSampler>> arr_time_samplers;
     std::vector<unsigned int> sizes;
@@ -420,8 +309,10 @@ private:
     std::vector<unsigned long> preemption;
 
     std::unordered_map<long int, double> arrTime;
+    std::unordered_map<long int, double> startSer;
     std::unordered_map<long int, double> waitTime;
     std::unordered_map<long int, double> holdTime;
+    std::unordered_map<long int, double> holdTimeDeclared;
     std::vector<std::list<double>> rawWaitingTime;
     std::vector<std::list<double>> rawResponseTime;
 
@@ -455,7 +346,7 @@ private:
 
     void resample() {
         // add arrivals and departures
-        if (this->w == -2) { // special blocks for serverFilling (memoryful)
+        if (this->w == -2 || this->w == -16 || this->w == -17) { // special blocks for serverFilling (memoryful)
             auto stopped_jobs = policy->get_stopped_jobs();
             auto ongoing_jobs = policy->get_ongoing_jobs();
             for (int i = 0; i < nclasses; i++) {
@@ -465,11 +356,25 @@ private:
 
                 for (auto job_id : stopped_jobs[i]) {
                     if (jobs_inservice[i].contains(job_id)) { // If they are currently being served: stop them
-                        jobs_preempted[i][job_id] =
-                            jobs_inservice[i][job_id] - simtime; // Save the remaining service time
+                        if (this->w == -2) {
+                            jobs_preempted[i][job_id] = jobs_inservice[i][job_id] - simtime; // Save the remaining service time
+                        } else if (this->w == -16 || this->w == -17) {
+                            jobs_preempted[i][job_id] = holdTime[job_id]; // Save the original whole service time
+                        }
                         jobs_inservice[i].erase(job_id);
                         arrTime[job_id] = simtime;
                         preemption[i]++;
+                    } else { // they were never even started
+                        if ((this->w == -16 || this->w == -17) && waitTime.find(job_id) == waitTime.end() ) {
+                            double sampled = ser_time_samplers[i]->sample();
+                            waitTime[job_id] = simtime - arrTime[job_id];
+                            holdTime[job_id] = sampled;
+                            startSer[job_id] = simtime;
+
+                            jobs_preempted[i][job_id] = holdTime[job_id];
+                            arrTime[job_id] = simtime;
+                            preemption[i]++;
+                        }
                     }
                 }
 
@@ -481,14 +386,23 @@ private:
                             jobs_inservice[i][job_id] = jobs_preempted[i][job_id] + simtime;
                             jobs_preempted[i].erase(job_id);
                             waitTime[job_id] = simtime - arrTime[job_id] + waitTime[job_id];
+                            phase_two_duration += (simtime - arrTime[job_id]);
+                            job_seq_amount[0] += 1;
+                            phase_three_duration += (simtime - startSer[job_id]);
+                            job_seq_amount[1] += 1;
                         } else { // or they are just new jobs about to be served for the first time: add them with new
                                  // service time
                             double sampled = ser_time_samplers[i]->sample();
+                            //if (i == 1) {
+                               // std::cout << "BIG JOB IN " << simtime << std::endl;
+                                //std::cout << "---------------"<< std::endl;
+                            //}
                             jobs_inservice[i][job_id] = sampled + simtime;
                             // rawWaitingTime[i].push_back(simtime-arrTime[job_id]);
                             // arrTime.erase(*job_id); //update waitingTime
                             waitTime[job_id] = simtime - arrTime[job_id];
                             holdTime[job_id] = sampled;
+                            startSer[job_id] = simtime;
                         }
 
                         if (jobs_inservice[i][job_id] < fastest_job_fel) {
@@ -529,7 +443,10 @@ private:
                     double sampled;
                     if (this->w == -3) {
                         sampled = holdTime[job_id];
-                        policy->insert_completion(this->sizes[i], sampled + simtime);
+                        policy->insert_completion(this->sizes[i], sampled + simtime, job_id);
+                    } else if (this->w == -13) {
+                        sampled = holdTime[job_id];
+                        policy->insert_completion(this->sizes[i], holdTimeDeclared[job_id] + simtime, job_id);
                     } else {
                         sampled = ser_time_samplers[i]->sample();
                     }
@@ -541,76 +458,6 @@ private:
                     if (jobs_inservice[i][job_id] < fel[i]) {
                         fel[i] = jobs_inservice[i][job_id];
                         job_fel[i] = job_id;
-                    }
-
-                    if (last_job < 0) {
-                        // std::cout << "sequence " << i << " starting from idle" << " simtime " << simtime <<
-                        // std::endl;
-                        curr_job_seq[pooled_i] = 1;
-                        curr_job_seq_start[pooled_i] = simtime;
-                        last_job = pooled_i;
-                        if (pooled_i == 0) {
-                            // std::cout << "phase three starting from idle" << " simtime " << simtime << std::endl;
-                            phase_three_start = simtime;
-                            curr_phase = 3;
-                        }
-                        // std::cout << "-------------------------------------" << std::endl;
-                    } else if (last_job == pooled_i) {
-                        curr_job_seq[pooled_i] = curr_job_seq[pooled_i] + 1;
-                    } else {
-                        // std::cout << "sequence " << pooled_i << " starting from sequence " << last_job << " simtime "
-                        // << simtime << std::endl;
-                        tot_job_seq[last_job] = tot_job_seq[last_job] + curr_job_seq[last_job];
-                        // if (last_job == 1 && pooled_i == 0) {
-                        //     std::cout << simtime << "  " << curr_job_seq_start[last_job] << std::endl;
-                        // }
-                        tot_job_seq_dur[last_job] = tot_job_seq_dur[last_job] + simtime - curr_job_seq_start[last_job];
-                        job_seq_amount[last_job] = job_seq_amount[last_job] + 1;
-                        curr_job_seq[last_job] = 0;
-                        curr_job_seq[pooled_i] = 1;
-                        curr_job_seq_start[pooled_i] = simtime;
-                        // std::cout << tot_job_seq_dur[last_job] << std::endl;
-                        last_job = pooled_i;
-                        if (pooled_i == 0) {
-                            if (policy->get_free_ser() == 0) {
-                                // std::cout << "phase two starting from phase one" << " simtime " << simtime <<
-                                // std::endl;
-                                phase_two_start = simtime;
-                                curr_phase = 2;
-                            } else {
-                                // std::cout << "phase three starting from phase one" << " simtime " << simtime <<
-                                // std::endl;
-                                phase_three_start = simtime;
-                                curr_phase = 3;
-                            }
-                            // std::cout << "-------------------------------------" << std::endl;
-                        } else {
-                            // std::cout << "phase one starting from phase three" << " simtime " << simtime <<
-                            // std::endl;
-                            phase_three_duration += (simtime - phase_three_start);
-                            if (add_phase_two) {
-                                phase_two_duration += (phase_three_start - phase_two_start);
-                                add_phase_two = false;
-                            }
-                            // std::cout << phase_two_duration+phase_three_duration << std::endl;
-                            // std::cout << tot_job_seq_dur[0] << std::endl;
-                            // std::cout << (phase_three_duration+phase_two_duration == tot_job_seq_dur[0]) <<
-                            // std::endl;
-                            if (phase_two_start < 0 && phase_two_duration == 0 &&
-                                phase_three_duration < tot_job_seq_dur[0]) {
-                                // phase_two_duration += (phase_three_start-phase_two_start);
-                            }
-                            curr_phase = 1;
-                            // std::cout << "small abis" << std::endl;
-                            // std::cout << policy->get_state_ser()[0] << " " << policy->get_state_buf()[1] <<
-                            // std::endl; std::cout << phase_three_start << std::endl; std::cout <<
-                            // curr_job_seq_start[0] << std::endl; std::cout << phase_two_start << std::endl; std::cout
-                            // << phase_three_start << std::endl; std::cout << phase_two_duration << std::endl;
-                            // std::cout << phase_three_duration << std::endl;
-                            // std::cout << phase_two_duration+phase_three_duration << std::endl;
-                            // std::cout << tot_job_seq_dur[0] << std::endl;
-                            // std::cout << "-------------------------------------" << std::endl;
-                        }
                     }
                 }
 
@@ -625,70 +472,6 @@ private:
                         }
                     }
                 }
-            }
-
-            if (curr_phase == 2) {
-                if (this->w > -4 && policy->get_free_ser() > 0) {
-                    // std::cout << "phase three starting from phase two" << " simtime " << simtime << std::endl;
-                    // phase_two_duration += (simtime-phase_two_start);
-                    phase_three_start = simtime;
-                    curr_phase = 3;
-                    add_phase_two = true;
-                    // std::cout << phase_two_duration << std::endl;
-                    // std::cout << "-------------------------------------" << std::endl;
-                } else if (this->w <= -4 && policy->prio_big() == true) {
-                    // std::cout << "phase three starting from phase two" << " simtime " << simtime << std::endl;
-                    // phase_two_duration += (simtime-phase_two_start);
-                    phase_three_start = simtime;
-                    curr_phase = 3;
-                    add_phase_two = true;
-                    // std::cout << phase_two_duration << std::endl;
-                    // std::cout << "-------------------------------------" << std::endl;
-                }
-            }
-
-            if (policy->get_free_ser() == this->n && last_job >= 0) {
-                // std::cout << "sequence " << last_job << " ending" << " simtime " << simtime << std::endl;
-                tot_job_seq[last_job] = tot_job_seq[last_job] + curr_job_seq[last_job];
-                tot_job_seq_dur[last_job] = tot_job_seq_dur[last_job] + simtime - curr_job_seq_start[last_job];
-                job_seq_amount[last_job] = job_seq_amount[last_job] + 1;
-                curr_job_seq[last_job] = 0;
-                // std::cout << tot_job_seq_dur[last_job] << std::endl;
-                if (last_job == 0) {
-                    // std::cout << "phase three ending" << " simtime " << simtime << std::endl;
-                    // std::cout << add_phase_two << std::endl;
-                    // std::cout << phase_two_start << std::endl;
-                    // std::cout << phase_three_start << std::endl;
-                    if (curr_phase == 3) {
-                        phase_three_duration += (simtime - phase_three_start);
-                        if (add_phase_two) {
-                            phase_two_duration += (phase_three_start - phase_two_start);
-                            add_phase_two = false;
-                        }
-                        if (phase_two_start < 0 && phase_two_duration == 0 &&
-                            phase_two_duration + phase_three_duration < tot_job_seq_dur[0]) {
-                            // std::cout << "HEHE-------------------------------------" << std::endl;
-                            // phase_two_duration += (phase_three_start-phase_two_start);
-                        }
-                    } else if (curr_phase == 2) {
-                        phase_two_duration += (simtime - phase_two_start);
-                    } else {
-                        std::cout << "WADAW-------------------------------------" << std::endl;
-                    }
-                    // std::cout << phase_two_duration << std::endl;
-                    // std::cout << phase_three_duration << std::endl;
-                    // std::cout << phase_two_duration+phase_three_duration << std::endl;
-                    // std::cout << tot_job_seq_dur[0] << std::endl;
-                    // std::cout << phase_three_duration << std::endl;
-                    // std::cout << "-------------------------------------" << std::endl;
-                }
-                last_job = -1;
-                curr_phase = 0;
-                // std::cout << "-------------------------------------" << std::endl;
-            }
-
-            if (curr_phase == 3) {
-                // std::cout << policy->get_state_ser()[0] << " " << policy->get_state_buf()[1] << std::endl;
             }
         }
     }

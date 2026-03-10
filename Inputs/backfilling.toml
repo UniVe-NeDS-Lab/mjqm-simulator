@@ -1,0 +1,45 @@
+identifier = "backfilling_test"
+events = 1000000
+repetitions = 21
+cores = 32
+
+arrival.distribution = "exponential"
+
+service.distribution = "exponential"
+
+
+[[class]]
+cores = 1
+arrival.prob = 0.4
+service.mean = 1
+
+[[class]]
+cores = 4
+arrival.prob = 0.3
+service.mean = 2
+
+[[class]]
+cores = 16
+arrival.prob = 0.2
+service.mean = 3
+
+[[class]]
+cores = 32
+arrival.prob = 0.1
+service.mean = 5
+
+
+[[pivot]]
+policy = [
+#    "back filling",
+    { name = "back filling imperfect", overest = 10.0},
+    { name = "back filling imperfect", overest = 2.5},
+]
+
+arrival.rate = [
+    0.88,
+    0.91,
+    0.94,
+    0.97,
+    1.00,
+]

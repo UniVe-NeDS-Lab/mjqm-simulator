@@ -18,6 +18,7 @@ public:
     void arrival(int c, int size, long int id) override;
     void departure(int c, int size, long int id) override;
     bool fit_jobs(std::unordered_map<long int, double> holdTime, double simTime) override;
+    double get_overest_max() override { return 1.0; }
     const std::vector<int>& get_state_ser() override { return state_ser; }
     const std::vector<int>& get_state_buf() override { return state_buf; }
     const std::vector<std::list<long int>>& get_stopped_jobs() override { return stopped_jobs; }
@@ -26,7 +27,7 @@ public:
     int get_window_size() override { return 0; }
     int get_w() const override { return w; }
     int get_violations_counter() override { return violations_counter; }
-    void insert_completion(int size, double completion) override;
+    void insert_completion(int size, double completion, long int id) override;
     void reset_completion(double simtime) override;
     bool prio_big() override { return false; }
     int get_state_ser_small() override { return -1; }

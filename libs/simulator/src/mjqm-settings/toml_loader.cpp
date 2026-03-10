@@ -254,6 +254,7 @@ Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.cl
         arr_time_samplers.push_back(cls.arrival_sampler->clone());
         ser_time_samplers.push_back(cls.service_sampler->clone());
         l.push_back(1. / cls.arrival_sampler->get_mean());
+        u.push_back(cls.service_sampler->get_mean());
     }
     // for debugging purposes, all simulations should print the same state of the RNG,
     // unless some distribution is deterministic only in some of them

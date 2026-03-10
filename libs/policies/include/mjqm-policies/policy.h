@@ -24,9 +24,10 @@ public:
     virtual int get_w() const = 0;
     virtual int get_violations_counter() = 0;
     virtual void flush_buffer() = 0;
-    virtual void insert_completion(int size, double completion) = 0;
+    virtual void insert_completion(int size, double completion, long int id) = 0;
     virtual void reset_completion(double simtime) = 0;
     virtual bool fit_jobs(std::unordered_map<long int, double> holdTime, double simTime) = 0;
+    virtual double get_overest_max() = 0;
     virtual bool prio_big() = 0;
     virtual int get_state_ser_small() = 0;
     virtual ~Policy() = default;

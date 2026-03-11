@@ -177,7 +177,7 @@ public:
         stats->phase_three_dur.collect((phase_three_duration * 1.0) / job_seq_amount[1]);
         stats->idle_period_prob.collect((idle_period * 1.0) / simtime);
 
-        stats->p0.collect((autocorr_phase_times[0] * 1.0) / cycle_count);
+        /*stats->p0.collect((autocorr_phase_times[0] * 1.0) / cycle_count);
         stats->p1.collect((autocorr_phase_times[1] * 1.0) / cycle_count);
         stats->p2.collect((autocorr_phase_times[4] * 1.0) / cycle_count);
         stats->p3.collect((autocorr_phase_times[5] * 1.0) / cycle_count);
@@ -190,7 +190,7 @@ public:
         stats->p0_res.collect((autocorr_residuals[0] * 1.0) / cycle_count);
         stats->p1_res.collect((autocorr_residuals[1] * 1.0) / cycle_count);
         stats->p2_res.collect((autocorr_residuals[4] * 1.0) / cycle_count);
-        stats->p3_res.collect((autocorr_residuals[5] * 1.0) / cycle_count);
+        stats->p3_res.collect((autocorr_residuals[5] * 1.0) / cycle_count);*/
     }
 
     void simulate(unsigned long nevents, unsigned int repetitions = 1) {

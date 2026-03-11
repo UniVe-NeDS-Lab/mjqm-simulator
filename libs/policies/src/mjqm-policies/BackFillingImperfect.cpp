@@ -25,6 +25,13 @@ void BackFillingImperfect::departure(int c, int size, long int id) {
         ++it;
     }
 
+    // std::cout << completion_time.size() << std::endl;
+    /*if (!completion_time.empty()) {
+        completion_time.erase(completion_time.begin());
+    } else {
+        std::cout << "empty completion_time?" << std::endl;
+        violations_counter++;
+    }*/
     // erase completion time
     auto it_real = completion_time_real.find(id);
     if (it_real != completion_time_real.end()) {
@@ -36,8 +43,6 @@ void BackFillingImperfect::departure(int c, int size, long int id) {
         // Step 3: erase from the unordered_map
         completion_time_real.erase(it_real);
     }
-
-
     // remove departing jobs
     this->ongoing_jobs[std::get<0>(e)].remove(std::get<2>(e));
     /*auto dep_job = std::find(ongoing_jobs.begin(), ongoing_jobs.end(), std::get<2>(e));
@@ -65,6 +70,7 @@ bool BackFillingImperfect::fit_jobs(std::unordered_map<long int, double> holdTim
                 // delete from buffer
                 it = buffer.erase(it);
                 added = true;
+                violations_counter++;
                 // std::cout << "added" << std::endl;
             } else {
                 ++it;
@@ -85,6 +91,9 @@ void BackFillingImperfect::reset_completion(double simtime) {
         new_completion_time[ctime.first - simtime] = ctime.second; // Modify the value associated with each key
     }
     completion_time = new_completion_time;
+    for (auto job_id = completion_time_real.begin(); job_id != completion_time_real.end(); ++job_id) {
+        completion_time_real[job_id->first] -= simtime;
+    }
 }
 double BackFillingImperfect::schedule_next() const {
     auto next_job = buffer.front();

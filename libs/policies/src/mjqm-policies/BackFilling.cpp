@@ -30,7 +30,6 @@ void BackFilling::departure(int c, int size, long int id) {
         completion_time.erase(completion_time.begin());
     } else {
         std::cout << "empty completion_time?" << std::endl;
-        violations_counter++;
     }
     // remove departing jobs
     this->ongoing_jobs[std::get<0>(e)].remove(std::get<2>(e));
@@ -59,6 +58,7 @@ bool BackFilling::fit_jobs(std::unordered_map<long int, double> holdTime, double
                 // delete from buffer
                 it = buffer.erase(it);
                 added = true;
+                violations_counter++;
                 // std::cout << "added" << std::endl;
             } else {
                 ++it;

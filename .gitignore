@@ -88,3 +88,5 @@ docs/generated/
 node_modules/
 
 *.ipynb
+
+p*.txt

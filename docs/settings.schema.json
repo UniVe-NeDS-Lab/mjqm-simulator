@@ -201,7 +201,8 @@
         "dual kill",
         "first fit",
         "adaptive msf",
-        "static msf"
+        "static msf",
+        "lcfs"
       ],
       "options": {
         "enum_titles": [
@@ -217,7 +218,8 @@
           "Dual Kill",
           "First-Fit",
           "Adaptive MSF",
-          "Static MSF"
+          "Static MSF",
+          "LCFS"
         ]
       }
     },

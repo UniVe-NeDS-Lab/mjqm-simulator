@@ -67,12 +67,10 @@ jobs:
           ./configure
 
   build-macos:
-    runs-on: macos-${{matrix.os_version}}
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
-        os_version:
-          - 13
         gcc:
           - 11
           - 15

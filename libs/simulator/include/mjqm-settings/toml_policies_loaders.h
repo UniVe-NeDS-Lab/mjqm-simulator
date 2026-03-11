@@ -35,6 +35,8 @@ std::unique_ptr<Policy> quick_swap_builder(const toml::table&, const ExperimentC
 
 std::unique_ptr<Policy> first_fit_builder(const toml::table&, const ExperimentConfig& conf);
 
+std::unique_ptr<Policy> lcfs_builder(const toml::table&, const ExperimentConfig& conf);
+
 std::unique_ptr<Policy> adaptive_msf_builder(const toml::table&, const ExperimentConfig& conf);
 
 std::unique_ptr<Policy> static_msf_builder(const toml::table&, const ExperimentConfig& conf);
@@ -56,6 +58,7 @@ inline static std::unordered_map<std::string_view, policy_builder> policy_builde
     {"adaptive msf", adaptive_msf_builder},
     {"static msf", static_msf_builder},
     {"most server first", most_server_first_builder},
+    {"lcfs", lcfs_builder},
 };
 
 #endif // TOML_POLICIES_LOADERS_H

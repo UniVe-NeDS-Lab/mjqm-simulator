@@ -24,6 +24,7 @@ public:
     const double l;
     const double h;
     const double alpha;
+    const double prob;
     const double mean = alpha == 1 ? h * l / (h - l) * log(h / l)
                                    : (pow(l, alpha) / (1 - pow(l / h, alpha)) * alpha / (alpha - 1) *
                                       (1 / pow(l, alpha - 1) - 1 / pow(h, alpha - 1)));
@@ -40,6 +41,7 @@ public:
     // operative methods
     inline double get_mean() const override { return mean; }
     inline double get_variance() const override { return variance; }
+    inline double get_prob() const override { return prob; }
     inline double sample() override {
         double u = randU01();
         double num = u * h_to_alpha - u * l_to_alpha - h_to_alpha;
@@ -49,7 +51,7 @@ public:
 
     // direct and indirect constructors
     explicit BoundedPareto(const std::string& name, double alpha, double l, double h) :
-        DistributionSampler(name), l(l), h(h), alpha(alpha) {
+        DistributionSampler(name), l(l), h(h), alpha(alpha), prob(1.) {
         assert(l > 0.);
         assert(h > l);
         assert(alpha > 0.);

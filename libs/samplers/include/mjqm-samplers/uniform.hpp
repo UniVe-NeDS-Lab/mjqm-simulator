@@ -18,6 +18,7 @@ public:
     // descriptive parameters and statistics
     const double min;
     const double max;
+    const double prob;
     const double mean = (min + max) / 2.;
     const double variance = pow(max - min, 2.) / 12.;
 
@@ -28,11 +29,12 @@ public:
     // operative methods
     inline double get_mean() const override { return mean; }
     inline double get_variance() const override { return variance; }
+    inline double get_prob() const override { return prob; }
     inline double sample() override { return randU01() * diff + min; }
 
     // factory methods
     explicit Uniform(const std::string& name, const double min, const double max) :
-        DistributionSampler(name), min(min), max(max) {
+        DistributionSampler(name), min(min), max(max), prob(1.) {
         assert(min > 0);
         assert(max > min);
     }

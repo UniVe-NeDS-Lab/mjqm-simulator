@@ -230,6 +230,9 @@ If `mean` is defined, the `min` and `max` will be calculated as $0.5 \times \mu$
 ### First-Fit
 - `policy = "first fit"`
 
+### LCFS
+- `policy = "lcfs"`
+
 # Overriding parameters from command line
 
 You can override any parameter defined in the configuration file from the command line.

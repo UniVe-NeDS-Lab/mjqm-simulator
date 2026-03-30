@@ -8,7 +8,7 @@
 
 void LCFS::arrival(int c, int size, long int id) {
     std::tuple<int,int,long int> e(c,size,id);
-    this->buffer.push_back(e);
+    this->buffer.push_front(e);
     state_buf[std::get<0>(e)]++;
     flush_buffer();
 }
@@ -24,7 +24,7 @@ void LCFS::flush_buffer() {
     ongoing_jobs.clear();
     ongoing_jobs.resize(state_buf.size());
 
-    if (freeservers > 0 && !buffer.empty()) {
+    /*if (freeservers > 0 && !buffer.empty()) {
         auto it = std::prev(buffer.end());
         //std::cout << freeservers << std::endl;
         while (freeservers > 0 && !buffer.empty()) {
@@ -39,9 +39,21 @@ void LCFS::flush_buffer() {
             } else {
                 break;
             }
-            //it++;
-            //state_buf[it->first] --;
         }
+    }*/
+   if (freeservers > 0 && !buffer.empty()) {
+        auto it = buffer.begin();
         //std::cout << freeservers << std::endl;
+        while (freeservers > 0 && !buffer.empty()) {
+            if (freeservers >= std::get<1>(*it)) {
+                freeservers -= std::get<1>(*it);
+                state_ser[std::get<0>(*it)]++;
+                state_buf[std::get<0>(*it)]--;
+                ongoing_jobs[std::get<0>(*it)].push_back(std::get<2>(*it));
+                it = buffer.erase(it);
+            } else {
+                break;
+            }
+        }
     }
 }

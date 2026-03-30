@@ -257,6 +257,8 @@ Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.cl
     this->debugMode = false;
     this->policy = conf.policy->clone();
     this->stats = &conf.stats;
+    this->autocorr = false;
+    this->arrival_det = false;
 
     occupancy_buf.resize(nclasses);
     occupancy_ser.resize(nclasses);
@@ -288,19 +290,27 @@ Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.cl
         u.push_back(cls.service_sampler->get_mean());
     }
     //std::string autocorr = conf.toml.at_path("arrival.type").value<std::string>().value_or("standard");
+    std::string arr_type = conf.toml.at_path("arrival.distribution").value<std::string>().value_or("exponential");
+    if (arr_type == "deterministic") {
+        arrival_det = true;
+    }
     double rho = conf.toml.at_path("arrival.autocorr").value<double>().value_or(1.0);
+    if (rho == 1.0) {
+        return;
+    }
+    autocorr = true;
     std::vector<std::vector<double>> P = buildP(l, rho);
     arr_time_samplers.clear();
     int idx = 0;
     for (const auto &row : P) {
         int jdx = 0;
         for (double v : row) {
-            std::cout << v*conf.toml.at_path("arrival.rate").value<double>().value_or(1.0) << " ";
+            //std::cout << v*conf.toml.at_path("arrival.rate").value<double>().value_or(1.0) << " ";
             arr_time_samplers.push_back(Exponential::with_rate("arrival_autocorr_"+idx+'.'+jdx, 
                                                                 v*conf.toml.at_path("arrival.rate").value<double>().value_or(1.0)));
             jdx += 1;
         }
-        std::cout << "\n";
+        //std::cout << "\n";
         idx += 1;
     }
     // for debugging purposes, all simulations should print the same state of the RNG,

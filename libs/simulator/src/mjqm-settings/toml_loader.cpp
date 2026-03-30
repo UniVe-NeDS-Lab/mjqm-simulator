@@ -3,6 +3,7 @@
 //
 
 #include <ranges>
+#include <algorithm>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -215,6 +216,31 @@ from_toml(const fs::path& input_file, const std::vector<std::multimap<std::strin
     return from_toml(data, overrides);
 }
 
+std::vector<std::vector<double>> buildP(std::vector<double> p, double rho) {
+    // Normalize p
+    double sum = 0;
+    for (double x : p) sum += x;
+    for (auto &x : p) x /= sum;
+
+    int n = p.size();
+    std::vector<std::vector<double>> P(n, std::vector<double>(n));
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            //P[i][j] = (1.0 - rho) * p[j];
+            if (i == j) {
+                P[i][j] = 1-((1-p[j])/rho);  // add stickiness
+            } else {
+                double pij = p[j]/(1-p[i]);
+                double qii = 1-((1-p[i])/rho);
+                P[i][j] = pij*(1-qii);
+            }
+        }
+    }
+
+    return P;
+}
+
 Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.classes.size())) {
     this->n = static_cast<int>(conf.cores);
     this->w = conf.policy->get_w(); // TODO should transform all branches that need it here into methods of the policies
@@ -238,6 +264,11 @@ Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.cl
     preemption.resize(nclasses);
     rawWaitingTime.resize(nclasses);
     rawResponseTime.resize(nclasses);
+    /*autocorr_phase_times.resize(8);
+    autocorr_phases.resize(8);
+    autocorr_phase_time_list.resize(8);
+    autocorr_residuals.resize(8);
+    autocorr_residual_list.resize(8);*/
     waste = 0;
     viol = 0;
     occ = 0;
@@ -255,6 +286,22 @@ Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.cl
         ser_time_samplers.push_back(cls.service_sampler->clone());
         l.push_back(1. / cls.arrival_sampler->get_mean());
         u.push_back(cls.service_sampler->get_mean());
+    }
+    //std::string autocorr = conf.toml.at_path("arrival.type").value<std::string>().value_or("standard");
+    double rho = conf.toml.at_path("arrival.autocorr").value<double>().value_or(1.0);
+    std::vector<std::vector<double>> P = buildP(l, rho);
+    arr_time_samplers.clear();
+    int idx = 0;
+    for (const auto &row : P) {
+        int jdx = 0;
+        for (double v : row) {
+            std::cout << v*conf.toml.at_path("arrival.rate").value<double>().value_or(1.0) << " ";
+            arr_time_samplers.push_back(Exponential::with_rate("arrival_autocorr_"+idx+'.'+jdx, 
+                                                                v*conf.toml.at_path("arrival.rate").value<double>().value_or(1.0)));
+            jdx += 1;
+        }
+        std::cout << "\n";
+        idx += 1;
     }
     // for debugging purposes, all simulations should print the same state of the RNG,
     // unless some distribution is deterministic only in some of them

@@ -67,12 +67,10 @@ jobs:
           ./configure
 
   build-macos:
-    runs-on: macos-${{matrix.os_version}}
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
-        os_version:
-          - 13
         gcc:
           - 11
           - 15
@@ -91,7 +89,6 @@ jobs:
         id: install-boost
         with:
           boost_version: ${{ matrix.boost }}
-          platform_version: ${{ matrix.os_version }}
           toolset: clang
           arch: x86
       - name: Install uv

@@ -1,0 +1,114 @@
+identifier = "killsmart_ex"
+events = 1000000
+repetitions = 21
+cores = 2048
+
+arrival.distribution = "exponential"
+
+service.distribution = "bounded pareto"
+
+
+[[class]]
+cores = 1
+arrival.prob = 0.95
+service.mean = 1.25
+service.alpha = 2.1
+
+[[class]]
+cores = 2048
+arrival.prob = 0.05
+service.mean = 10
+service.alpha = 2.1
+
+
+[[pivot]]
+policy = [
+#    "fifo",
+#    "back filling",
+#    "most server first",
+#    "server filling memoryful",
+#    { name ="quick swap", threshold = 1 },
+#    { name ="quick swap", threshold = 32 },
+#    "first fit",
+#    "adaptive msf",
+#    "static msf",
+#    { name = "smash", window = 2 },
+#    { name = "smash", window = 5 },
+#    { name = "smash", window = 10 },
+     { name = "kill smart", k = 21, v = 1},
+#     { name = "kill smart", k = 21, v = 3},
+     { name = "kill smart", k = 21, v = 5},
+     { name = "kill smart", k = 21, v = 19},
+     { name = "kill smart", k = 21, v = 100},
+     { name = "kill smart", k = 14, v = 1},
+#     { name = "kill smart", k = 14, v = 3},
+     { name = "kill smart", k = 14, v = 5},
+     { name = "kill smart", k = 14, v = 19},
+     { name = "kill smart", k = 14, v = 100},
+     { name = "kill smart", k = 7, v = 1},
+#     { name = "kill smart", k = 7, v = 3},
+     { name = "kill smart", k = 7, v = 5},
+     { name = "kill smart", k = 7, v = 19},
+     { name = "kill smart", k = 7, v = 100},
+#      { name = "kill smart", k = 2, v = 100},
+#     { name = "kill smart", k = 1, v = 5},
+#     { name = "kill smart", k = 41, v = 50},
+#     { name = "kill smart", k = 51, v = 40},
+#     { name = "kill smart", k = 81, v = 25},
+#     { name = "kill smart", k = 101, v = 20},
+]
+
+arrival.rate = [
+    0.05,
+    0.10,
+    0.15,
+    0.20,
+    0.25,
+    0.30,
+    0.35,
+    0.40,
+    0.45,
+    0.50,
+    0.55,
+    0.60,
+    0.64,
+    0.68,
+    0.72,
+    0.76,
+    0.80,
+    0.84,
+    0.88,
+    0.92,
+    0.96,
+    1.00,
+    1.04,
+    1.08,
+    1.12,
+    1.16,
+    1.20,
+    1.23,
+    1.26,
+    1.29,
+    1.32,
+    1.35,
+    1.38,
+    1.41,
+    1.44,
+    1.47,
+    1.50,
+    1.53,
+    1.56,
+    1.59,
+    1.62,
+    1.65,
+    1.68,
+    1.71,
+    1.74,
+    1.77,
+    1.80,
+    1.82,
+    1.84,
+    1.86,
+    1.88,
+    1.90,
+]

@@ -89,3 +89,5 @@ __pycache__/
 node_modules/
 
 *.ipynb
+
+p*.txt

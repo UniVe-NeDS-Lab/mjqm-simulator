@@ -28,35 +28,39 @@ echo "Step 1/9: Workload distribution..."
 uv run scripts/plot_workload_distribution.py
 
 echo ""
-echo "Step 2/9: Kleinrock's power metric..."
-uv run scripts/plot_power_metric.py
+echo "Step 2/10: Kleinrock's power metric (exemplars for presentation)..."
+uv run scripts/plot_power_metric.py --exemplars
 
 echo ""
-echo "Step 3/9: Waiting time near stability boundaries..."
+echo "Step 3/10: Kleinrock theory (didactic figure)..."
+uv run scripts/plot_kleinrock_theory.py
+
+echo ""
+echo "Step 4/10: Waiting time near stability boundaries..."
 uv run scripts/plot_stability_boundary.py
 
 echo ""
-echo "Step 4/9: Per-class waiting times..."
+echo "Step 5/10: Per-class waiting times..."
 uv run scripts/plot_per_class_waiting.py
 
 echo ""
-echo "Step 5/9: Per-class throughput..."
+echo "Step 6/10: Per-class throughput..."
 uv run scripts/plot_per_class_throughput.py
 
 echo ""
-echo "Step 6/9: FIFO violations..."
+echo "Step 7/10: FIFO violations..."
 uv run scripts/plot_fifo_violations.py
 
 echo ""
-echo "Step 7/9: Welch's method illustration..."
+echo "Step 8/10: Welch's method illustration..."
 uv run scripts/plot_welch_method.py
 
 echo ""
-echo "Step 8/9: Quick Swap CV comparison..."
+echo "Step 9/10: Quick Swap CV comparison..."
 uv run scripts/plot_qs_cv.py
 
 echo ""
-echo "Step 9/9: Policy behavior scenarios..."
+echo "Step 10/10: Policy behavior scenarios..."
 uv run scripts/plot_policy_scenarios.py
 
 echo ""

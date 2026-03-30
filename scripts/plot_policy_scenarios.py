@@ -57,7 +57,7 @@ def darken_color(hex_color, factor=0.8):
 def draw_queue(ax, all_jobs, queue_x=1, allocated_jobs=None):
     """
     Draw the job queue on the left side, vertically arranged.
-    Jobs are shown as vertical bars sized to match server spacing.
+    Each job box contains small circles representing core demand.
     First-arrived job is rightmost (closest to servers).
 
     Parameters:
@@ -73,11 +73,12 @@ def draw_queue(ax, all_jobs, queue_x=1, allocated_jobs=None):
     reversed_jobs = list(reversed(all_jobs))
 
     job_width = 1.2  # Match the width of server job boxes
-    x_spacing = 1.5  # Increase spacing to accommodate wider rectangles
+    x_spacing = 1.5  # Spacing between queue items
 
     # Server spacing parameters (must match server drawing)
     server_spacing = 1.3
     server_radius = 0.4
+    circle_radius = 0.3  # Slightly smaller circles inside queue boxes
 
     # Calculate max height for centering (based on server spacing)
     max_cores = max(cores for _, cores in all_jobs)
@@ -122,9 +123,20 @@ def draw_queue(ax, all_jobs, queue_x=1, allocated_jobs=None):
                              linestyle=linestyle, alpha=0.7)
         ax.add_patch(rect)
 
-        # Job label
-        ax.text(x_pos, y_pos + job_height/2, f"{job_id}",
-               ha="center", va="center", fontsize=28, fontweight="bold")
+        # Draw circles inside the box representing core demand
+        circle_spacing = server_spacing  # Match server spacing
+        total_circle_height = (cores - 1) * circle_spacing
+        circle_base_y = center_y - total_circle_height / 2
+        for c in range(cores):
+            cy = circle_base_y + c * circle_spacing
+            circle = plt.Circle((x_pos, cy), circle_radius,
+                              facecolor="white", edgecolor=border_color,
+                              linewidth=2.5, zorder=5, alpha=0.9)
+            ax.add_patch(circle)
+
+        # Job label above the box
+        ax.text(x_pos, y_pos + job_height + 0.25, f"{job_id}",
+               ha="center", va="bottom", fontsize=28, fontweight="bold")
 
 
 def draw_allocated_jobs_with_servers(ax, allocations, n_servers=6, n_occupied_existing=2):
@@ -282,6 +294,18 @@ def create_scenario_plot(policy_name, allocations, all_jobs, output_path, n_serv
 
     # Draw servers and allocated jobs on the right
     draw_allocated_jobs_with_servers(ax, allocations, n_servers, n_occupied_existing=2)
+
+    # Draw flow arrow between queue and servers
+    server_spacing = 1.3
+    center_y = ((n_servers - 1) * server_spacing) / 2
+    # Arrow from right edge of queue area to left edge of server area
+    max_queue_x = 1 + (len(all_jobs) - 1) * 1.5 + 0.6 + 0.3  # queue right edge
+    server_left_x = 11 - 0.4 - 0.8  # server border left edge
+    arrow_x_start = max_queue_x + 0.2
+    arrow_x_end = server_left_x - 0.2
+    ax.annotate("", xy=(arrow_x_end, center_y), xytext=(arrow_x_start, center_y),
+                arrowprops=dict(arrowstyle="->,head_width=0.4,head_length=0.3",
+                                lw=4, color="#666666"))
 
     # Configure axes
     ax.set_xlim(-1, 14)

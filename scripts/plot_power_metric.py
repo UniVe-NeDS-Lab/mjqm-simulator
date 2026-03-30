@@ -3,27 +3,29 @@
 Generate Kleinrock's Power Metric plot showing the characteristic "knee" for stability detection.
 """
 
+import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from plot_config import policy_styles, configure_matplotlib
+from plot_config import policy_styles, EXEMPLAR_POLICIES, configure_matplotlib
 
 configure_matplotlib()
 
 
-def plot_power_metric(csv_path, output_path):
+def plot_power_metric(csv_path, output_path, exemplars_only=False):
     """
     Plot Kleinrock's Power Metric (Throughput / Response Time) vs arrival rate.
     Highlights the "knee" which indicates the stability boundary.
     """
     df = pd.read_csv(csv_path)
+    allowed = set(EXEMPLAR_POLICIES) if exemplars_only else set(policy_styles)
 
     fig, ax = plt.subplots(figsize=(12, 8))
 
-    # Plot all policies
+    # Plot policies
     for label, group in df.groupby("label"):
-        if label not in policy_styles:
+        if label not in policy_styles or label not in allowed:
             continue
 
         style = policy_styles[label]
@@ -86,6 +88,11 @@ def plot_power_metric(csv_path, output_path):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Plot Kleinrock's power metric.")
+    parser.add_argument("--exemplars", action="store_true",
+                        help="Plot only one representative per policy family")
+    args = parser.parse_args()
+
     csv_path = Path("Results/cellA.csv")
     output_path = Path("../tesi/figures/power-metric-comparison.pdf")
 
@@ -94,4 +101,4 @@ if __name__ == "__main__":
         print("Run load_experiment_data.py first to generate the cleaned CSV.")
         exit(1)
 
-    plot_power_metric(csv_path, output_path)
+    plot_power_metric(csv_path, output_path, exemplars_only=args.exemplars)

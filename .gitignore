@@ -6,7 +6,7 @@
 !*/
 ### Above combination will ignore all files without extension ###
 !configure
-!simula
+!rebuild
 
 # Compiled object files
 Results/

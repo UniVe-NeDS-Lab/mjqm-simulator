@@ -47,7 +47,6 @@ mjqm-simulator
 │   ├── simulator
 │   │   ├── include
 │   │   │   ├── mjqm-settings
-│   │   │   │   ├── loader.hpp
 │   │   │   │   ├── toml_distributions_loaders.h
 │   │   │   │   ├── toml_loader.h
 │   │   │   │   ├── toml_overrides.h
@@ -90,9 +89,7 @@ mjqm-simulator
 ├── configure
 ├── README.md
 ├── rebuild
-├── simula
-├── simulator_smash.cpp
-├── simulator_toml.cpp
+├── simulator.cpp
 └── toml_loader_test.cpp
 ```
 

@@ -1,0 +1,216 @@
+identifier = "cellA"
+events = 30000000
+repetitions = 40
+cores = 4096
+
+arrival.distribution = "exponential"
+
+service.distribution = "exponential"
+
+output.columns = [
+    "cores",
+    "cores[*]",
+    "arrival.prob[*]",
+    "service.mean[*]",
+]
+
+[[class]]
+cores = 1
+arrival.prob = 0.9396353658169432
+service.mean = 2.1409873469099194
+
+[[class]]
+cores = 2
+arrival.prob = 0.021369679192454423
+service.mean = 3.106702185711682
+
+[[class]]
+cores = 3
+arrival.prob = 0.003654943722124495
+service.mean = 12.102343780345203
+
+[[class]]
+cores = 4
+arrival.prob = 0.0020326269746717305
+service.mean = 64.05097202037886
+
+[[class]]
+cores = 5
+arrival.prob = 0.0028506668616428755
+service.mean = 11.618184870384368
+
+[[class]]
+cores = 6
+arrival.prob = 0.0006029925980723161
+service.mean = 17.03883005514975
+
+[[class]]
+cores = 7
+arrival.prob = 0.00025203542258942744
+service.mean = 79.64336897163261
+
+[[class]]
+cores = 8
+arrival.prob = 9.290042880429407e-05
+service.mean = 385.76513177377205
+
+[[class]]
+cores = 9
+arrival.prob = 0.004762007165375667
+service.mean = 0.5470902404688687
+
+[[class]]
+cores = 10
+arrival.prob = 0.0006812698112314898
+service.mean = 86.27105520108734
+
+[[class]]
+cores = 11
+arrival.prob = 9.634118542667532e-05
+service.mean = 2.5884924020086015
+
+[[class]]
+cores = 14
+arrival.prob = 0.0009745943132894924
+service.mean = 0.139611087640828
+
+[[class]]
+cores = 18
+arrival.prob = 0.009185099803446778
+service.mean = 0.4457132862310415
+
+[[class]]
+cores = 20
+arrival.prob = 0.00029332450205800257
+service.mean = 98.60385027798739
+
+[[class]]
+cores = 24
+arrival.prob = 6.021324089167208e-05
+service.mean = 20.574291256495883
+
+[[class]]
+cores = 27
+arrival.prob = 0.0058914355266723156
+service.mean = 0.31099659656152046
+
+[[class]]
+cores = 28
+arrival.prob = 0.001886394818220527
+service.mean = 0.0966073795915248
+
+[[class]]
+cores = 30
+arrival.prob = 5.247153849131424e-05
+service.mean = 19.774441312571042
+
+[[class]]
+cores = 38
+arrival.prob = 0.0011053430649399804
+service.mean = 0.21811895778670848
+
+[[class]]
+cores = 40
+arrival.prob = 0.0026356195727440463
+service.mean = 1.3794496495169697
+
+[[class]]
+cores = 42
+arrival.prob = 0.0009393265579100845
+service.mean = 0.16284454785860503
+
+[[class]]
+cores = 50
+arrival.prob = 0.00042579363201968116
+service.mean = 25.46456835583003
+
+[[class]]
+cores = 60
+arrival.prob = 5.7632673424886133e-05
+service.mean = 25.934993843534098
+
+[[class]]
+cores = 80
+arrival.prob = 3.35473770682173e-05
+service.mean = 15.237804559560923
+
+[[class]]
+cores = 98
+arrival.prob = 0.00012730799502810668
+service.mean = 0.3764618474083978
+
+[[class]]
+cores = 100
+arrival.prob = 4.9030781868932984e-05
+service.mean = 7.159567431399696
+
+[[class]]
+cores = 120
+arrival.prob = 3.0966809601431354e-05
+service.mean = 0.04927775594923228
+
+[[class]]
+cores = 498
+arrival.prob = 0.00019182218169775533
+service.mean = 0.4807384773220182
+
+[[class]]
+cores = 2998
+arrival.prob = 2.9246431290240725e-05
+service.mean = 0.325075486127068
+
+
+[[pivot]]
+policy = [
+    "fifo",
+    "server filling memoryful",
+    "adaptive msf",
+    "static msf",
+    { name = "quick swap", threshold = 1 },
+    { name = "quick swap", threshold = 2048 },
+    { name = "smash", window = 2 },
+    { name = "smash", window = 5 },
+    { name = "smash", window = 10 },
+]
+
+arrival.rate = [
+    7.08160504001,
+    24.876407448240258,
+    43.17526315789473,
+    78.26081467293102,
+    79.27052631578947,
+    115.3657894736842,
+    131.64522189762178,
+    151.46105263157895,
+    185.02962912231257,
+    187.5563157894737,
+    223.65157894736842,
+    238.41403634700333,
+    259.7468421052631,
+    291.7984435716941,
+    295.84210526315786,
+    331.9373684210526,
+    345.18285079638486,
+    368.03263157894736,
+    398.56725802107565,
+    404.12789473684205,
+    440.2231578947368,
+    451.9516652457664,
+    476.31842105263155,
+    505.33607247045717,
+    512.4136842105263,
+    548.5089473684211,
+    558.7204796951479,
+    584.6042105263158,
+    612.1048869198387,
+    620.6994736842105,
+    656.7947368421053,
+    683.2840965527597,
+    692.89,
+    701.0788989609899,
+    721.7984435716941,
+    748.8285079638486,
+    777.7204796951479,
+    803.2840965527597,
+    824.02962912231257,
+]

@@ -372,7 +372,7 @@ policy = [
 ## Step 3: Run experiments
 
 ```sh
-./simulator_toml policy_comparison
+./simulator policy_comparison
 ```
 
 ## Step 4: Identify stability boundaries

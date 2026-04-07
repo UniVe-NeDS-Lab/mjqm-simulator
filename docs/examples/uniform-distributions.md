@@ -138,7 +138,7 @@ Then compare:
 ## Running the experiment
 
 1. Save this configuration to `Inputs/uniform_service_times.toml`
-2. Run: `./simulator_toml uniform_service_times`
+2. Run: `./simulator uniform_service_times`
 3. Results will show performance across 8 arrival rates
 
 ## Advanced experiment: Distribution comparison

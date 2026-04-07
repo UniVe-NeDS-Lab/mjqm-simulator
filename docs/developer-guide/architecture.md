@@ -41,7 +41,7 @@ The policy's `flush_buffer()` is called after both arrivals and departures, ensu
 
 ## Parallel execution model
 
-When a TOML configuration generates multiple experiment configurations (via `[[pivot]]` sweeps), the entry point (`simulator_toml.cpp`) dispatches them to a **Boost.Asio thread pool** sized to the hardware concurrency. Each experiment runs independently with its own `Simulator` instance and `Policy` clone.
+When a TOML configuration generates multiple experiment configurations (via `[[pivot]]` sweeps), the entry point (`simulator.cpp`) dispatches them to a **Boost.Asio thread pool** sized to the hardware concurrency. Each experiment runs independently with its own `Simulator` instance and `Policy` clone.
 
 Within a single experiment, **replications run sequentially**. Between replications, statistics are reset but the system state (jobs in service, queue contents) is preserved to maintain continuity. Simulation time is reset to zero by adjusting all timestamps by the current time offset.
 

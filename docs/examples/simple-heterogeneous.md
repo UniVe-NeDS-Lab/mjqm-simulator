@@ -66,7 +66,7 @@ FIFO will experience head-of-line blocking when 8-core jobs arrive and fewer tha
 ## Running the experiment
 
 1. Save this configuration to `Inputs/simple_heterogeneous.toml`
-2. Run: `./simulator_toml simple_heterogeneous`
+2. Run: `./simulator simple_heterogeneous`
 3. Results will be in `Results/simple_heterogeneous/`
 
 ## Try variations

@@ -82,7 +82,7 @@ As window size increases:
 ## Running the experiment
 
 1. Save this configuration to `Inputs/smash_window_comparison.toml`
-2. Run: `./simulator_toml smash_window_comparison`
+2. Run: `./simulator smash_window_comparison`
 3. Results will generate 30 output files (6 arrival rates × 5 window sizes)
 
 ## Interpreting results

@@ -25,18 +25,11 @@
 #include <mjqm-samplers/sampler.h>
 #include <mjqm-simulator/experiment_stats.h>
 
-#if __has_include("toml++/toml.h")
 #include <mjqm-settings/toml_loader.h>
-#endif
 
 class Simulator {
 public:
-    Simulator(const std::vector<double>& l, const std::vector<double>& u, const std::vector<unsigned int>& sizes, int w,
-              int servers, int sampling_method, std::string logfile_name, ExperimentStats& stats);
-
-#if __has_include("toml++/toml.h")
     explicit Simulator(ExperimentConfig& conf);
-#endif
 
     ~Simulator() = default;
 

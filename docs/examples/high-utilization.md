@@ -89,7 +89,7 @@ Back Filling reserves capacity for the blocked head-of-line job, then admits sma
 ## Running the experiment
 
 1. Save this configuration to `Inputs/high_utilization_backfilling.toml`
-2. Run: `./simulator_toml high_utilization_backfilling`
+2. Run: `./simulator high_utilization_backfilling`
 3. **Note**: With 5M events and 40 repetitions across 8 arrival rates, this experiment will take substantial time (minutes to hours depending on hardware)
 
 ## Comparison experiment

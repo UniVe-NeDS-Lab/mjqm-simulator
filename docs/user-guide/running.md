@@ -6,12 +6,12 @@ tags:
 
 # Running an experiment
 
-After compiling the project, you can run an experiment by executing the `simulator_toml` binary with the name of the configuration file as the only argument.
+After compiling the project, you can run an experiment by executing the `simulator` binary with the name of the configuration file as the only argument.
 
 The program expects the configuration file to be in the `Inputs` directory, where you can already find some simple configurations.
 
 ```sh
-./simulator_toml my_awesome_experiment
+./simulator my_awesome_experiment
 ```
 
 > The program can accept additional parameters that will be discussed [later](#overriding-parameters-from-command-line).
@@ -269,13 +269,13 @@ lambda = 0.01
 You can override the `lambda` parameter from the command line:
 
 ```sh
-./simulator_toml my_awesome_experiment --arrival.lambda 0.02
+./simulator my_awesome_experiment --arrival.lambda 0.02
 ```
 
 If you want to override the `lambda` parameter for a specific job class, you can use the class index to identify it:
 
 ```sh
-./simulator_toml my_awesome_experiment --class.3.arrival.lambda 0.02
+./simulator my_awesome_experiment --class.3.arrival.lambda 0.02
 ```
 
 ## Multiple pivots from command line
@@ -286,7 +286,7 @@ To achieve that, you can use the `--pivot` argument separating the overrides.
 For example, if you want to test two sets of values, this command line is equivalent to the following configuration extract:
 
 ```sh
-./simulator_toml my_awesome_experiment --arrival.rate 0.1 0.2 0.3 --policy.name smash --policy.window 1 4 8 --pivot --arrival.rate 0.1 0.2 0.3 --policy "server filling" "back filling" "most server first"
+./simulator my_awesome_experiment --arrival.rate 0.1 0.2 0.3 --policy.name smash --policy.window 1 4 8 --pivot --arrival.rate 0.1 0.2 0.3 --policy "server filling" "back filling" "most server first"
 ```
 
 ```toml

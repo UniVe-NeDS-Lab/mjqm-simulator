@@ -105,7 +105,7 @@ At low load (λ=20–40), all policies deliver comparable performance with negli
 ## Running the experiment
 
 1. Save this configuration to `Inputs/policy_comparison.toml`
-2. Run: `./simulator_toml policy_comparison`
+2. Run: `./simulator policy_comparison`
 3. This generates 240 output files (10 arrival rates × 6 policies × 4 repetition groups)
 4. Use the analysis dashboard or plotting tools to visualize results
 

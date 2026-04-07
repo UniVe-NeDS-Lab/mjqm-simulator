@@ -74,8 +74,8 @@ public:
             e = 0;
         for (auto& e : preemption)
             e = 0;
-        // for (auto& e : rep_free_servers_distro)
-        //     e = 0;
+        for (auto& e : rep_free_servers_distro)
+            e = 0;
         for (auto& e : fel)
             e -= simtime;
 
@@ -405,7 +405,7 @@ private:
     double simtime = 0.0;
 
     // overall statistics
-    // std::vector<double> rep_free_servers_distro;
+    std::vector<double> rep_free_servers_distro;
 
     // statistics for single run
     std::vector<double> occupancy_buf;
@@ -792,7 +792,7 @@ private:
         }
         waste += (n - occ) * delta;
         viol += policy->get_violations_counter() * delta;
-        // rep_free_servers_distro[policy->get_free_ser()] += delta;
+        rep_free_servers_distro[policy->get_free_ser()] += delta;
 
         windowSize.push_back(policy->get_window_size() * delta);
     }

@@ -36,14 +36,14 @@ std::unique_ptr<Policy> back_filling_builder(toml::table&, ExperimentConfig& con
     return std::make_unique<BackFilling>(-3, conf.cores, n_classes, sizes);
 }
 
-std::unique_ptr<Policy> back_filling_imperfect_builder(const toml::table& data, const ExperimentConfig& conf) {
+std::unique_ptr<Policy> back_filling_imperfect_builder(toml::table& data, ExperimentConfig& conf) {
     std::vector<unsigned int> sizes;
     unsigned int n_classes = conf.get_sizes(sizes);
     const auto overestimate_max = data.at_path("policy.overest").value<double>().value_or(1.0);
     return std::make_unique<BackFillingImperfect>(-13, conf.cores, n_classes, sizes, overestimate_max);
 }
 
-std::unique_ptr<Policy> balanced_splitting_builder(const toml::table& data, const ExperimentConfig& conf) {
+std::unique_ptr<Policy> balanced_splitting_builder(toml::table& data, ExperimentConfig& conf) {
     std::vector<unsigned int> sizes;
     unsigned int n_classes = conf.get_sizes(sizes);
     std::vector<double> lambdas;
@@ -84,7 +84,7 @@ std::unique_ptr<Policy> balanced_splitting_builder(const toml::table& data, cons
     return std::make_unique<BalancedSplitting>(-18, conf.cores, n_classes, sizes, result, psi, conf.cores-rsv_total, rsv_total);
 }
 
-std::unique_ptr<Policy> kill_smart_builder(const toml::table& data, const ExperimentConfig& conf) {
+std::unique_ptr<Policy> kill_smart_builder(toml::table& data, ExperimentConfig& conf) {
     std::vector<unsigned int> sizes;
     unsigned int n_classes = conf.get_sizes(sizes);
     const auto max_kill_cycle = data.at_path("policy.k").value<int>().value_or(10);
@@ -96,7 +96,7 @@ std::unique_ptr<Policy> kill_smart_builder(const toml::table& data, const Experi
     return std::make_unique<KillSmart>(-16, conf.cores, n_classes, sizes, max_kill_cycle, kill_threshold);
 }
 
-std::unique_ptr<Policy> dual_kill_builder(const toml::table& data, const ExperimentConfig& conf) {
+std::unique_ptr<Policy> dual_kill_builder(toml::table& data, ExperimentConfig& conf) {
     std::vector<unsigned int> sizes;
     unsigned int n_classes = conf.get_sizes(sizes);
     const auto max_kill_cycle = data.at_path("policy.k").value<int>().value_or(10);
@@ -108,7 +108,7 @@ std::unique_ptr<Policy> dual_kill_builder(const toml::table& data, const Experim
     return std::make_unique<DualKill>(-17, conf.cores, n_classes, sizes, max_kill_cycle, kill_threshold);
 }
 
-std::unique_ptr<Policy> quick_swap_builder(const toml::table& data, const ExperimentConfig& conf) {
+std::unique_ptr<Policy> quick_swap_builder(toml::table& data, ExperimentConfig& conf) {
     std::vector<unsigned int> sizes;
     unsigned int n_classes = conf.get_sizes(sizes);
     const auto threshold = data.at_path("policy.threshold").value<int>().value_or(1);
@@ -121,7 +121,7 @@ std::unique_ptr<Policy> first_fit_builder(toml::table&, ExperimentConfig& conf) 
     return std::make_unique<FirstFit>(-14, conf.cores, n_classes, sizes);
 }
 
-std::unique_ptr<Policy> lcfs_builder(const toml::table&, const ExperimentConfig& conf) {
+std::unique_ptr<Policy> lcfs_builder(toml::table&, ExperimentConfig& conf) {
     std::vector<unsigned int> sizes;
     unsigned int n_classes = conf.get_sizes(sizes);
     return std::make_unique<LCFS>(-19, conf.cores, n_classes, sizes);

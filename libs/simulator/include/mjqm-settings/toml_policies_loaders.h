@@ -23,19 +23,19 @@ std::unique_ptr<Policy> server_filling_mem_builder(toml::table&, ExperimentConfi
 
 std::unique_ptr<Policy> back_filling_builder(toml::table&, ExperimentConfig& conf);
 
-std::unique_ptr<Policy> back_filling_imperfect_builder(const toml::table&, const ExperimentConfig& conf);
+std::unique_ptr<Policy> back_filling_imperfect_builder(toml::table&, ExperimentConfig& conf);
 
-std::unique_ptr<Policy> balanced_splitting_builder(const toml::table&, const ExperimentConfig& conf);
+std::unique_ptr<Policy> balanced_splitting_builder(toml::table&, ExperimentConfig& conf);
 
-std::unique_ptr<Policy> kill_smart_builder(const toml::table&, const ExperimentConfig& conf);
+std::unique_ptr<Policy> kill_smart_builder(toml::table&, ExperimentConfig& conf);
 
-std::unique_ptr<Policy> dual_kill_builder(const toml::table&, const ExperimentConfig& conf);
+std::unique_ptr<Policy> dual_kill_builder(toml::table&, ExperimentConfig& conf);
 
-std::unique_ptr<Policy> quick_swap_builder(const toml::table&, const ExperimentConfig& conf);
+std::unique_ptr<Policy> quick_swap_builder(toml::table&, ExperimentConfig& conf);
 
 std::unique_ptr<Policy> first_fit_builder(toml::table&, ExperimentConfig& conf);
 
-std::unique_ptr<Policy> lcfs_builder(const toml::table&, const ExperimentConfig& conf);
+std::unique_ptr<Policy> lcfs_builder(toml::table&, ExperimentConfig& conf);
 
 std::unique_ptr<Policy> adaptive_msf_builder(toml::table&, ExperimentConfig& conf);
 

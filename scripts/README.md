@@ -7,13 +7,13 @@ All scripts run with `uv run` from the project root directory.
 
 - **Python**: managed by `uv`; dependencies declared in `pyproject.toml`. Run `uv sync` once to set up.
 - **LaTeX**: a TeX distribution (e.g., TeX Live) is needed for matplotlib's `usetex=True`.
-- **Experiment data**: most plotting scripts read `Results/cellA.csv`. If the file is missing, generate it with:
+- **Experiment data**: plotting scripts read from `Results/<experiment>.csv`. If the file is missing, generate it with:
 
 ```bash
-uv run scripts/load_experiment_data.py cellA
+uv run scripts/load_experiment_data.py <experiment>
 ```
 
-This processes the raw per-policy CSVs in `Results/cellA/`, cleans column names, computes derived metrics (stability, power, throughput), and writes the unified CSV.
+This processes the raw per-policy CSVs in `Results/<experiment>/`, cleans column names, computes derived metrics (stability, power, throughput), and writes a unified CSV.
 
 ## Plot styles
 

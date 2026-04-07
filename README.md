@@ -1,6 +1,6 @@
 # MJQM simulator
 The simulator for **Multiserver Job Queuing Model (MJQM)** is a powerful tool designed to simulate and analyze multiserver job queuing systems.
-Started by NeDS-Lab at Ca' Foscari University of Venice.
+Started by [UniVe-NeDS-Lab](https://github.com/UniVe-NeDS-Lab) at Ca' Foscari University of Venice.
 
 ## Key Features
 

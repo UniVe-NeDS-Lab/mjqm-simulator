@@ -1,6 +1,6 @@
 """
 Shared plotting configuration: colourblind-safe palette, policy styles,
-and matplotlib defaults for thesis figures.
+and matplotlib defaults.
 
 Palette from Paul Tol's muted/vibrant qualitative schemes, combined with
 unique markers and line styles for triple redundant encoding.
@@ -58,21 +58,12 @@ policy_styles = {
     "Quick Swap (l = 2048)": {"color": WINE,   "marker": "P", "linestyle": _LS_QS},
 }
 
-# One representative per family for presentation plots
-EXEMPLAR_POLICIES = [
-    "First-In First-Out",
-    "SMASH (w = 5)",
-    "Back Filling",
-    "Server Filling",
-    "Most Server First",
-]
-
 # Flat colour list (same order as policy_styles) for legacy scripts
 policy_colors = [s["color"] for s in policy_styles.values()]
 
 
 def configure_matplotlib(font_size=21):
-    """Apply shared matplotlib defaults for thesis-quality figures."""
+    """Apply shared matplotlib defaults for publication-quality figures."""
     plt.rc("font", **{"family": "serif", "serif": ["Palatino"]})
     plt.rc("text", usetex=True)
     matplotlib.rcParams["font.size"] = font_size

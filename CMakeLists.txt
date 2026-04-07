@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(mjqm-simulator
     VERSION 0.1.0
     DESCRIPTION "Simulator for Multiserver Job Queuing Model (MJQM)"
-    HOMEPAGE_URL "https://github.com/NeDS-Lab/mjqm-simulator"
+    HOMEPAGE_URL "https://github.com/UniVe-NeDS-Lab/mjqm-simulator"
     LANGUAGES CXX
 )
 

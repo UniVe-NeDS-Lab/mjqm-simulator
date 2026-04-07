@@ -152,7 +152,7 @@ public:
     CollectedStat window_size{"Window Size", true};
     CollectedStat violations{"FIFO Violations", true};
     CollectedStat timings_tot{"Run Duration", true};
-    CollectedStat phase_two_dur{"Phase Two Duration", true};
+    /*CollectedStat phase_two_dur{"Phase Two Duration", true};
     CollectedStat phase_three_dur{"Phase Three Duration", true};
     CollectedStat idle_period_prob{"Idle Period Probability", true};
     CollectedStat p0{"Phase 0 Duration", true};
@@ -168,7 +168,9 @@ public:
     CollectedStat p0_res{"Phase 0 Residuals", true};
     CollectedStat p1_res{"Phase 1 Residuals", true};
     CollectedStat p2_res{"Phase 2 Residuals", true};
-    CollectedStat p3_res{"Phase 3 Residuals", true};
+    CollectedStat p3_res{"Phase 3 Residuals", true};*/
+    CollectedStat small_seq_avg{"Small Sequence Length", true};
+    CollectedStat big_seq_avg{"Big Sequence Length", true};
     Stat warnings{"Stability Check", false};
     Stat lambda{"lambda", false};
 
@@ -184,7 +186,7 @@ public:
         editor(window_size);
         editor(violations);
         editor(timings_tot);
-        editor(phase_two_dur);
+        /*editor(phase_two_dur);
         editor(phase_three_dur);
         editor(idle_period_prob);
         editor(p0);
@@ -200,7 +202,9 @@ public:
         editor(p0_res);
         editor(p1_res);
         editor(p2_res);
-        editor(p3_res);
+        editor(p3_res);*/
+        editor(small_seq_avg);
+        editor(big_seq_avg);
         editor(warnings);
         editor(lambda);
         for (auto& cs : class_stats) {
@@ -219,7 +223,7 @@ public:
         visitor(window_size);
         visitor(violations);
         visitor(timings_tot);
-        visitor(phase_two_dur);
+        /*visitor(phase_two_dur);
         visitor(phase_three_dur);
         visitor(idle_period_prob);
         visitor(p0);
@@ -235,7 +239,9 @@ public:
         visitor(p0_res);
         visitor(p1_res);
         visitor(p2_res);
-        visitor(p3_res);
+        visitor(p3_res);*/
+        visitor(small_seq_avg);
+        visitor(big_seq_avg);
         visitor(warnings);
         visitor(lambda);
         for (auto& cs : class_stats) {

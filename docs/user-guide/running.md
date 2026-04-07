@@ -249,6 +249,9 @@ Static MSF follows a fixed cycle that specifies the order in which job classes a
 
 First-Fit scans the queue from the head and admits the first job whose server requirement fits within available capacity. The scan repeats until no more jobs can be admitted. Unlike FIFO, it skips over infeasible jobs, but unlike SMASH or MSF, it does not reorder by size.
 
+### LCFS
+- `policy = "lcfs"`
+
 # Overriding parameters from command line
 
 You can override any parameter defined in the configuration file from the command line.

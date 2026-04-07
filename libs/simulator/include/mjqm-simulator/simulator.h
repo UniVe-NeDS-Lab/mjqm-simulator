@@ -50,6 +50,8 @@ public:
         small_switch = 0;
         big_switch = 0;
         cycle_count = 0;
+        tot_big_seq.clear();
+        tot_small_seq.clear();
         //for (auto& e : autocorr_phase_time_list)
             //e.clear();
         //for (auto& e : autocorr_residual_list)
@@ -166,11 +168,11 @@ public:
         stats->resp_tot.collect(rt_mean_var.first);
         stats->resp_var_tot.collect(rt_mean_var.second);
 
-        stats->phase_two_dur.collect((phase_two_duration * 1.0) / simtime);
+        /*stats->phase_two_dur.collect((phase_two_duration * 1.0) / simtime);
         stats->phase_three_dur.collect((phase_three_duration * 1.0) / job_seq_amount[1]);
         stats->idle_period_prob.collect((idle_period * 1.0) / simtime);
 
-        /*stats->p0.collect((autocorr_phase_times[0] * 1.0) / cycle_count);
+        stats->p0.collect((autocorr_phase_times[0] * 1.0) / cycle_count);
         stats->p1.collect((autocorr_phase_times[1] * 1.0) / cycle_count);
         stats->p2.collect((autocorr_phase_times[4] * 1.0) / cycle_count);
         stats->p3.collect((autocorr_phase_times[5] * 1.0) / cycle_count);
@@ -184,6 +186,14 @@ public:
         stats->p1_res.collect((autocorr_residuals[1] * 1.0) / cycle_count);
         stats->p2_res.collect((autocorr_residuals[4] * 1.0) / cycle_count);
         stats->p3_res.collect((autocorr_residuals[5] * 1.0) / cycle_count);*/
+
+        if (!tot_small_seq.empty()) {
+            stats->small_seq_avg.collect( std::accumulate(tot_small_seq.begin(), tot_small_seq.end(), 0.0) / tot_small_seq.size() );
+        }
+        if (!tot_big_seq.empty()) {
+            stats->big_seq_avg.collect( std::accumulate(tot_big_seq.begin(), tot_big_seq.end(), 0.0) / tot_big_seq.size() );
+        }
+        
     }
 
     void simulate(unsigned long nevents, unsigned int repetitions = 1) {
@@ -215,7 +225,6 @@ public:
                 auto itmin = std::min_element(fel.begin(), fel.end());
                 // std::cout << *itmin << std::endl;
                 int pos = std::distance(fel.begin(), itmin);
-                // std::cout << pos << std::endl;
                 collect_statistics(pos);
                 // std::cout << "collect" << std::endl;
                 if (pos < nclasses) { // departure
@@ -427,10 +436,18 @@ private:
     int cycle_count;
     double start_phase = 0.0;
 
+    double small_seq = 0.0;
+    double big_seq = 0.0;
+    std::vector<double> tot_small_seq;
+    std::vector<double> tot_big_seq;
+
     int viol_ctr;
 
     int last_arr = 0;
     bool last_ev_arr;
+
+    bool autocorr;
+    bool arrival_det;
 
     double waste = 0.0;
     double viol = 0.0;
@@ -464,13 +481,15 @@ private:
             auto stopped_jobs = policy->get_stopped_jobs();
             auto ongoing_jobs = policy->get_ongoing_jobs();
             for (int i = 0; i < nclasses; i++) {
-                if (last_ev_arr) {
-                    fel[i + nclasses] = arr_time_samplers[(last_arr*nclasses)+i]->sample() + simtime;
+                if (autocorr) {
+                    if (last_ev_arr) {
+                        fel[i + nclasses] = arr_time_samplers[(last_arr*nclasses)+i]->sample() + simtime;
+                    }
+                } else {
+                    if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
+                        fel[i + nclasses] = arr_time_samplers[i]->sample() + simtime;
+                    }
                 }
-                
-                /*if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
-                    fel[i + nclasses] = arr_time_samplers[i]->sample() + simtime;
-                }*/
 
                 for (auto job_id : stopped_jobs[i]) {
                     if (jobs_inservice[i].contains(job_id)) { // If they are currently being served: stop them
@@ -550,11 +569,14 @@ private:
                     pooled_i = 1;
                 }
 
-                /*if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
-                    fel[i + nclasses] = arr_time_samplers[i]->sample() + simtime;
-                }*/
-               if (last_ev_arr) {
-                    fel[i + nclasses] = arr_time_samplers[(last_arr*nclasses)+i]->sample() + simtime;
+                if (autocorr) {
+                    if (last_ev_arr) {
+                        fel[i + nclasses] = arr_time_samplers[(last_arr*nclasses)+i]->sample() + simtime;
+                    }
+                } else {
+                    if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
+                        fel[i + nclasses] = arr_time_samplers[i]->sample() + simtime;
+                    }
                 }
 
                 // std::cout << ongoing_jobs[i].size() << std::endl;
@@ -597,8 +619,26 @@ private:
 
     void collect_statistics(int pos) {
 
-        if (pos < nclasses)
+        if (pos < nclasses) {
             completion[pos]++;
+            //std::cout << pos << std::endl;
+            if (pos == 0) {
+                small_seq++;
+                if (big_seq > 0) {
+                    tot_big_seq.push_back(big_seq);
+                    big_seq = 0;
+                }
+            } else if (pos == 1) {
+                big_seq++;
+                if (small_seq > 0) {
+                    tot_small_seq.push_back(small_seq);
+                    small_seq = 0;
+                }
+            }
+            
+        } else{
+            //std::cout << pos << std::endl;
+        }
 
         double delta = fel[pos] - simtime;
         int jobs_tot = 0;

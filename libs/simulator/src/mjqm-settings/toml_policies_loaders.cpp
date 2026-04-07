@@ -121,6 +121,12 @@ std::unique_ptr<Policy> first_fit_builder(toml::table&, ExperimentConfig& conf) 
     return std::make_unique<FirstFit>(-14, conf.cores, n_classes, sizes);
 }
 
+std::unique_ptr<Policy> lcfs_builder(const toml::table&, const ExperimentConfig& conf) {
+    std::vector<unsigned int> sizes;
+    unsigned int n_classes = conf.get_sizes(sizes);
+    return std::make_unique<LCFS>(-19, conf.cores, n_classes, sizes);
+}
+
 std::unique_ptr<Policy> adaptive_msf_builder(toml::table&, ExperimentConfig& conf) {
     std::vector<unsigned int> sizes;
     unsigned int n_classes = conf.get_sizes(sizes);

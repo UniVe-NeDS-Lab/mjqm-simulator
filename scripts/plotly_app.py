@@ -504,4 +504,9 @@ def show_main_plot(experiment, y_axis, y_group, selected_class, plot_stable):
 
 # Run the app
 if __name__ == "__main__":
-    app.run(debug=True)
+    import os
+    app.run(
+        debug=os.environ.get("DASH_DEBUG", "false").lower() == "true",
+        host=os.environ.get("DASH_HOST", "127.0.0.1"),
+        port=int(os.environ.get("DASH_PORT", "8050")),
+    )

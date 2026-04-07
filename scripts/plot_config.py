@@ -24,42 +24,12 @@ SAND    = "#DDCC77"
 OLIVE   = "#999933"
 BLUE    = "#0077BB"
 
-# ── Family-based encoding ────────────────────────────────────────────
-# Linestyle  → policy *family*  (shared across all variants)
-# Colour     → variant *within* the family (different shades)
-# Marker     → unique per policy for additional discrimination
-#
-# Families: FIFO (solid), SMASH (dashed), Filling (dotted),
-#           MSF (dash-dot), Quick Swap (long-dash)
-# ─────────────────────────────────────────────────────────────────────
-
-_LS_FIFO  = "-"
-_LS_SMASH = "--"
-_LS_FILL  = ":"
-_LS_MSF   = "-."
-_LS_QS    = (0, (5, 2))
-
-policy_styles = {
-    # FIFO family — solid, black, circle
-    "First-In First-Out":    {"color": BLACK,  "marker": "o", "linestyle": _LS_FIFO},
-    # SMASH family — dashed, blue shades, diamond
-    "SMASH (w = 2)":         {"color": CYAN,   "marker": "D", "linestyle": _LS_SMASH},
-    "SMASH (w = 5)":         {"color": BLUE,   "marker": "D", "linestyle": _LS_SMASH},
-    "SMASH (w = 10)":        {"color": INDIGO, "marker": "D", "linestyle": _LS_SMASH},
-    # Filling family — dotted, teal/green shades, triangle
-    "Back Filling":          {"color": TEAL,   "marker": "^", "linestyle": _LS_FILL},
-    "Server Filling":        {"color": OLIVE,  "marker": "^", "linestyle": _LS_FILL},
-    # MSF family — dash-dot, orange/red shades, square
-    "Most Server First":     {"color": ORANGE, "marker": "s", "linestyle": _LS_MSF},
-    "Adaptive MSF":          {"color": RED,    "marker": "s", "linestyle": _LS_MSF},
-    "Static MSF":            {"color": SAND,   "marker": "s", "linestyle": _LS_MSF},
-    # Quick Swap family — long dash, purple shades, pentagon
-    "Quick Swap (l = 1)":    {"color": PURPLE, "marker": "P", "linestyle": _LS_QS},
-    "Quick Swap (l = 2048)": {"color": WINE,   "marker": "P", "linestyle": _LS_QS},
-}
-
-# Flat colour list (same order as policy_styles) for legacy scripts
-policy_colors = [s["color"] for s in policy_styles.values()]
+# Colourblind-safe colour cycle for plotting policies.
+# Ordered to maximise perceptual distance between adjacent entries.
+policy_colors = [
+    BLACK, CYAN, BLUE, INDIGO, TEAL, OLIVE,
+    ORANGE, RED, SAND, PURPLE, WINE,
+]
 
 
 def configure_matplotlib(font_size=21):

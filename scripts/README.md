@@ -20,7 +20,7 @@ This processes the raw per-policy CSVs in `Results/<experiment>/`, cleans column
 All figures share a single style defined in `plot_config.py`:
 
 - **Palette**: colourblind-safe colours from Paul Tol's muted/vibrant schemes.
-- **Per-policy encoding**: each policy has a unique combination of colour, marker, and line style (`policy_styles` dict) for triple-redundant encoding.
+- **Per-policy encoding**: colourblind-safe colour cycle (`policy_colors`) for consistent policy colouring across plots.
 - **Font and sizes**: `configure_matplotlib(font_size=21)` sets Palatino serif with LaTeX rendering.
 - **Smoothing**: `smooth(y)` applies Savitzky-Golay filtering in log-space, used by most data-driven plots.
 

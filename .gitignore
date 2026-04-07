@@ -11,6 +11,8 @@
 
 # Compiled object files
 Results/
+docker-artifact/
+*.zip
 out
 *.o
 *.obj

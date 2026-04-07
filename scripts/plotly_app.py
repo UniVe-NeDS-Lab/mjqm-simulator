@@ -17,7 +17,7 @@ from load_experiment_data import (
     load_experiment_data,
     load_experiments_list,
 )
-from plot_cells import prepare_cosmetics
+from plot_experiment import prepare_cosmetics
 
 base, available_experiments = load_experiments_list()
 
@@ -35,6 +35,19 @@ y_axis_mappings = dict(
         class_column="T{} Waiting",
         uom=" [s]",
         per_class=True,
+    ),
+    throughput=dict(
+        column="Throughput Total",
+        label="Throughput",
+        class_column="T{} Throughput",
+        uom="",
+        per_class=True,
+    ),
+    power=dict(
+        column="Power",
+        label="Power (Knee)",
+        uom="",
+        per_class=False,
     ),
     # run_duration=dict(
     #     column="Run Duration",
@@ -115,6 +128,13 @@ app.layout = [
                 labelPosition="top",
                 style=dict(margin="0 .5em"),
             ),
+            daq.BooleanSwitch(
+                id="display-only-stable",
+                on=True,
+                label="Show only stable experiments",
+                labelPosition="top",
+                style=dict(margin="0 .5em"),
+            ),
         ],
         style={
             "justifyContent": "flex-start",
@@ -171,11 +191,9 @@ app.layout = [
                     "border": "thin lightgrey solid",
                     "overflowX": "scroll",
                     "margin": "0 .5em",
-                    "flex": "1 0 100%"
+                    "flex": "1 0 100%",
                 },
-                parent_style={
-                    "flex": "1 0 50%"
-                },
+                parent_style={"flex": "1 0 50%"},
             ),
             dcc.Tabs(
                 id="y-axis-group",
@@ -214,11 +232,9 @@ app.layout = [
                     "border": "thin lightgrey solid",
                     "overflowX": "scroll",
                     "margin": "0 .5em",
-                    "flex": "1 0 100%"
+                    "flex": "1 0 100%",
                 },
-                parent_style={
-                    "flex": "1 0 50%"
-                },
+                parent_style={"flex": "1 0 50%"},
             ),
         ],
         target_components={
@@ -253,11 +269,7 @@ app.layout = [
                 ),
                 responsive=True,
                 mathjax=True,
-                style={
-                    "width": "100%",
-                    "height": "550px",
-                    "flex": "1 0 100%"
-                },
+                style={"width": "100%", "height": "550px", "flex": "1 0 100%"},
             ),
             # html.Br(),
             # dcc.Clipboard(target_id="structure"),
@@ -371,12 +383,13 @@ def only_overall_value(experiment, y_axis):
     Input("y-axis-value", "value"),
     Input("y-axis-group", "value"),
     Input("custom-class-selection", "value"),
+    Input("display-only-stable", "on"),
     running=[
         (Output("experiment-selection", "disabled"), True, False),
         (Output("custom-class-selection", "disabled"), True, False),
     ],
 )
-def show_main_plot(experiment, y_axis, y_group, selected_class):
+def show_main_plot(experiment, y_axis, y_group, selected_class, plot_stable):
     global dfs, Ts, exp, asymptotes, actual_util
     if experiment is None:
         return None, dict(visibility="hidden")
@@ -402,8 +415,14 @@ def show_main_plot(experiment, y_axis, y_group, selected_class):
 
     colors, marks, marks_plotly = prepare_cosmetics(dfs, exp)
     dfs.set_index(["label"], drop=False, inplace=True)
+    df_plot = dfs[dfs["stable"]] if plot_stable else dfs
+    no_stable = False
+    if plot_stable and df_plot.empty:
+        # Fallback when no stable rows are present for the current selection
+        df_plot = dfs
+        no_stable = True
     fig = px.line(
-        dfs[dfs["stable"]],
+        df_plot,
         "arrival.rate",
         col,
         color="label",
@@ -427,13 +446,27 @@ def show_main_plot(experiment, y_axis, y_group, selected_class):
         },
         template="plotly_white",
     )
+    # Merge legend items: set legendgroup and ensure names include utilisation percentage
     for idx in asymptotes.index:
-        fig.add_vline(
-            asymptotes[idx],
-            name=f"{actual_util[idx]:.1f}%",
-            legend="legend2",
+        pct_label = f"{actual_util[idx]:.1f}%"
+        # Update matching line traces to include percentage and group together
+        for tr in fig.data:
+            if tr.name == str(idx):
+                tr.legendgroup = str(idx)
+                tr.name = f"({pct_label}) {tr.name}"
+                tr.showlegend = True
+    y_min = df_plot[col].min()
+    y_max = df_plot[col].max()
+    # Add asymptote lines grouped with their corresponding policy traces, without separate legend items
+    for idx in asymptotes.index:
+        fig.add_scatter(
+            x=[asymptotes[idx], asymptotes[idx]],
+            y=[y_min, y_max],
+            mode="lines",
+            legendgroup=str(idx),
             line=dict(dash="dot", width=1, color=colors[idx]),
-            showlegend=True,
+            showlegend=False,
+            hoverinfo="skip",
         )
     fig.update_layout(
         title=dict(xanchor="center", x=0.5, yanchor="top"),
@@ -443,17 +476,21 @@ def show_main_plot(experiment, y_axis, y_group, selected_class):
             xanchor="left",
             x=0.01,
             title=None,
-        ),
-        legend2=dict(
-            yanchor="top",
-            y=0.99,
-            xanchor="center",
-            x=0.99,
-            title=None,
+            groupclick="togglegroup",
         ),
         hoversubplots="axis",
         hovermode="x unified",
     )
+    if no_stable and plot_stable:
+        fig.add_annotation(
+            text="No stable data available for current selection. Showing all data.",
+            xref="paper",
+            yref="paper",
+            x=0.5,
+            y=1.05,
+            showarrow=False,
+            font=dict(color="red", size=12),
+        )
     return fig, dict(visibility="visible", display="flex")
 
 

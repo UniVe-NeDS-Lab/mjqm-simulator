@@ -5,10 +5,18 @@
 #define TOML_IMPLEMENTATION
 #include <mjqm-settings/toml_utils.h>
 
+void ensure_table_at_path(toml::table& data, const toml::path& path) {
+    auto parent_node = data.at_path(path);
+    if (!parent_node.is_table()) {
+        data.at_path(path.parent()).as_table()->insert_or_assign(path.leaf().str(), toml::table{});
+    }
+};
+
 template <typename VALUE_TYPE>
 void overwrite_value(toml::table& data, const toml::path& path, const VALUE_TYPE& value) {
-    auto parent_node = data.at_path(path.parent()).as_table();
-    parent_node->insert_or_assign(path.leaf().str(), value);
+    ensure_table_at_path(data, path.parent());
+    auto parent_table = data.at_path(path.parent()).as_table();
+    parent_table->insert_or_assign(path.leaf().str(), value);
 }
 template void overwrite_value(toml::table&, const toml::path&, const double&);
 template void overwrite_value(toml::table&, const toml::path&, const long&);
@@ -45,6 +53,7 @@ toml::node_type interpreted_node_type(const toml::node_view<toml::node>& node, c
 
 template <>
 void overwrite_value<std::string>(toml::table& data, const toml::path& path, const std::string& value) {
+    ensure_table_at_path(data, path.parent());
     auto parent_node = data.at_path(path.parent()).as_table();
     auto current_node = data.at_path(path);
     auto type = interpreted_node_type(current_node, value);

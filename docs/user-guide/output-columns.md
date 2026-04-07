@@ -1,3 +1,9 @@
+---
+title: Output Columns
+tags:
+  - user-guide
+---
+
 # Output columns
 
 There are two types of values that can be output: configuration values, and computed values.

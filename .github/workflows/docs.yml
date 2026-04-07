@@ -1,0 +1,65 @@
+name: docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "site/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # needed for git dates in frontmatter
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Clone Quartz
+        run: |
+          git clone --depth 1 https://github.com/jackyzha0/quartz.git quartz-build
+
+      - name: Install Quartz dependencies
+        working-directory: quartz-build
+        run: npm ci
+
+      - name: Copy content and config
+        run: |
+          rm -rf quartz-build/content
+          cp -r docs quartz-build/content
+          cp site/quartz.config.ts quartz-build/quartz.config.ts
+          cp site/quartz.layout.ts quartz-build/quartz.layout.ts
+
+      - name: Build site
+        working-directory: quartz-build
+        run: npx quartz build
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: quartz-build/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

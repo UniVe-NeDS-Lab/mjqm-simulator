@@ -99,7 +99,11 @@ required_columns = set(["arrival.rate", "Utilisation"])
 
 
 def read_csv(f: Path):
-    df = pd.read_csv(f, delimiter=";")
+    try:
+        df = pd.read_csv(f, delimiter=";")
+    except Exception as e:
+        print(f"Error reading {f}: {e}", file=sys.stderr)
+        return None
     if df.empty:
         return None
     win = None
@@ -174,6 +178,12 @@ def clean_dfs(dfs):
     dfs = dfs.astype(types)
 
     idx = ["label", "arrival.rate"]
+    dupes = dfs.duplicated(subset=idx, keep="last")
+    if dupes.any():
+        progress.write(
+            f"{Fore.YELLOW}{Style.BRIGHT}Dropping {dupes.sum()} duplicate rows (keeping latest)"
+        )
+        dfs = dfs[~dupes]
     dfs.sort_values(
         by=idx,
         inplace=True,
@@ -189,27 +199,57 @@ def clean_dfs(dfs):
     return dfs, Ts, exp
 
 
-def compute_stability(dfs, exp):
-    arr_rate_increase = dfs.groupby(level=exp)["arrival.rate"].transform(
-        lambda x: x.rolling(2).sem()
-    )
-    util_increase = dfs.groupby(level=exp)["Utilisation"].transform(
-        lambda x: x.rolling(2).sem()
-    )
-    util_increase_ratio = arr_rate_increase / util_increase
-    util_increase_ratio.name = "Utilisation Increase Ratio"
-    dfs = pd.concat([dfs, util_increase_ratio], axis=1)
-    divergence = dfs.groupby(level=exp)["Utilisation Increase Ratio"].transform(
-        lambda x: (
-            x.rolling(2)
-            .apply(lambda x: abs(1.0 - x.iloc[1] / x.iloc[0]))
-            .fillna(0)
-            .cummax()
-        )
-    )
-    stable = dfs["Stability Check"] & (divergence < 0.01)
-    stable.name = "stable"
-    dfs = pd.concat([dfs, stable], axis=1)
+def compute_stability(dfs, exp, response_col="RespTime Total"):
+    """
+    Identifies stability using Kleinrock's Power Metric (The Knee).
+
+    Stability is defined as the operating range up to the point of
+    maximum system power (Throughput / Response Time).
+
+    Logic:
+    1. Calculate total throughput by summing per-class throughputs.
+    2. Calculate Power = Throughput / Response Time.
+    3. Find the arrival rate that maximizes Power (The Knee).
+    4. Mark all arrival rates <= Knee as 'stable'.
+    """
+
+    # 1. Compute total throughput from per-class throughputs
+    # Find all columns matching the pattern "T{number} Throughput" (excluding ConfInt)
+    throughput_cols = [col for col in dfs.columns
+                       if col.startswith('T')
+                       and col.endswith('Throughput')
+                       and 'ConfInt' not in col]
+
+    # Sum across all job classes to get total system throughput
+    # In stable operation, this equals arrival rate; beyond stability, it saturates
+    dfs["Throughput Total"] = dfs[throughput_cols].sum(axis=1)
+
+    # 2. Calculate Kleinrock's Power
+    # Power = effective work done (throughput) / delay experienced (response time)
+    dfs["Power"] = dfs["Throughput Total"] / dfs[response_col]
+
+    # 3. Define the Knee detection logic
+    def apply_knee_detection(group):
+        # Find the index of the row with the maximum Power
+        knee_idx = group["Power"].idxmax()
+
+        # Get the arrival rate at the knee
+        knee_lambda = group.loc[knee_idx, "arrival.rate"]
+
+        # Propagate stability:
+        # Anything with load <= knee_lambda is stable (Pre-knee + Knee).
+        # Anything with load > knee_lambda is considered saturated/unstable.
+        group["stable"] = group["arrival.rate"] <= knee_lambda
+
+        return group
+
+    # We use apply() to handle the per-experiment masking
+    dfs = dfs.groupby(level=exp, group_keys=False).apply(apply_knee_detection)
+
+    # Optional: Combine with previous checks if they exist
+    if "Stability Check" in dfs.columns:
+        dfs["stable"] = dfs["stable"] & dfs["Stability Check"]
+
     return dfs
 
 
@@ -254,6 +294,48 @@ def compute_utilisation(dfs, Ts, exp, n_cores=None):
     return asymptotes, actual_util
 
 
+def compute_fairness_cv(dfs, Ts):
+    """
+    Computes the Coefficient of Variation (CV) of per-class waiting times.
+
+    CV = (standard deviation / mean) across all job classes
+
+    Lower CV indicates more uniform (fair) treatment across classes.
+    Higher CV indicates greater dispersion (unfairness).
+
+    Parameters:
+    - dfs: DataFrame with per-class waiting time columns
+    - Ts: List of job class identifiers (e.g., [1, 100, 2998])
+
+    Returns:
+    - DataFrame with added column "WaitTime CV"
+    """
+    # Find all per-class waiting time columns (excluding ConfInt columns)
+    waiting_cols = [f"T{T} Waiting" for T in Ts]
+
+    # Verify all columns exist
+    missing_cols = [col for col in waiting_cols if col not in dfs.columns]
+    if missing_cols:
+        print(f"Warning: Missing waiting time columns: {missing_cols}", file=sys.stderr)
+        waiting_cols = [col for col in waiting_cols if col in dfs.columns]
+
+    if not waiting_cols:
+        print("Error: No waiting time columns found for CV computation", file=sys.stderr)
+        dfs["WaitTime CV"] = pd.NA
+        return dfs
+
+    # Compute mean and std across classes for each row (experiment configuration)
+    dfs["WaitTime Mean (per-class)"] = dfs[waiting_cols].mean(axis=1)
+    dfs["WaitTime Std (per-class)"] = dfs[waiting_cols].std(axis=1)
+
+    # Compute CV = std / mean
+    # Handle division by zero: if mean is very close to zero, set CV to NaN
+    dfs["WaitTime CV"] = dfs["WaitTime Std (per-class)"] / dfs["WaitTime Mean (per-class)"]
+    dfs.loc[dfs["WaitTime Mean (per-class)"].abs() < 1e-9, "WaitTime CV"] = pd.NA
+
+    return dfs
+
+
 def load_experiments_list():
     results = Path("Results")
     return results, list(
@@ -264,6 +346,16 @@ def load_experiments_list():
 def select_experiment(preselected: str):
     base, available = load_experiments_list()
     if preselected:
+        if preselected.startswith("/"):
+            selected = Path(preselected)
+            if selected.is_dir() and list(selected.glob("*.csv")):
+                print(selected)
+                return selected
+            print(
+                f"{Fore.YELLOW}{Style.BRIGHT}No CSV files found in: {preselected}",
+                file=sys.stderr,
+            )
+            return None
         if (selected := base / preselected) in available:
             print(selected)
             return selected
@@ -286,7 +378,12 @@ def select_experiment(preselected: str):
 
 def load_experiment_data(folder, n_cores=None):
     global progress
-    folder = folder if isinstance(folder, Path) else Path("Results") / folder
+    if isinstance(folder, Path):
+        pass
+    elif folder.startswith("/"):
+        folder = Path(folder)
+    else:
+        folder = Path("Results") / folder
     filenames = list(folder.glob("*.csv"))
     if not filenames:
         print(
@@ -294,7 +391,7 @@ def load_experiment_data(folder, n_cores=None):
             file=sys.stderr,
         )
         return None, None, None, None, None
-    progress = tqdm(None, desc="Loading data", total=len(filenames) + 4)
+    progress = tqdm(None, desc="Loading data", total=len(filenames) + 5)
     dfs = concat_csv_files(filenames, progress)
     if "cores" in dfs.columns:
         n_cores = dfs["cores"].max()
@@ -312,15 +409,29 @@ def load_experiment_data(folder, n_cores=None):
     progress.update(1)
     asymptotes, actual_util = compute_utilisation(dfs, Ts, exp, n_cores=n_cores)
     progress.update(1)
+    dfs = compute_fairness_cv(dfs, Ts)
+    progress.update(1)
     progress.close()
+
+    # write final dfs to folder parent using folder name as prefix
+    output_folder = folder.parent
+    output_file = output_folder / f"{folder.name}.csv"
+    dfs.to_csv(output_file, index=False)
+    print(f"{Fore.GREEN}{Style.BRIGHT}Cleaned data saved to {output_file}")
 
     return dfs, Ts, exp, asymptotes, actual_util
 
 
-if __name__ == "__main__":
+def main():
     folder = select_experiment(sys.argv[1] if len(sys.argv) > 1 else None)
     if not folder:
         exit(0)
     dfs, Ts, exp, asymptotes, actual_util = load_experiment_data(
         folder, n_cores=2048
     )
+
+    return dfs, Ts, exp, asymptotes, actual_util
+
+
+if __name__ == "__main__":
+    main()

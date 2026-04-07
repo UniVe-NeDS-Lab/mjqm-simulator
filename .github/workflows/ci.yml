@@ -41,7 +41,7 @@ jobs:
           - os_version: 24.04
             boost: 1.78.0
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
@@ -78,7 +78,7 @@ jobs:
           - 1.78.0
           - 1.88.0
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
@@ -114,7 +114,7 @@ jobs:
         boost:
           - 1.88.0
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Setup toolchain
         shell: bash
         run: |

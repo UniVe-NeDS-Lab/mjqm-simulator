@@ -1,11 +1,17 @@
+---
+title: Running an Experiment
+tags:
+  - user-guide
+---
+
 # Running an experiment
 
-After compiling the project, you can run an experiment by executing the `simulator_toml` binary with the name of the configuration file as the only argument.
+After compiling the project, you can run an experiment by executing the `simulator` binary with the name of the configuration file as the only argument.
 
 The program expects the configuration file to be in the `Inputs` directory, where you can already find some simple configurations.
 
 ```sh
-./simulator_toml my_awesome_experiment
+./simulator my_awesome_experiment
 ```
 
 > The program can accept additional parameters that will be discussed [later](#overriding-parameters-from-command-line).
@@ -124,7 +130,7 @@ Each set is defined by a `[[pivot]]` header, and then you can define the values 
 > This pivot will generate 9 different configurations, with all the possible combinations of the default arrival rate, and the SMASH window size.
 
 ## Output columns
-You can find more information about the output columns in the [output_columns](output_columns.md) page.
+You can find more information about the output columns in the [output columns](output-columns.md) page.
 
 ## Available distributions
 
@@ -169,6 +175,13 @@ In addition, if used in the arrival distribution, you can define per each job cl
 The `alpha` parameter is required, and must be greater than 1 to ensure the mean is finite.
 Then, you can either define the `s` parameter, or the `mean` parameter.
 
+### Lognormal
+
+- `distribution = "lognormal"`
+- `mean`: the mean of the distribution. Required.
+
+The standard deviation is fixed at $0.5 \times \mu$.
+
 ### Uniform
 
 - `distribution = "uniform"`
@@ -181,54 +194,60 @@ If `mean` is defined, the `min` and `max` will be calculated as $0.5 \times \mu$
 
 ## Available policies
 
+The following sections describe configuration syntax and basic behaviour for each policy. For detailed performance comparisons, stability analysis, and guidance on choosing the right policy for your workload, see the [Policy Comparison Guide](policy-comparison.md).
+
+
+
+For complete configuration examples demonstrating policy usage, see the [Examples](../examples/simple-heterogeneous.md) section.
+
 ### FIFO
 - `policy = "fifo"`
+
+Jobs are admitted strictly in arrival order. When the head-of-line job needs more servers than are free, the system blocks all subsequent admissions — even if smaller jobs could run on the idle servers. This head-of-line blocking can leave servers idle and reduce the maximum sustainable load. [Iliadis, 1991](https://doi.org/10.1002/dac.4510040302)
 
 > **Note**: The FIFO policy is implemented as [SMASH](#smash) with a window size of 1.
 
 ### SMASH
 - `policy.name = "smash"`
-- `policy.window`: the window size. Default is 1.
+- `policy.window`: the window size. Default is 2.
+
+SMASH (SMAll SHuffle) uses a bounded lookahead window to work around head-of-line blocking. At each scheduling event, the scheduler inspects the first `window` jobs in the queue and admits the largest feasible one. Admission repeats with the updated queue and remaining idle servers until no feasible job sits inside the window. With `window=1`, SMASH behaves identically to FIFO; larger windows give more scheduling freedom but weaken arrival-order guarantees. [Olliaro et al., 2026](https://doi.org/10.1109/TPDS.2026.3657959)
 
 ### Server filling
 - `policy = "server filling memoryful"`.
 
+Server Filling constructs a working set from running jobs plus queued jobs (added in FIFO order up to system capacity), then sorts the working set by descending server demand. All servers are released and jobs from the sorted working set are admitted in order. Running jobs that no longer fit after reallocation are preempted; their remaining service time is preserved for later resumption. [Grosof and Harchol-Balter, 2023](https://doi.org/10.1145/3584684.3597264)
+
 ### Back filling
 - `policy = "back filling"`
 
-### Back filling imperfect
-- `policy = "back filling imperfect"`
-- `policy.overest`: Mean of positive gaussian random over-estimation.
-
-### Balanced splitting
-- `policy = "balanced splitting"`
-- `policy.psi`: Variable for reserved servers partitioning.
+When the head-of-line job cannot run, the scheduler computes a reservation — the earliest moment when enough servers will be released. Other queued jobs may be admitted, but only if they fit in the currently idle servers *and* their service completes before the reservation time. This prevents starvation of large jobs whilst still filling idle capacity. [Srinivasan et al., 2002](https://doi.org/10.1109/ICPPW.2002.1039773); [Mu'alem and Feitelson, 2001](https://doi.org/10.1109/71.932708)
 
 ### Most server first
 - `policy = "most server first"`
+
+At each scheduling event, the scheduler admits the largest feasible job in the queue (most servers required among those that fit), regardless of arrival order. Admission repeats until no feasible job remains. Under heavy load, small jobs tend to finish quickly because they fill narrow idle gaps left by large jobs. [Chen et al., 2025](https://arxiv.org/abs/2509.01893)
 
 ### Most server first w/ quick swap
 - `policy.name = "quick swap"`
 - `policy.threshold`: the threshold. Default is 1.
 
-### Kill smart
-- `policy.name = "kill smart"`
-- `policy.k`: max stopped size. Default is 10.
-- `policy.v`: how many jobs to kill at once. Default is 1.
-
-### Dual kill
-- `policy.name = "dual kill"`
-- `policy.k`: max stopped size. Default is 10.
-- `policy.v`: how many jobs to kill at once. Default is 1.
+Quick Swap adds a freeze mechanism to Most Server First. When the number of free servers reaches `threshold` and no largest-class job is running but at least one is waiting, admissions are frozen until enough servers accumulate for that waiting job. A high threshold makes the freeze rare, keeping behaviour close to standard MSF; a low threshold triggers it more often, protecting large jobs at the cost of throughput. [Chen et al., 2025](https://arxiv.org/abs/2509.01893)
 
 ### Adaptive Most server first
 - `policy = "adaptive msf"`
 
+Adaptive MSF monitors class occupancy and triggers a "quick swap" when at least one class has jobs in service but none waiting, and simultaneously another class has jobs waiting but none in service. During a quick swap, only the largest waiting job is admitted and all other admissions are blocked. Normal operation resumes once that job enters service. [Chen et al., 2025](https://arxiv.org/abs/2509.01893)
+
 ### Static Most server first
 - `policy = "static msf"`
 
+Static MSF follows a fixed cycle that specifies the order in which job classes are served. When the number of jobs in service for class $i$ falls below $\lfloor N/d_i \rfloor$ (where $N$ is total servers), a "quick swap" is triggered: additional admissions are blocked and the scheduler moves to the next class in the cycle. The cycle repeats indefinitely. [Chen et al., 2025](https://arxiv.org/abs/2509.01893)
+
 ### First-Fit
 - `policy = "first fit"`
+
+First-Fit scans the queue from the head and admits the first job whose server requirement fits within available capacity. The scan repeats until no more jobs can be admitted. Unlike FIFO, it skips over infeasible jobs, but unlike SMASH or MSF, it does not reorder by size.
 
 ### LCFS
 - `policy = "lcfs"`
@@ -253,13 +272,13 @@ lambda = 0.01
 You can override the `lambda` parameter from the command line:
 
 ```sh
-./simulator_toml my_awesome_experiment --arrival.lambda 0.02
+./simulator my_awesome_experiment --arrival.lambda 0.02
 ```
 
 If you want to override the `lambda` parameter for a specific job class, you can use the class index to identify it:
 
 ```sh
-./simulator_toml my_awesome_experiment --class.3.arrival.lambda 0.02
+./simulator my_awesome_experiment --class.3.arrival.lambda 0.02
 ```
 
 ## Multiple pivots from command line
@@ -270,7 +289,7 @@ To achieve that, you can use the `--pivot` argument separating the overrides.
 For example, if you want to test two sets of values, this command line is equivalent to the following configuration extract:
 
 ```sh
-./simulator_toml my_awesome_experiment --arrival.rate 0.1 0.2 0.3 --policy.name smash --policy.window 1 4 8 --pivot --arrival.rate 0.1 0.2 0.3 --policy "server filling" "back filling" "most server first"
+./simulator my_awesome_experiment --arrival.rate 0.1 0.2 0.3 --policy.name smash --policy.window 1 4 8 --pivot --arrival.rate 0.1 0.2 0.3 --policy "server filling" "back filling" "most server first"
 ```
 
 ```toml

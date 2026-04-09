@@ -63,8 +63,15 @@ and ensure the relevant ports are reachable.
 
 ## 2. Run a simulation
 
+If you use Linux or similar machines
 ```sh
-docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
+docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator:amd64 \
+    ./simulator validation_mm1 --repetitions 5
+```
+
+or if you use Apple/ARM machines
+```sh
+docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator:arm64 \
     ./simulator validation_mm1 --repetitions 5
 ```
 
@@ -73,7 +80,7 @@ Results are written to the `results/` directory on the host.
 ## 3. Explore results with the web UI
 
 ```sh
-docker run --rm -p 8050:8050 -v "$(pwd)/results:/app/Results" mjqm-simulator \
+docker run --rm -p 8050:8050 -v "$(pwd)/results:/app/Results" mjqm-simulator:amd64 \
     uv run --no-dev scripts/plotly_app.py
 ```
 
@@ -87,7 +94,7 @@ Example configs are in the `configs/` directory. Mount one into the container:
 docker run --rm \
     -v "$(pwd)/configs/cellA_Sorted_4096.toml:/app/Inputs/cellA_Sorted_4096.toml" \
     -v "$(pwd)/results:/app/Results" \
-    mjqm-simulator ./simulator cellA_Sorted_4096
+    mjqm-simulator:amd64 ./simulator cellA_Sorted_4096
 ```
 
 ## 5. Override parameters
@@ -95,7 +102,7 @@ docker run --rm \
 Any TOML parameter can be overridden from the command line:
 
 ```sh
-docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
+docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator:amd64 \
     ./simulator validation_mm1 --arrival.lambda 0.5 --repetitions 10
 ```
 INSTR

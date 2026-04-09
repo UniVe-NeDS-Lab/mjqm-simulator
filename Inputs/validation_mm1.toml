@@ -18,8 +18,8 @@
 #   λ=0.95→ E[R]=20.00, E[Wq]=19.00
 
 identifier = "validation_mm1"
-events = 5000000
-repetitions = 40
+events = 1000000
+repetitions = 20
 cores = 1
 policy = "fifo"
 

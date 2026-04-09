@@ -65,7 +65,7 @@ Docker will automatically use the right version for your system.
 ## 2. Run a simulation
 
 ```sh
-docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
+docker run --rm --cpus=2 -v "$(pwd)/results:/app/Results" mjqm-simulator \
     ./simulator validation_mm1 --repetitions 5
 ```
 
@@ -76,7 +76,7 @@ Results are written to the `results/` directory on the host.
 Once a simulation has produced results, you can visualise them interactively:
 
 ```sh
-docker run --rm -p 8050:8050 -v "$(pwd)/results:/app/Results" mjqm-simulator \
+docker run --rm --cpus=2 -p 8050:8050 -v "$(pwd)/results:/app/Results" mjqm-simulator \
     uv run --no-dev scripts/plotly_app.py
 ```
 
@@ -87,7 +87,7 @@ Open http://localhost:8050 in your browser.
 Example configs are in the `configs/` directory. Mount one into the container:
 
 ```sh
-docker run --rm \
+docker run --rm --cpus=2 \
     -v "$(pwd)/configs/cellA_Sorted_4096.toml:/app/Inputs/cellA_Sorted_4096.toml" \
     -v "$(pwd)/results:/app/Results" \
     mjqm-simulator ./simulator cellA_Sorted_4096
@@ -98,7 +98,7 @@ docker run --rm \
 Any TOML parameter can be overridden from the command line:
 
 ```sh
-docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
+docker run --rm --cpus=2 -v "$(pwd)/results:/app/Results" mjqm-simulator \
     ./simulator validation_mm1 --arrival.lambda 0.5 --repetitions 10
 ```
 INSTR

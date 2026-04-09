@@ -9,7 +9,7 @@
 ### 1. Run a simulation
 
 ```sh
-docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
+docker run --rm --cpus=2 -v "$(pwd)/results:/app/Results" mjqm-simulator \
     ./simulator validation_mm1
 ```
 
@@ -18,7 +18,7 @@ Results are written to the `results/` directory on the host.
 Or run the bundled example (shorter, 5 repetitions):
 
 ```sh
-docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
+docker run --rm --cpus=2 -v "$(pwd)/results:/app/Results" mjqm-simulator \
     ./run-examples.sh
 ```
 
@@ -27,7 +27,7 @@ docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
 Once a simulation has produced results, you can visualise them interactively:
 
 ```sh
-docker run --rm -p 8050:8050 -v "$(pwd)/results:/app/Results" mjqm-simulator \
+docker run --rm --cpus=2 -p 8050:8050 -v "$(pwd)/results:/app/Results" mjqm-simulator \
     uv run --no-dev scripts/plotly_app.py
 ```
 
@@ -38,7 +38,7 @@ Open http://localhost:8050 in your browser.
 Any TOML parameter can be overridden from the command line:
 
 ```sh
-docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
+docker run --rm --cpus=2 -v "$(pwd)/results:/app/Results" mjqm-simulator \
     ./simulator validation_mm1 --arrival.lambda 0.5
 ```
 
@@ -47,7 +47,7 @@ docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
 Mount your own TOML config file into the `Inputs/` directory:
 
 ```sh
-docker run --rm \
+docker run --rm --cpus=2 \
     -v "$(pwd)/my_config.toml:/app/Inputs/my_config.toml" \
     -v "$(pwd)/results:/app/Results" \
     mjqm-simulator ./simulator my_config

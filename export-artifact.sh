@@ -3,12 +3,10 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-TAG="${1:-latest}"
 OUTDIR="docker-artifact"
 IMAGE="mjqm-simulator"
 
 echo "=== MJQM Simulator — Docker Artifact Export ==="
-echo "Tag: ${TAG}"
 echo ""
 
 # Ensure buildx builder exists
@@ -17,23 +15,16 @@ docker buildx inspect mjqm-builder >/dev/null 2>&1 || \
 docker buildx use mjqm-builder
 docker buildx inspect --bootstrap >/dev/null 2>&1
 
-# Build both architectures
-echo "Building linux/amd64..."
-docker buildx build --platform linux/amd64 -t "${IMAGE}:amd64" --load .
-
-echo ""
-echo "Building linux/arm64..."
-docker buildx build --platform linux/arm64 -t "${IMAGE}:arm64" --load .
-
 # Prepare output directory
 rm -rf "${OUTDIR}"
 mkdir -p "${OUTDIR}/configs"
 
-# Export images
-echo ""
-echo "Exporting images..."
-docker save "${IMAGE}:amd64" | gzip > "${OUTDIR}/${IMAGE}-amd64.tar.gz"
-docker save "${IMAGE}:arm64" | gzip > "${OUTDIR}/${IMAGE}-arm64.tar.gz"
+# Build multi-arch OCI image
+echo "Building linux/amd64 + linux/arm64..."
+docker buildx build \
+    --platform linux/amd64,linux/arm64 \
+    -o "type=oci,dest=${OUTDIR}/${IMAGE}.tar" \
+    .
 
 # Bundle configs and docs
 cp Inputs/validation_mm1.toml "${OUTDIR}/configs/"
@@ -41,37 +32,40 @@ cp Inputs/validation_mm1.toml "${OUTDIR}/configs/"
     cp Inputs/cellA_Sorted_4096.toml "${OUTDIR}/configs/"
 cp docker-README.md "${OUTDIR}/README.md"
 
+# Extract image ID from the OCI archive
+IMAGE_ID=$(tar -xf "${OUTDIR}/${IMAGE}.tar" -O index.json \
+    | grep -o '"sha256:[a-f0-9]*"' | head -1 | tr -d '"')
+
 # Create INSTRUCTIONS.md
 cat > "${OUTDIR}/INSTRUCTIONS.md" <<'INSTR'
 # Loading and Running the MJQM Simulator
 
+## Prerequisites
+
+You need [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+installed on your machine (available for Linux, macOS, and Windows).
+
 ## 1. Load the Docker image
 
-Pick the image matching your architecture:
-
 ```sh
-# Intel/AMD — most Windows PCs, Linux servers, older Macs
-docker load < mjqm-simulator-amd64.tar.gz
-
-# ARM — Apple Silicon Macs, Windows on ARM (e.g. Surface Pro X), ARM servers
-docker load < mjqm-simulator-arm64.tar.gz
+docker load -i mjqm-simulator.tar.gz
+docker tag IMAGE_ID_PLACEHOLDER mjqm-simulator
 ```
 
-**Note:** The examples below assume Docker is running on your local machine.
-If you are running on a remote host, replace `localhost` with the host's address
-and ensure the relevant ports are reachable.
+The image supports both Intel/AMD and Apple Silicon/ARM machines.
+Docker will automatically use the right version for your system.
+
+> **Note:** The examples below assume Docker is running on your local machine.
+> If you are running on a remote server, replace `localhost` with the server's
+> address and make sure the relevant ports are open.
+>
+> **Windows users:** Replace `$(pwd)` with `%cd%` in Command Prompt,
+> or `${PWD}` in PowerShell.
 
 ## 2. Run a simulation
 
-If you use Linux or similar machines
 ```sh
-docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator:amd64 \
-    ./simulator validation_mm1 --repetitions 5
-```
-
-or if you use Apple/ARM machines
-```sh
-docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator:arm64 \
+docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
     ./simulator validation_mm1 --repetitions 5
 ```
 
@@ -79,8 +73,10 @@ Results are written to the `results/` directory on the host.
 
 ## 3. Explore results with the web UI
 
+Once a simulation has produced results, you can visualise them interactively:
+
 ```sh
-docker run --rm -p 8050:8050 -v "$(pwd)/results:/app/Results" mjqm-simulator:amd64 \
+docker run --rm -p 8050:8050 -v "$(pwd)/results:/app/Results" mjqm-simulator \
     uv run --no-dev scripts/plotly_app.py
 ```
 
@@ -94,7 +90,7 @@ Example configs are in the `configs/` directory. Mount one into the container:
 docker run --rm \
     -v "$(pwd)/configs/cellA_Sorted_4096.toml:/app/Inputs/cellA_Sorted_4096.toml" \
     -v "$(pwd)/results:/app/Results" \
-    mjqm-simulator:amd64 ./simulator cellA_Sorted_4096
+    mjqm-simulator ./simulator cellA_Sorted_4096
 ```
 
 ## 5. Override parameters
@@ -102,14 +98,22 @@ docker run --rm \
 Any TOML parameter can be overridden from the command line:
 
 ```sh
-docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator:amd64 \
+docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
     ./simulator validation_mm1 --arrival.lambda 0.5 --repetitions 10
 ```
 INSTR
 
+# Embed the actual image ID
+sed -i '' "s|IMAGE_ID_PLACEHOLDER|${IMAGE_ID}|" "${OUTDIR}/INSTRUCTIONS.md"
+
+# Compress the image
+echo ""
+echo "Compressing image..."
+gzip "${OUTDIR}/${IMAGE}.tar"
+
 # Package
 ZIPNAME="${IMAGE}-docker-$(date +%Y%m%d).zip"
-(cd "${OUTDIR}" && zip -r "../${ZIPNAME}" .)
+(cd "${OUTDIR}" && zip -0 -r "../${ZIPNAME}" .)
 
 echo ""
 echo "Done! Artifact: ${ZIPNAME}"

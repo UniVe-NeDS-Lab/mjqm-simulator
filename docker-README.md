@@ -2,9 +2,9 @@
 
 ## Quick Start
 
-**Note:** The examples below assume Docker is running on your local machine.
-If you are running on a remote host, replace `localhost` with the host's address
-and ensure the relevant ports are reachable.
+> **Note:** The examples below assume Docker is running on your local machine.
+> If you are running on a remote host, replace `localhost` with the host's
+> address and ensure the relevant ports are reachable.
 
 ### 1. Run a simulation
 
@@ -13,7 +13,7 @@ docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
     ./simulator validation_mm1
 ```
 
-Results are written to the mounted `results/` directory on the host.
+Results are written to the `results/` directory on the host.
 
 Or run the bundled example (shorter, 5 repetitions):
 
@@ -23,6 +23,8 @@ docker run --rm -v "$(pwd)/results:/app/Results" mjqm-simulator \
 ```
 
 ### 2. Explore results with the web UI
+
+Once a simulation has produced results, you can visualise them interactively:
 
 ```sh
 docker run --rm -p 8050:8050 -v "$(pwd)/results:/app/Results" mjqm-simulator \

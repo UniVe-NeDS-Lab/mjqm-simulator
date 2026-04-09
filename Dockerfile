@@ -3,8 +3,8 @@
 # Build stage — compile the simulator with static linking
 FROM gcc:15 AS builder
 
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt/lists \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
     apt-get update && \
     apt-get install -y --no-install-recommends cmake libboost-all-dev
 
@@ -30,7 +30,7 @@ WORKDIR /app
 
 COPY --from=builder /build/build/simulator ./
 COPY pyproject.toml uv.lock ./
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,target=/root/.cache/uv,sharing=locked \
     uv sync --no-dev --link-mode=copy
 
 COPY scripts/ ./scripts/

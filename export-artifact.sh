@@ -27,9 +27,12 @@ docker buildx build \
     .
 
 # Bundle configs and docs
-cp Inputs/validation_mm1.toml "${OUTDIR}/configs/"
-[ -f Inputs/cellA_Sorted_4096.toml ] && \
-    cp Inputs/cellA_Sorted_4096.toml "${OUTDIR}/configs/"
+cp Inputs/tools_B.toml "${OUTDIR}/configs/"
+cp Inputs/tools_oneOrT.toml "${OUTDIR}/configs/"
+cp Inputs/tools_five_bpar.toml "${OUTDIR}/configs/"
+cp Inputs/tools_five_exp.toml "${OUTDIR}/configs/"
+#[ -f Inputs/cellA_Sorted_4096.toml ] && \
+#    cp Inputs/cellA_Sorted_4096.toml "${OUTDIR}/configs/"
 cp docker-README.md "${OUTDIR}/README.md"
 
 # Extract image ID from the OCI archive
@@ -111,7 +114,7 @@ docker run --rm --cpus=2 \
 INSTR
 
 # Embed the actual image ID
-sed -i '' "s|IMAGE_ID_PLACEHOLDER|${IMAGE_ID}|" "${OUTDIR}/INSTRUCTIONS.md"
+sed -i "s|IMAGE_ID_PLACEHOLDER|${IMAGE_ID}|" "${OUTDIR}/INSTRUCTIONS.md"
 
 # Compress the image
 echo ""

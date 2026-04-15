@@ -1,0 +1,51 @@
+identifier = "tools_five"
+events = 1000000
+repetitions = 40
+cores = 20
+
+arrival.distribution = "exponential"
+service.distribution = "Bounded pareto"
+
+[[class]]
+cores = 1
+arrival.prob = 0.5
+service.L = 0.15
+service.H = 400
+service.distribution = "bounded pareto"
+service.alpha = 1.4
+
+[[class]]
+cores = 2
+arrival.prob = 0.1
+service.L = 0.25
+service.H = 400
+service.distribution = "bounded pareto"
+service.alpha = 1.4
+
+[[class]]
+cores = 5
+arrival.prob = 0.2
+service.L = 0.38
+service.H = 400
+service.distribution = "bounded pareto"
+service.alpha = 1.4
+
+[[class]]
+cores = 10
+arrival.prob = 0.19
+service.L = 1.05
+service.H = 400
+service.distribution = "bounded pareto"
+service.alpha = 1.4
+
+[[class]]
+cores = 15
+arrival.prob = 0.01
+service.L = 3.35
+service.H = 400
+service.distribution = "bounded pareto"
+service.alpha = 1.4
+
+[[pivot]]
+policy = "fifo"
+arrival.rate = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7]

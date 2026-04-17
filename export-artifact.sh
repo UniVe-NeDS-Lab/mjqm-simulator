@@ -31,7 +31,7 @@ mkdir -p "${OUTDIR}/scripts/sre"
 echo "Building linux/amd64 + linux/arm64..."
 docker buildx build \
     --platform linux/amd64,linux/arm64 \
-    -o "type=docker,dest=${OUTDIR}/${IMAGE}.tar" \
+    -o "type=oci,dest=${OUTDIR}/${IMAGE}.tar" \
     .
 
 # Bundle configs and docs

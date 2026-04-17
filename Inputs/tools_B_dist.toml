@@ -1,0 +1,171 @@
+identifier = "tools_B_dist"
+events = 30000000
+repetitions = 40
+cores = 2048
+
+arrival.distribution = "exponential"
+service.distribution = "exponential"
+
+[[class]]
+cores = 1
+arrival.prob = 0.8392993266737124
+service.mean = 6.670818209090094
+service.alpha = 2.1
+
+[[class]]
+cores = 2
+arrival.prob = 0.049979002091829525
+service.mean = 0.224450764692716
+service.alpha = 2.1
+
+[[class]]
+cores = 3
+arrival.prob = 0.006508356371322629
+service.mean = 5.15671379019361
+service.alpha = 2.1
+
+[[class]]
+cores = 4
+arrival.prob = 0.023577366842412194
+service.mean = 3.1955852362829025
+service.alpha = 2.1
+
+[[class]]
+cores = 5
+arrival.prob = 0.0008797227878056887
+service.mean = 102.19873790827272
+service.alpha = 2.1
+
+[[class]]
+cores = 6
+arrival.prob = 0.0014569164721125885
+service.mean = 120.72594130104356
+service.alpha = 2.1
+
+[[class]]
+cores = 9
+arrival.prob = 0.00008558389112136791
+service.mean = 5.849804523379304
+service.alpha = 2.1
+
+[[class]]
+cores = 10
+arrival.prob = 0.005690333598046299
+service.mean = 13.470126238432995
+service.alpha = 2.1
+
+[[class]]
+cores = 11
+arrival.prob = 0.000033835491838680335
+service.mean = 3869.978617668152
+service.alpha = 2.1
+
+[[class]]
+cores = 14
+arrival.prob = 0.00003980646098668275
+service.mean = 228.9730426311493
+service.alpha = 2.1
+
+[[class]]
+cores = 15
+arrival.prob = 0.0003901033176694909
+service.mean = 12.7212342680717
+service.alpha = 2.1
+
+[[class]]
+cores = 16
+arrival.prob = 0.00007762259892403135
+service.mean = 13966.232180644305
+service.alpha = 2.1
+
+[[class]]
+cores = 20
+arrival.prob = 0.0006926324211682798
+service.mean = 102.57075294680979
+service.alpha = 2.1
+
+[[class]]
+cores = 30
+arrival.prob = 0.0002348581198214282
+service.mean = 0.740345397238004
+service.alpha = 2.1
+
+[[class]]
+cores = 35
+arrival.prob = 0.00021893553542675511
+service.mean = 0.20537715391679243
+service.alpha = 2.1
+
+[[class]]
+cores = 38
+arrival.prob = 0.00005771936843068999
+service.mean = 73.37070080329632
+service.alpha = 2.1
+
+[[class]]
+cores = 50
+arrival.prob = 0.0007145259747109553
+service.mean = 52.465917109114876
+service.alpha = 2.1
+
+[[class]]
+cores = 98
+arrival.prob = 0.00008757421417070205
+service.mean = 0.8119266900149259
+service.alpha = 2.1
+
+[[class]]
+cores = 99
+arrival.prob = 0.0007583130817963064
+service.mean = 5.161066228010523
+service.alpha = 2.1
+
+[[class]]
+cores = 100
+arrival.prob = 0.0685885226031037
+service.mean = 3.0955465282235286
+service.alpha = 2.1
+
+[[class]]
+cores = 120
+arrival.prob = 0.00003582581488801447
+service.mean = 0.2790125211079915
+service.alpha = 2.1
+
+[[class]]
+cores = 200
+arrival.prob = 0.0000796129219733655
+service.mean = 5227.133928918838
+service.alpha = 2.1
+
+[[class]]
+cores = 256
+arrival.prob = 0.00013534196735472134
+service.mean = 3582.756444790784
+service.alpha = 2.1
+
+[[class]]
+cores = 500
+arrival.prob = 0.00021097424322941857
+service.mean = 51.97127277446243
+service.alpha = 2.1
+
+[[class]]
+cores = 795
+arrival.prob = 0.000037816137937348614
+service.mean = 3.3203725814819336
+service.alpha = 2.1
+
+[[class]]
+cores = 2000
+arrival.prob = 0.00012937099820671893
+service.mean = 570.2348033171434
+service.alpha = 2.1
+
+[[pivot]]
+policy = [
+    "fifo"
+]
+arrival.rate = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]
+service.distribution = ["deterministic", "uniform", "exponential", "bounded pareto"]
+

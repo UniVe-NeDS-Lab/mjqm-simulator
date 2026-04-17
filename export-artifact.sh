@@ -18,19 +18,34 @@ docker buildx inspect --bootstrap >/dev/null 2>&1
 # Prepare output directory
 rm -rf "${OUTDIR}"
 mkdir -p "${OUTDIR}/configs"
+mkdir -p "${OUTDIR}/results"
+mkdir -p "${OUTDIR}/results/prerun/"
+mkdir -p "${OUTDIR}/results/prerun/tools_B_pol"
+mkdir -p "${OUTDIR}/results/prerun/tools_B_dist"
+mkdir -p "${OUTDIR}/scripts"
+mkdir -p "${OUTDIR}/scripts/mg"
+mkdir -p "${OUTDIR}/scripts/sre"
+
 
 # Build multi-arch OCI image
 echo "Building linux/amd64 + linux/arm64..."
 docker buildx build \
     --platform linux/amd64,linux/arm64 \
-    -o "type=oci,dest=${OUTDIR}/${IMAGE}.tar" \
+    -o "type=docker,dest=${OUTDIR}/${IMAGE}.tar" \
     .
 
 # Bundle configs and docs
-cp Inputs/tools_B.toml "${OUTDIR}/configs/"
+cp Inputs/tools_B_pol.toml "${OUTDIR}/configs/"
+cp Inputs/tools_B_dist.toml "${OUTDIR}/configs/"
 cp Inputs/tools_oneOrT.toml "${OUTDIR}/configs/"
 cp Inputs/tools_five_bpar.toml "${OUTDIR}/configs/"
 cp Inputs/tools_five_exp.toml "${OUTDIR}/configs/"
+cp docker-prerun/results/tools_B_dist/*.csv "${OUTDIR}/results/prerun/tools_B_dist/"
+cp docker-prerun/results/tools_B_pol/*.csv "${OUTDIR}/results/prerun/tools_B_pol/"
+cp docker-prerun/scripts/*.py mkdir "${OUTDIR}/scripts/"
+cp docker-prerun/scripts/mg/*.csv "${OUTDIR}/scripts/mg/"
+cp docker-prerun/scripts/sre/*.csv "${OUTDIR}/scripts/sre/"
+
 #[ -f Inputs/cellA_Sorted_4096.toml ] && \
 #    cp Inputs/cellA_Sorted_4096.toml "${OUTDIR}/configs/"
 cp docker-README.md "${OUTDIR}/README.md"
@@ -114,7 +129,7 @@ docker run --rm --cpus=2 \
 INSTR
 
 # Embed the actual image ID
-sed -i "s|IMAGE_ID_PLACEHOLDER|${IMAGE_ID}|" "${OUTDIR}/INSTRUCTIONS.md"
+sed -i '' "s|IMAGE_ID_PLACEHOLDER|${IMAGE_ID}|" "${OUTDIR}/INSTRUCTIONS.md"
 
 # Compress the image
 echo ""

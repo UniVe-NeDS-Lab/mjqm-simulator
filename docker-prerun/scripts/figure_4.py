@@ -25,8 +25,8 @@ cols = [
     'purple',     # purple
     'darkgreen',  # dark green
     '#453f44',    # grayish
-    'pink',       # light pink
-    'gold',       # bright yellow-gold
+#    'pink',       # light pink
+#    'gold',       # bright yellow-gold
     'deepskyblue',# cyan-like blue
     'orangered',  # red-orange
     'limegreen',  # bright green
@@ -138,16 +138,16 @@ for dist in dists:
     g_sorted = list(g_sorted)
             
     tipe = dist
-    ax.plot(a_sorted, c_sorted, label='[Class-1] '+tipe+'-DES', color = cols[i], ls = styles[j], lw = line_size)
+    ax.plot(a_sorted, c_sorted, label='[Class-1] DES', color = cols[i], ls = styles[j], lw = line_size)
     if (dist=='Exponential'):
-        ax.plot(result_df["lam"], result_df["T1"], label='[Class-1] '+tipe+'-SRE', color = cols[i], ls = styles[j+1], lw = line_size, markersize = 100, marker = '*')
+        ax.plot(result_df["lam"], result_df["T1"], label='[Class-1] SRE', color = cols[i], ls = '', lw = line_size, markersize = 100, marker = '*')
     else:
-        ax.plot(result_df_bpar["lam"], result_df_bpar["T1"], label='[Class-1] '+tipe+'-SRE', color = cols[i], ls = styles[j+1], lw = line_size, markersize = 100, marker = '*')
-    ax.plot(a_sorted, g_sorted, label='[Class-15] '+tipe+'-DES', color = cols[i], ls = styles[j+2], lw = line_size)
+        ax.plot(result_df_bpar["lam"], result_df_bpar["T1"], label='[Class-1] SRE', color = cols[i], ls = '', lw = line_size, markersize = 100, marker = '*')
+    ax.plot(a_sorted, g_sorted, label='[Class-15] DES', color = cols[i], ls = styles[j+2], lw = line_size)
     if (dist=='Exponential'):
-        ax.plot(result_df["lam"], result_df["T15"], label='[Class-15] '+tipe+'-SRE', color = cols[i], ls = styles[j+1], lw = line_size, markersize = 75, marker = 'X')
+        ax.plot(result_df["lam"], result_df["T15"], label='[Class-15] SRE', color = cols[i], ls = '', lw = line_size, markersize = 75, marker = 'X')
     else:
-        ax.plot(result_df_bpar["lam"], result_df_bpar["T15"], label='[Class-15] '+tipe+'-SRE', color = cols[i], ls = styles[j+1], lw = line_size, markersize = 75, marker = 'X')
+        ax.plot(result_df_bpar["lam"], result_df_bpar["T15"], label='[Class-15] SRE', color = cols[i], ls = '', lw = line_size, markersize = 75, marker = 'X')
     i+=3
 
 
@@ -169,7 +169,7 @@ legend1 = ax.legend(
     handles[:4], labels[:4],
     loc='lower right',
     bbox_to_anchor=(1, 0.00),
-    fontsize=225
+    fontsize=230
 )
 
 # last 4 → upper left
@@ -177,7 +177,7 @@ legend2 = ax.legend(
     handles[4:], labels[4:],
     loc='upper left',
     bbox_to_anchor=(0, 1),
-    fontsize=180
+    fontsize=230
 )
 
 # keep both legends
@@ -213,7 +213,7 @@ with open('../results/'+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)
     reader = csv.DictReader(file, delimiter=';')
     for row in reader:
         lambdas.append(float(row['arrival.rate']))
-        rts.append(float(row['Queue Total']))
+        rts.append(float(row['WaitTime Total']))
 
 # Zip, sort by first list, then unzip
 a_sorted, b_sorted = zip(*sorted(zip(lambdas, rts)))
@@ -230,19 +230,19 @@ with open('mg/MGEXP-N1024_T512_ps0.9_mus1_mub0.1.csv', mode ='r')as file:
     reader = csv.DictReader(file, delimiter=',')
     for row in reader:
         lambdas.append(float(row['Arrival rate']))
-        rts.append(float(row['Nw- small'])+ float(row['Nw - big']))
+        rts.append(float(row['Wt']))
 
-ax.plot(lambdas, rts, label='Matrix Geometric', color = cols[i], ls = styles[j+1], lw = line_size, markersize = 100, marker = '*')
+ax.plot(lambdas, rts, label='Matrix Geometric', color = cols[i], ls = '', lw = line_size, markersize = 100, marker = 'v')
     
 i+=1
 
 ax.set_xlabel("Arrival Rate", fontsize=label_size)
-ax.set_ylabel("Queue Length", fontsize=label_size)
+ax.set_ylabel("Average Overall Waiting Time", fontsize=label_size)
 #ax.xaxis.set_ticks(np.arange(0.25,0.56,0.05))
 #plt.xscale('log')
 plt.yscale("log")
-plot_filename = "Queue Length vs. Arrival Rate"
-ax.set_title(plot_filename, fontsize=label_size)
+plot_filename = "Average Overall Waiting Time vs. Arrival Rate"
+ax.set_title(plot_filename, fontsize=250)
 #ax.xaxis.set_ticks([c[-4] for c in measurements[(i*runs):(i*runs)+runs]])
 ax.tick_params(axis='both', which='major', labelsize=tick_size, pad = l_pad)
 ax.tick_params(axis='both', which='minor', labelsize=tick_size, pad = l_pad)

@@ -21,8 +21,8 @@ cols = [
     'purple',     # purple
     'darkgreen',  # dark green
     '#453f44',    # grayish
-    'pink',       # light pink
-    'gold',       # bright yellow-gold
+#    'pink',       # light pink
+#    'gold',       # bright yellow-gold
     'deepskyblue',# cyan-like blue
     'orangered',  # red-orange
     'limegreen',  # bright green
@@ -40,6 +40,11 @@ def set_ymargin(ax, bottom=0.0, top=0.3):
     bottom = lim[0] - delta*bottom
     top = lim[1] + delta*top
     ax.set_ylim(bottom=bottom,top=top)
+
+prerun_input = input('Use pre-run results? (yes/no): ')
+prerun = ''
+if prerun_input == 'yes' or prerun_input == 'y' or prerun_input == 'Yes' or prerun_input == 'Y':
+    prerun = 'prerun/'
 
 plt.figure(dpi=1200)
 plt.rc('font',**{'family':'serif','serif':['Palatino']})
@@ -63,7 +68,7 @@ for win in wins:
     lambdas = []
     rtt = []
     rts = []
-    with open('../results/'+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-Exponential-'+sim_name+'.csv', mode ='r')as file:
+    with open('../results/'+prerun+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-Exponential-'+sim_name+'.csv', mode ='r')as file:
         reader = csv.DictReader(file, delimiter=';')
         for row in reader:
             lambdas.append(float(row['arrival.rate']))
@@ -96,11 +101,11 @@ ax.set_ylabel("Average Overall Response Time", fontsize=label_size)
 plt.xscale('log')
 plt.yscale("log")
 plot_filename = "Average Overall Response Time vs. Arrival Rate"
-ax.set_title(plot_filename, fontsize=225)
+ax.set_title(plot_filename, fontsize=245)
 #ax.xaxis.set_ticks([c[-4] for c in measurements[(i*runs):(i*runs)+runs]])
 ax.tick_params(axis='both', which='major', labelsize=tick_size, pad = l_pad)
 ax.tick_params(axis='both', which='minor', labelsize=tick_size, pad = l_pad)
-ax.legend(bbox_to_anchor=(0,1.00), loc='upper left', fontsize = 280,ncol=1)
+ax.legend(bbox_to_anchor=(0,1.00), loc='upper left', fontsize = 260,ncol=1)
 #ax.set_xlim(left=9, right = 12.5)
 ax.set_ylim(bottom=5, top=10_000)
 plt.grid()
@@ -135,7 +140,7 @@ for w in range(len(wins)):
     lambdas = []
     rtt = []
     rts = []
-    with open('../results/'+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-Exponential-'+sim_name+'.csv', mode ='r')as file:
+    with open('../results/'+prerun+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-Exponential-'+sim_name+'.csv', mode ='r')as file:
     #with open('../sim/res/OverLambdas-nClasses26-N2048-Win'+str(win)+'-Exponential-cellB-Sorted_2048.csv', mode ='r')as file:
         reader = csv.DictReader(file, delimiter=';')
         r = 0
@@ -180,7 +185,7 @@ ax.set_xticklabels(policies, fontsize=label_size)
 
 ax.set_yscale('log')
 ax.set_ylabel('Average Waiting Time', fontsize=label_size)
-ax.set_title('Waiting time distribution by scheduling policy', fontsize=240)
+ax.set_title('Average Waiting Time vs. Scheduling Policy', fontsize=260)
 
 #plt.xscale('log')
 plt.yscale("log")
@@ -216,7 +221,7 @@ for dist in dists:
     lambdas = []
     rtt = []
     rts = []
-    with open('../results/'+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-'+dist+'-'+sim_name+'.csv', mode ='r')as file:
+    with open('../results/'+prerun+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-'+dist+'-'+sim_name+'.csv', mode ='r')as file:
         reader = csv.DictReader(file, delimiter=';')
         for row in reader:
             lambdas.append(float(row['arrival.rate']))
@@ -238,11 +243,11 @@ ax.set_ylabel("Average Overall Response Time", fontsize=label_size)
 #plt.xscale('log')
 plt.yscale("log")
 plot_filename = "Average Overall Response Time vs. Arrival Rate"
-ax.set_title(plot_filename, fontsize=225)
+ax.set_title(plot_filename, fontsize=245)
 #ax.xaxis.set_ticks([c[-4] for c in measurements[(i*runs):(i*runs)+runs]])
 ax.tick_params(axis='both', which='major', labelsize=tick_size, pad = l_pad)
 ax.tick_params(axis='both', which='minor', labelsize=tick_size, pad = l_pad)
-ax.legend(bbox_to_anchor=(0,1.00), loc='upper left', fontsize = 250,ncol=1)
+ax.legend(bbox_to_anchor=(0,1.00), loc='upper left', fontsize = 260,ncol=1)
 ax.set_xlim(left=0.1,right=1.6)
 ax.set_ylim(bottom=5, top=1000_000)
 plt.grid()

@@ -91,3 +91,5 @@ node_modules/
 *.ipynb
 
 p*.txt
+
+uv.lock

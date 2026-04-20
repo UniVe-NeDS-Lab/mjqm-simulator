@@ -1,5 +1,7 @@
 # Import packages
 
+import sys
+
 import dash_daq as daq
 import plotly.express as px
 from dash import (
@@ -19,7 +21,9 @@ from load_experiment_data import (
 )
 from plot_experiment import prepare_cosmetics
 
-base, available_experiments = load_experiments_list()
+base, available_experiments = load_experiments_list(
+    sys.argv[1] if len(sys.argv) > 1 else None
+)
 
 y_axis_mappings = dict(
     response_time=dict(
@@ -130,7 +134,7 @@ app.layout = [
             ),
             daq.BooleanSwitch(
                 id="display-only-stable",
-                on=True,
+                on=False,
                 label="Show only stable experiments",
                 labelPosition="top",
                 style=dict(margin="0 .5em"),
@@ -336,7 +340,7 @@ def update_table(experiment, cores, display_table):
     global dfs, Ts, exp, asymptotes, actual_util
     if experiment is None:
         return None, dict(display="none"), no_update, False, None, None
-    results = load_experiment_data(experiment, n_cores=cores or 2048)
+    results = load_experiment_data(base / experiment, n_cores=cores or 2048)
     if results is None:
         return None, dict(display="none"), no_update, False, None, None
     dfs, Ts, exp, asymptotes, actual_util = results

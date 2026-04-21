@@ -72,7 +72,6 @@ sed \
 # Generate .dockerignore for artifact layout
 cat > "${OUTDIR}/.dockerignore" <<'DIGNORE'
 mjqm-simulator.tar.gz
-README.md
 *.zip
 .DS_Store
 __pycache__/

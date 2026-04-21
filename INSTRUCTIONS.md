@@ -37,11 +37,10 @@ docker run --rm --cpus=2 \
     ./run-examples.sh
 ```
 
-This runs the M/M/1 validation experiment with 5 repetitions (~30 s)
-and writes CSV results to `Results/validation_mm1/`. The simulator
-prints `"Repetition N Done"` after each repetition and
-`"All threads joined"` when the experiment completes. If CSV files
-appear in `Results/validation_mm1/`, the quick check passed.
+This runs the M/M/1 validation experiment with 5 repetitions (~30 s).
+The simulator prints `"Repetition N Done"` after each repetition and
+`"All threads joined"` when the experiment completes. The output CSV
+files are written to `Results/validation_mm1/`.
 
 ## Simulator CLI
 
@@ -96,8 +95,9 @@ cluster node (20-core Intel Xeon Gold 6148 CPU @ 2.40 GHz, 200 GB ECC RAM):
 | `tools_B_dist`     | 30 M   | 16            | ~95 min       |
 | `tools_B_pol`      | 30–60 M| 28–59         | ~11.5 h       |
 
-Precomputed results for the Cell B experiments are included in
-`Results/prerun/` and can be used directly for figure generation and
+Precomputed results for the Cell B experiments are included both in
+the Docker image and in the artifact at `Results/prerun/`, and can be
+used directly for figure generation and
 visualisation without re-running the simulations. New simulation results
 are written to `Results/<config_name>/` and do not overwrite the
 precomputed data.

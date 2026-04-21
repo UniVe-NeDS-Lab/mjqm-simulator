@@ -115,7 +115,7 @@ for dist in dists:
     rt5 = []
     rt10 = []
     rt15 = []
-    with open('../results/'+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-'+dist+'-'+sim_name+'.csv', mode ='r')as file:
+    with open('../Results/'+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-'+dist+'-'+sim_name+'.csv', mode ='r')as file:
         reader = csv.DictReader(file, delimiter=';')
         for row in reader:
             lambdas.append(float(row['arrival.rate']))
@@ -209,7 +209,7 @@ dist = 'Exponential'
 lambdas = []
 rtt = []
 rts = []
-with open('../results/'+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-'+dist+'-'+sim_name+'.csv', mode ='r')as file:
+with open('../Results/'+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-'+dist+'-'+sim_name+'.csv', mode ='r')as file:
     reader = csv.DictReader(file, delimiter=';')
     for row in reader:
         lambdas.append(float(row['arrival.rate']))

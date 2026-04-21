@@ -18,10 +18,10 @@ docker buildx inspect --bootstrap >/dev/null 2>&1
 # Prepare output directory
 rm -rf "${OUTDIR}"
 mkdir -p "${OUTDIR}/configs"
-mkdir -p "${OUTDIR}/results"
-mkdir -p "${OUTDIR}/results/prerun/"
-mkdir -p "${OUTDIR}/results/prerun/tools_B_pol"
-mkdir -p "${OUTDIR}/results/prerun/tools_B_dist"
+mkdir -p "${OUTDIR}/Results"
+mkdir -p "${OUTDIR}/Results/prerun/"
+mkdir -p "${OUTDIR}/Results/prerun/tools_B_pol"
+mkdir -p "${OUTDIR}/Results/prerun/tools_B_dist"
 mkdir -p "${OUTDIR}/scripts"
 mkdir -p "${OUTDIR}/scripts/mg"
 mkdir -p "${OUTDIR}/scripts/sre"
@@ -43,8 +43,8 @@ cp Inputs/tools_oneOrT.toml "${OUTDIR}/configs/"
 cp Inputs/tools_five_bpar.toml "${OUTDIR}/configs/"
 cp Inputs/tools_five_exp.toml "${OUTDIR}/configs/"
 cp docker-prerun/custom/*.toml "${OUTDIR}/configs/"
-cp docker-prerun/results/tools_B_dist/*.csv "${OUTDIR}/results/prerun/tools_B_dist/"
-cp docker-prerun/results/tools_B_pol/*.csv "${OUTDIR}/results/prerun/tools_B_pol/"
+cp docker-prerun/results/tools_B_dist/*.csv "${OUTDIR}/Results/prerun/tools_B_dist/"
+cp docker-prerun/results/tools_B_pol/*.csv "${OUTDIR}/Results/prerun/tools_B_pol/"
 cp docker-prerun/scripts/*.py "${OUTDIR}/scripts/"
 cp docker-prerun/mg/*.csv "${OUTDIR}/scripts/mg/"
 cp docker-prerun/sre/*.csv "${OUTDIR}/scripts/sre/"
@@ -65,7 +65,7 @@ sed \
     -e 's|COPY libs/ \./libs/|COPY src/libs/ ./libs/|' \
     -e 's|COPY simulator.cpp toml_loader_test.cpp \./|COPY src/simulator.cpp src/toml_loader_test.cpp ./|' \
     -e 's|COPY Inputs/ \./Inputs/|COPY configs/ ./Inputs/|' \
-    -e 's|COPY docker-prerun/results/ \./Results/prerun/|COPY results/prerun/ ./Results/prerun/|' \
+    -e 's|COPY docker-prerun/results/ \./Results/prerun/|COPY Results/prerun/ ./Results/prerun/|' \
     -e 's|COPY INSTRUCTIONS.md \./README.md|COPY README.md ./README.md|' \
     Dockerfile > "${OUTDIR}/Dockerfile"
 

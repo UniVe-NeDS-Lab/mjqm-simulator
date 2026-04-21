@@ -61,13 +61,13 @@ jobs:
           ! grep -q 'IMAGE_ID_PLACEHOLDER' /tmp/readme.md
       - name: Test quick check
         run: |
-          mkdir -p results
+          mkdir -p Results
           docker run --rm --cpus=2 \
-            -v "$(pwd)/results:/app/Results" \
+            -v "$(pwd)/Results:/app/Results" \
             mjqm-simulator \
             ./run-examples.sh
-          test -d results/validation_mm1
-          ls results/validation_mm1/*.csv
+          test -d Results/validation_mm1
+          ls Results/validation_mm1/*.csv
       - name: Test web UI
         run: |
           id=$(docker run -d --rm -p 8050:8050 \
@@ -105,12 +105,12 @@ jobs:
       - name: Test quick check (PowerShell)
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path results
+          New-Item -ItemType Directory -Force -Path Results
           docker run --rm --cpus=2 `
-            -v "${PWD}/results:/app/Results" `
+            -v "${PWD}/Results:/app/Results" `
             mjqm-simulator `
             ./run-examples.sh
-          Get-ChildItem -Path results -Recurse
+          Get-ChildItem -Path Results -Recurse
       - name: Test web UI
         shell: pwsh
         run: |

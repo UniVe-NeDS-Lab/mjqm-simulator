@@ -32,16 +32,16 @@ Run the bundled example script to verify the simulator works correctly:
 
 ```sh
 docker run --rm --cpus=2 \
-    -v "$(pwd)/results:/app/Results" \
+    -v "$(pwd)/Results:/app/Results" \
     mjqm-simulator \
     ./run-examples.sh
 ```
 
 This runs the M/M/1 validation experiment with 5 repetitions (~30 s)
-and writes CSV results to `results/validation_mm1/`. The simulator
+and writes CSV results to `Results/validation_mm1/`. The simulator
 prints `"Repetition N Done"` after each repetition and
 `"All threads joined"` when the experiment completes. If CSV files
-appear in `results/validation_mm1/`, the quick check passed.
+appear in `Results/validation_mm1/`, the quick check passed.
 
 ## Simulator CLI
 
@@ -65,12 +65,12 @@ results to `Results/<config_name>/`.
 
 ```sh
 docker run --rm --cpus=2 \
-    -v "$(pwd)/results:/app/Results" \
+    -v "$(pwd)/Results:/app/Results" \
     mjqm-simulator \
     ./simulator validation_mm1 --repetitions 5
 ```
 
-Results are written to the `results/` directory on the host.
+Results are written to the `Results/` directory on the host.
 
 ## Reproducing the paper figures
 
@@ -109,7 +109,7 @@ event count to produce results in a shorter time:
 
 ```sh
 docker run --rm --cpus=2 \
-    -v "$(pwd)/results:/app/Results" \
+    -v "$(pwd)/Results:/app/Results" \
     mjqm-simulator \
     ./simulator tools_B_pol --events 1000000
 ```
@@ -117,7 +117,7 @@ docker run --rm --cpus=2 \
 On a Mac Mini M1, this reduced simulation takes approximately 45 minutes.
 The results will be noisier than the full run but sufficient to verify
 that the simulator operates correctly. To reproduce the exact paper
-figures, use the precomputed results in `results/prerun/`.
+figures, use the precomputed results in `Results/prerun/`.
 
 ### Figure generation scripts
 
@@ -155,7 +155,7 @@ For example, to run a reduced simulation with 1 million events:
 
 ```sh
 docker run --rm --cpus=2 \
-    -v "$(pwd)/results:/app/Results" \
+    -v "$(pwd)/Results:/app/Results" \
     mjqm-simulator \
     ./simulator tools_B_pol --events 1000000
 ```
@@ -188,7 +188,7 @@ ones, mount them into a subdirectory:
 
 ```sh
 docker run --rm -p 8050:8050 \
-    -v "$(pwd)/results:/app/Results/local" \
+    -v "$(pwd)/Results:/app/Results/local" \
     mjqm-simulator \
     uv run --no-dev scripts/plotly_app.py
 ```
@@ -228,14 +228,15 @@ Mount your own config file into the `Inputs/` directory:
 ```sh
 docker run --rm --cpus=2 \
     -v "$(pwd)/my_config.toml:/app/Inputs/my_config.toml" \
-    -v "$(pwd)/results:/app/Results" \
+    -v "$(pwd)/Results:/app/Results" \
     mjqm-simulator \
     ./simulator my_config
 ```
 
-The simulator looks for configs in the `Inputs/` directory and appends
-`.toml` automatically. Example configs are also available in the
-`configs/` directory of the artifact zip.
+The simulator looks for configs in the `Inputs/` directory (inside the
+Docker image) and appends `.toml` automatically. The same configs are
+also available in the `configs/` directory of the artifact zip for
+reference and editing.
 
 ## Bundled experiment configs
 

@@ -39,8 +39,7 @@ COPY docker-prerun/results/ ./Results/prerun/
 COPY INSTRUCTIONS.md ./README.md
 COPY run-examples.sh ./
 
-RUN sed -i '/<!-- artifact-only-begin -->/,/<!-- artifact-only-end -->/d' README.md && \
-    mkdir -p Results && chmod +x run-examples.sh
+RUN mkdir -p Results && chmod +x run-examples.sh
 
 ENV DASH_HOST=0.0.0.0
 EXPOSE 8050

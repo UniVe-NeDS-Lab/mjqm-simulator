@@ -1,6 +1,5 @@
 # MJQM Simulator — Docker Artifact
 
-<!-- artifact-only-begin -->
 ## Prerequisites
 
 You need [Docker Desktop](https://www.docker.com/products/docker-desktop/)
@@ -13,20 +12,15 @@ installed on your machine (available for Linux, macOS, and Windows).
 > **Windows users:** Replace `$(pwd)` with `%cd%` in Command Prompt,
 > or `${PWD}` in PowerShell.
 >
-> **Docker version:** The image is distributed as an OCI archive
-> (multi-architecture: amd64 + arm64). Loading it with `docker load`
-> requires Docker Engine 25.0+ or Docker Desktop 4.27+.
-
 ## Load the Docker image
 
 ```sh
 docker load -i mjqm-simulator.tar.gz
-docker tag IMAGE_ID_PLACEHOLDER mjqm-simulator
 ```
 
-The image supports both Intel/AMD and Apple Silicon/ARM machines.
-Docker will automatically use the right version for your system.
-<!-- artifact-only-end -->
+The image is automatically tagged as `mjqm-simulator`.
+Apple Silicon/ARM machines run the image transparently via
+Docker Desktop's Rosetta emulation.
 
 ## Quick check (Phase I)
 

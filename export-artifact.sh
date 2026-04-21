@@ -28,11 +28,12 @@ mkdir -p "${OUTDIR}/scripts/sre"
 mkdir -p "${OUTDIR}/src"
 
 
-# Build multi-arch OCI image
-echo "Building linux/amd64 + linux/arm64..."
+# Build amd64 Docker image
+echo "Building linux/amd64..."
 docker buildx build \
-    --platform linux/amd64,linux/arm64 \
-    -o "type=oci,dest=${OUTDIR}/${IMAGE}.tar" \
+    --platform linux/amd64 \
+    --tag "${IMAGE}" \
+    -o "type=docker,dest=${OUTDIR}/${IMAGE}.tar" \
     .
 
 # Bundle configs and docs
@@ -65,6 +66,7 @@ sed \
     -e 's|COPY simulator.cpp toml_loader_test.cpp \./|COPY src/simulator.cpp src/toml_loader_test.cpp ./|' \
     -e 's|COPY Inputs/ \./Inputs/|COPY configs/ ./Inputs/|' \
     -e 's|COPY docker-prerun/results/ \./Results/prerun/|COPY results/prerun/ ./Results/prerun/|' \
+    -e 's|COPY INSTRUCTIONS.md \./README.md|COPY README.md ./README.md|' \
     Dockerfile > "${OUTDIR}/Dockerfile"
 
 # Generate .dockerignore for artifact layout
@@ -76,14 +78,7 @@ README.md
 __pycache__/
 DIGNORE
 
-# Extract image ID from the OCI archive
-IMAGE_ID=$(tar -xf "${OUTDIR}/${IMAGE}.tar" -O index.json \
-    | grep -o '"sha256:[a-f0-9]*"' | head -1 | tr -d '"')
-
-# Copy versioned instructions and patch in the image digest
-sed -e '/<!-- artifact-only-begin -->/d' -e '/<!-- artifact-only-end -->/d' \
-    -e "s|IMAGE_ID_PLACEHOLDER|${IMAGE_ID}|" \
-    INSTRUCTIONS.md > "${OUTDIR}/README.md"
+cp INSTRUCTIONS.md "${OUTDIR}/README.md"
 
 # Compress the image
 echo ""

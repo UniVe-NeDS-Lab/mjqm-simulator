@@ -114,11 +114,24 @@ figures, use the precomputed results in `results/prerun/`.
 ### Figure generation scripts
 
 Two scripts in the `scripts/` directory generate figures matching those
-in the paper:
+in the paper. These scripts run on the host (not inside Docker) and
+require Python 3 with `matplotlib` and `pandas`. From the artifact root:
 
-- `figure_B.py` — Figures 2a, 2b, and 3 (Cell B). Offers the option to
-  use precomputed results instead of freshly generated outputs.
-- `figure_4.py` — Figures 4a and 4b (smaller configurations).
+```sh
+cd scripts
+python3 figure_B.py
+```
+
+The script prompts whether to use precomputed results or freshly
+generated simulation outputs. Output: `figure_2a.pdf`, `figure_2b.pdf`,
+`figure_3.pdf`.
+
+```sh
+cd scripts
+python3 figure_4.py
+```
+
+Output: `figure_4a.pdf`, `figure_4b.pdf`.
 
 ## Override parameters
 
@@ -146,7 +159,7 @@ interactive web dashboard is available immediately without running any
 simulation first:
 
 ```sh
-docker run --rm --cpus=2 -p 8050:8050 \
+docker run --rm -p 8050:8050 \
     mjqm-simulator \
     uv run --no-dev scripts/plotly_app.py
 ```
@@ -165,7 +178,7 @@ To also include your own simulation results alongside the precomputed
 ones, mount them into a subdirectory:
 
 ```sh
-docker run --rm --cpus=2 -p 8050:8050 \
+docker run --rm -p 8050:8050 \
     -v "$(pwd)/results:/app/Results/local" \
     mjqm-simulator \
     uv run --no-dev scripts/plotly_app.py

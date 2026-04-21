@@ -1,5 +1,9 @@
 # MJQM Simulator — Docker Artifact
 
+After extracting the zip, all commands below should be run from the
+artifact root directory (the folder containing `README.md`,
+`mjqm-simulator.tar.gz`, `configs/`, `scripts/`, etc.).
+
 ## Prerequisites
 
 You need [Docker Desktop](https://www.docker.com/products/docker-desktop/)
@@ -18,7 +22,7 @@ installed on your machine (available for Linux, macOS, and Windows).
 docker load -i mjqm-simulator.tar.gz
 ```
 
-The image is automatically tagged as `mjqm-simulator`.
+Expected output: `Loaded image: mjqm-simulator:latest`.
 Apple Silicon/ARM machines run the image transparently via
 Docker Desktop's Rosetta emulation.
 
@@ -34,7 +38,10 @@ docker run --rm --cpus=2 \
 ```
 
 This runs the M/M/1 validation experiment with 5 repetitions (~30 s)
-and writes CSV results to `results/validation_mm1/`.
+and writes CSV results to `results/validation_mm1/`. The simulator
+prints `"Repetition N Done"` after each repetition and
+`"All threads joined"` when the experiment completes. If CSV files
+appear in `results/validation_mm1/`, the quick check passed.
 
 ## Simulator CLI
 
@@ -44,14 +51,15 @@ The simulator accepts a TOML configuration file and optional parameter overrides
 ./simulator <config> [--key value ...] [--pivot --key value ...]
 ```
 
-Run `./simulator --help` for a summary of available options.
+To see the available options:
+
+```sh
+docker run --rm mjqm-simulator ./simulator --help
+```
+
 The simulator loads the configuration from `Inputs/`, runs the specified
 number of discrete events for each repetition, and writes aggregated CSV
 results to `Results/<config_name>/`.
-
-**Expected output:** The simulator prints progress messages of the form
-`"Repetition N Done"` after each repetition, and `"All threads joined"`
-when the experiment completes.
 
 ## Run a simulation
 
@@ -164,7 +172,8 @@ docker run --rm -p 8050:8050 \
     uv run --no-dev scripts/plotly_app.py
 ```
 
-Open http://localhost:8050 in your browser. The dashboard provides:
+Open http://localhost:8050 in your browser. Press Ctrl+C in the
+terminal to stop the server. The dashboard provides:
 
 - A **dropdown** to select an experiment from the available results.
 - **Tabs** for different metrics: response time, waiting time, throughput,

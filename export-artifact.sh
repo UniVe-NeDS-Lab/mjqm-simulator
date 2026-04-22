@@ -48,6 +48,7 @@ cp docker-prerun/results/tools_B_pol/*.csv "${OUTDIR}/Results/prerun/tools_B_pol
 cp docker-prerun/scripts/*.py "${OUTDIR}/scripts/"
 cp docker-prerun/mg/*.csv "${OUTDIR}/scripts/mg/"
 cp docker-prerun/sre/*.csv "${OUTDIR}/scripts/sre/"
+cp LICENSE.md "${OUTDIR}/"
 
 # Bundle source code for native build
 cp CMakeLists.txt CMakePresets.json configure rebuild simulator.cpp toml_loader_test.cpp "${OUTDIR}/src/"

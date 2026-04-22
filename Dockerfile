@@ -36,7 +36,8 @@ RUN --mount=type=cache,target=/root/.cache/uv,sharing=locked \
 COPY scripts/ ./scripts/
 COPY Inputs/ ./Inputs/
 COPY docker-prerun/results/ ./Results/prerun/
-COPY INSTRUCTIONS.md ./README.md
+COPY README.md ./
+COPY INSTRUCTIONS.md* ./README.md
 COPY run-examples.sh ./
 
 RUN sed -i '/<!-- artifact-only-begin -->/,/<!-- artifact-only-end -->/d' README.md && \

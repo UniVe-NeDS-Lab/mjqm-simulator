@@ -26,6 +26,8 @@ docker tag IMAGE_ID_PLACEHOLDER mjqm-simulator
 
 The image supports both Intel/AMD and Apple Silicon/ARM machines.
 Docker will automatically use the right version for your system.
+
+An alternative is to build the image from the source file (explained at the end of this README), but it will take much more time.
 <!-- artifact-only-end -->
 
 ## Quick check (Phase I)
@@ -33,7 +35,7 @@ Docker will automatically use the right version for your system.
 Run the bundled example script to verify the simulator works correctly:
 
 ```sh
-docker run --rm --cpus=2 \
+docker run --rm \
     -v "$(pwd)/results:/app/Results" \
     mjqm-simulator \
     ./run-examples.sh
@@ -50,10 +52,7 @@ The simulator accepts a TOML configuration file and optional parameter overrides
 ./simulator <config> [--key value ...] [--pivot --key value ...]
 ```
 
-Run `./simulator --help` for a summary of available options.
-The simulator loads the configuration from `Inputs/`, runs the specified
-number of discrete events for each repetition, and writes aggregated CSV
-results to `Results/<config_name>/`.
+Run `docker run mjqm-simulator ./simulator --help` for a summary of available options.
 
 **Expected output:** The simulator prints progress messages of the form
 `"Repetition N Done"` after each repetition, and `"All threads joined"`
@@ -61,16 +60,18 @@ when the experiment completes.
 
 ## Run a simulation
 
+To run a simulation, for example:
+
 ```sh
-docker run --rm --cpus=2 \
+docker run --rm \
     -v "$(pwd)/results:/app/Results" \
     mjqm-simulator \
-    ./simulator validation_mm1 --repetitions 5
+    ./simulator tools_oneOrT
 ```
 
 Results are written to the `results/` directory on the host.
 
-## Reproducing the paper figures
+### Reproducing the paper figures
 
 The following configurations reproduce the figures in the paper:
 
@@ -82,6 +83,8 @@ The following configurations reproduce the figures in the paper:
 | Figure 4b     | `tools_oneOrT`                                     |
 
 ### Runtime estimates
+
+<span style="color:red">IMPORTANT</span>
 
 Configurations based on the Google Borg Cell B dataset (`tools_B_*`)
 require a large number of events (30–60 million) to produce reliable
@@ -98,18 +101,34 @@ Precomputed results for the Cell B experiments are included in
 `Results/prerun/` and can be used directly for figure generation and
 visualisation without re-running the simulations. New simulation results
 are written to `Results/<config_name>/` and do not overwrite the
-precomputed data.
+precomputed data. We also provide an alternative to run shorter experiments in the next section.
+
 
 ### Reduced experiments
 
+Any TOML parameter can be overridden from the command line using
+dot-notation paths that mirror the configuration structure. Overrides
+modify an in-memory copy of the configuration; the file on disk is never
+changed. When a configuration file defines `[[pivot]]` sections that
+iterate over values for a parameter, a CLI override for the same key
+replaces those values entirely (the iteration continues, but over the
+CLI-provided values). Non-overlapping pivot keys are preserved.
+
 For the Cell B configurations that exceed 8 hours in full, override the
-event count to produce results in a shorter time:
+event count to produce results in a shorter time with only 1 million events:
 
 ```sh
-docker run --rm --cpus=2 \
+docker run --rm \
     -v "$(pwd)/results:/app/Results" \
     mjqm-simulator \
     ./simulator tools_B_pol --events 1000000
+```
+
+```sh
+docker run --rm \
+    -v "$(pwd)/results:/app/Results" \
+    mjqm-simulator \
+    ./simulator tools_B_dist --events 1000000
 ```
 
 On a Mac Mini M1, this reduced simulation takes approximately 45 minutes.
@@ -120,40 +139,21 @@ figures, use the precomputed results in `results/prerun/`.
 ### Figure generation scripts
 
 Two scripts in the `scripts/` directory generate figures matching those
-in the paper:
+in the paper. Simply run `cd scripts` and run them using Python3:
 
 - `figure_B.py` — Figures 2a, 2b, and 3 (Cell B). Offers the option to
   use precomputed results instead of freshly generated outputs.
 - `figure_4.py` — Figures 4a and 4b (smaller configurations).
 
-## Override parameters
-
-Any TOML parameter can be overridden from the command line using
-dot-notation paths that mirror the configuration structure. Overrides
-modify an in-memory copy of the configuration; the file on disk is never
-changed. When a configuration file defines `[[pivot]]` sections that
-iterate over values for a parameter, a CLI override for the same key
-replaces those values entirely (the iteration continues, but over the
-CLI-provided values). Non-overlapping pivot keys are preserved.
-
-For example, to run a reduced simulation with 1 million events:
-
-```sh
-docker run --rm --cpus=2 \
-    -v "$(pwd)/results:/app/Results" \
-    mjqm-simulator \
-    ./simulator tools_B_pol --events 1000000
-```
-
 ## Explore results with the web UI
 
 The image ships with precomputed results in `Results/prerun/`. The
 interactive web dashboard is available immediately without running any
-simulation first:
+simulation first since we have already provided some precomputed results:
 
-```sh
-docker run --rm --cpus=2 -p 8050:8050 \
-    mjqm-simulator \
+```
+docker run --rm -p 8050:8050 \
+    -v $(pwd)/results:/app/Results mjqm-simulator \
     uv run --no-dev scripts/plotly_app.py
 ```
 
@@ -167,13 +167,18 @@ Open http://localhost:8050 in your browser. The dashboard provides:
 - A **stability toggle** to filter out unstable operating points.
 - A **data table** view with CSV export.
 
-To also include your own simulation results alongside the precomputed
-ones, mount them into a subdirectory:
+The web UI (`plotly_app.py`) also supports:
 
-```sh
-docker run --rm --cpus=2 -p 8050:8050 \
-    -v "$(pwd)/results:/app/Results/local" \
-    mjqm-simulator \
+- `DASH_HOST` — bind address (default: `0.0.0.0`)
+- `DASH_PORT` — port (default: `8050`)
+- `DASH_DEBUG` — enable debug mode (default: `false`)
+
+For example, to run on port 9000:
+
+```
+docker run --rm -p 9000:9000 \
+    -e DASH_PORT=9000 \
+    -v $(pwd)/results:/app/Results mjqm-simulator \
     uv run --no-dev scripts/plotly_app.py
 ```
 
@@ -183,7 +188,7 @@ Configuration files use the [TOML](https://toml.io/) format. A minimal
 example:
 
 ```toml
-identifier = "my_experiment"
+identifier = "my_config"
 events = 1000000
 repetitions = 20
 cores = 1
@@ -210,7 +215,7 @@ Full documentation of all supported fields is available in the
 Mount your own config file into the `Inputs/` directory:
 
 ```sh
-docker run --rm --cpus=2 \
+docker run --rm \
     -v "$(pwd)/my_config.toml:/app/Inputs/my_config.toml" \
     -v "$(pwd)/results:/app/Results" \
     mjqm-simulator \
@@ -231,23 +236,6 @@ The image ships with several configs in `Inputs/`:
 - `tools_oneOrT` — one-or-T configuration for Matrix Geometric validation
 - `tools_five_bpar` — 5-class system with Bounded Pareto service times
 - `tools_five_exp` — 5-class system with Exponential service times
-
-## Environment variables
-
-The web UI (`plotly_app.py`) supports:
-
-- `DASH_HOST` — bind address (default: `0.0.0.0`)
-- `DASH_PORT` — port (default: `8050`)
-- `DASH_DEBUG` — enable debug mode (default: `false`)
-
-For example, to run on port 9000:
-
-```sh
-docker run --rm -p 9000:9000 \
-    -e DASH_PORT=9000 \
-    mjqm-simulator \
-    uv run --no-dev scripts/plotly_app.py
-```
 
 ## Building from source
 

@@ -68,7 +68,7 @@ for win in wins:
     lambdas = []
     rtt = []
     rts = []
-    with open('../results/'+prerun+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-Exponential-'+sim_name+'.csv', mode ='r')as file:
+    with open('../Results/'+prerun+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-Exponential-'+sim_name+'.csv', mode ='r')as file:
         reader = csv.DictReader(file, delimiter=';')
         for row in reader:
             lambdas.append(float(row['arrival.rate']))
@@ -140,7 +140,7 @@ for w in range(len(wins)):
     lambdas = []
     rtt = []
     rts = []
-    with open('../results/'+prerun+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-Exponential-'+sim_name+'.csv', mode ='r')as file:
+    with open('../Results/'+prerun+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-Exponential-'+sim_name+'.csv', mode ='r')as file:
     #with open('../sim/res/OverLambdas-nClasses26-N2048-Win'+str(win)+'-Exponential-cellB-Sorted_2048.csv', mode ='r')as file:
         reader = csv.DictReader(file, delimiter=';')
         r = 0
@@ -221,7 +221,7 @@ for dist in dists:
     lambdas = []
     rtt = []
     rts = []
-    with open('../results/'+prerun+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-'+dist+'-'+sim_name+'.csv', mode ='r')as file:
+    with open('../Results/'+prerun+sim_name+'/overLambdas-nClasses'+str(nClass)+'-N'+str(N)+'-Win'+str(win)+'-'+dist+'-'+sim_name+'.csv', mode ='r')as file:
         reader = csv.DictReader(file, delimiter=';')
         for row in reader:
             lambdas.append(float(row['arrival.rate']))

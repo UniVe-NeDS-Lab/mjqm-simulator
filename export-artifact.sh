@@ -18,21 +18,22 @@ docker buildx inspect --bootstrap >/dev/null 2>&1
 # Prepare output directory
 rm -rf "${OUTDIR}"
 mkdir -p "${OUTDIR}/configs"
-mkdir -p "${OUTDIR}/results"
-mkdir -p "${OUTDIR}/results/prerun/"
-mkdir -p "${OUTDIR}/results/prerun/tools_B_pol"
-mkdir -p "${OUTDIR}/results/prerun/tools_B_dist"
+mkdir -p "${OUTDIR}/Results"
+mkdir -p "${OUTDIR}/Results/prerun/"
+mkdir -p "${OUTDIR}/Results/prerun/tools_B_pol"
+mkdir -p "${OUTDIR}/Results/prerun/tools_B_dist"
 mkdir -p "${OUTDIR}/scripts"
 mkdir -p "${OUTDIR}/scripts/mg"
 mkdir -p "${OUTDIR}/scripts/sre"
 mkdir -p "${OUTDIR}/src"
 
 
-# Build multi-arch OCI image
-echo "Building linux/amd64 + linux/arm64..."
+# Build amd64 Docker image
+echo "Building linux/amd64..."
 docker buildx build \
-    --platform linux/amd64,linux/arm64 \
-    -o "type=oci,dest=${OUTDIR}/${IMAGE}.tar" \
+    --platform linux/amd64 \
+    --tag "${IMAGE}" \
+    -o "type=docker,dest=${OUTDIR}/${IMAGE}.tar" \
     .
 
 # Bundle configs and docs
@@ -42,8 +43,8 @@ cp Inputs/tools_oneOrT.toml "${OUTDIR}/configs/"
 cp Inputs/tools_five_bpar.toml "${OUTDIR}/configs/"
 cp Inputs/tools_five_exp.toml "${OUTDIR}/configs/"
 cp docker-prerun/custom/*.toml "${OUTDIR}/configs/"
-cp docker-prerun/results/tools_B_dist/*.csv "${OUTDIR}/results/prerun/tools_B_dist/"
-cp docker-prerun/results/tools_B_pol/*.csv "${OUTDIR}/results/prerun/tools_B_pol/"
+cp docker-prerun/results/tools_B_dist/*.csv "${OUTDIR}/Results/prerun/tools_B_dist/"
+cp docker-prerun/results/tools_B_pol/*.csv "${OUTDIR}/Results/prerun/tools_B_pol/"
 cp docker-prerun/scripts/*.py "${OUTDIR}/scripts/"
 cp docker-prerun/mg/*.csv "${OUTDIR}/scripts/mg/"
 cp docker-prerun/sre/*.csv "${OUTDIR}/scripts/sre/"
@@ -64,26 +65,19 @@ sed \
     -e 's|COPY libs/ \./libs/|COPY src/libs/ ./libs/|' \
     -e 's|COPY simulator.cpp toml_loader_test.cpp \./|COPY src/simulator.cpp src/toml_loader_test.cpp ./|' \
     -e 's|COPY Inputs/ \./Inputs/|COPY configs/ ./Inputs/|' \
-    -e 's|COPY docker-prerun/results/ \./Results/prerun/|COPY results/prerun/ ./Results/prerun/|' \
+    -e 's|COPY docker-prerun/results/ \./Results/prerun/|COPY Results/prerun/ ./Results/prerun/|' \
+    -e 's|COPY INSTRUCTIONS.md \./README.md|COPY README.md ./README.md|' \
     Dockerfile > "${OUTDIR}/Dockerfile"
 
 # Generate .dockerignore for artifact layout
 cat > "${OUTDIR}/.dockerignore" <<'DIGNORE'
 mjqm-simulator.tar.gz
-README.md
 *.zip
 .DS_Store
 __pycache__/
 DIGNORE
 
-# Extract image ID from the OCI archive
-IMAGE_ID=$(tar -xf "${OUTDIR}/${IMAGE}.tar" -O index.json \
-    | grep -o '"sha256:[a-f0-9]*"' | head -1 | tr -d '"')
-
-# Copy versioned instructions and patch in the image digest
-sed -e '/<!-- artifact-only-begin -->/d' -e '/<!-- artifact-only-end -->/d' \
-    -e "s|IMAGE_ID_PLACEHOLDER|${IMAGE_ID}|" \
-    INSTRUCTIONS.md > "${OUTDIR}/README.md"
+cp INSTRUCTIONS.md "${OUTDIR}/README.md"
 
 # Compress the image
 echo ""

@@ -1,6 +1,9 @@
 # MJQM Simulator — Docker Artifact
 
-<!-- artifact-only-begin -->
+After extracting the zip, all commands below should be run from the
+artifact root directory (the folder containing `README.md`,
+`mjqm-simulator.tar.gz`, `configs/`, `scripts/`, etc.).
+
 ## Prerequisites
 
 You need [Docker Desktop](https://www.docker.com/products/docker-desktop/)
@@ -13,22 +16,15 @@ installed on your machine (available for Linux, macOS, and Windows).
 > **Windows users:** Replace `$(pwd)` with `%cd%` in Command Prompt,
 > or `${PWD}` in PowerShell.
 >
-> **Docker version:** The image is distributed as an OCI archive
-> (multi-architecture: amd64 + arm64). Loading it with `docker load`
-> requires Docker Engine 25.0+ or Docker Desktop 4.27+.
-
 ## Load the Docker image
 
 ```sh
 docker load -i mjqm-simulator.tar.gz
-docker tag IMAGE_ID_PLACEHOLDER mjqm-simulator
 ```
 
-The image supports both Intel/AMD and Apple Silicon/ARM machines.
-Docker will automatically use the right version for your system.
-
-An alternative is to build the image from the source file (explained at the end of this README), but it will take much more time.
-<!-- artifact-only-end -->
+Expected output: `Loaded image: mjqm-simulator:latest`.
+Apple Silicon/ARM machines run the image transparently via
+Docker Desktop's Rosetta emulation.
 
 ## Quick check (Phase I)
 
@@ -36,13 +32,15 @@ Run the bundled example script to verify the simulator works correctly:
 
 ```sh
 docker run --rm \
-    -v "$(pwd)/results:/app/Results" \
+    -v "$(pwd)/Results:/app/Results" \
     mjqm-simulator \
     ./run-examples.sh
 ```
 
-This runs the M/M/1 validation experiment with 5 repetitions (~30 s)
-and writes CSV results to `results/validation_mm1/`.
+This runs the M/M/1 validation experiment with 5 repetitions (~30 s).
+The simulator prints `"Repetition N Done"` after each repetition and
+`"All threads joined"` when the experiment completes. The output CSV
+files are written to `Results/validation_mm1/`.
 
 ## Simulator CLI
 
@@ -52,11 +50,15 @@ The simulator accepts a TOML configuration file and optional parameter overrides
 ./simulator <config> [--key value ...] [--pivot --key value ...]
 ```
 
-Run `docker run mjqm-simulator ./simulator --help` for a summary of available options.
+To see the available options:
 
-**Expected output:** The simulator prints progress messages of the form
-`"Repetition N Done"` after each repetition, and `"All threads joined"`
-when the experiment completes.
+```sh
+docker run --rm mjqm-simulator ./simulator --help
+```
+
+The simulator loads the configuration from `Inputs/`, runs the specified
+number of discrete events for each repetition, and writes aggregated CSV
+results to `Results/<config_name>/`.
 
 ## Run a simulation
 
@@ -64,12 +66,12 @@ To run a simulation, for example:
 
 ```sh
 docker run --rm \
-    -v "$(pwd)/results:/app/Results" \
+    -v "$(pwd)/Results:/app/Results" \
     mjqm-simulator \
     ./simulator tools_oneOrT
 ```
 
-Results are written to the `results/` directory on the host.
+Results are written to the `Results/` directory on the host.
 
 ### Reproducing the paper figures
 
@@ -97,8 +99,9 @@ cluster node (20-core Intel Xeon Gold 6148 CPU @ 2.40 GHz, 200 GB ECC RAM):
 | `tools_B_dist`     | 30 M   | 16            | ~95 min       |
 | `tools_B_pol`      | 30–60 M| 28–59         | ~11.5 h       |
 
-Precomputed results for the Cell B experiments are included in
-`Results/prerun/` and can be used directly for figure generation and
+Precomputed results for the Cell B experiments are included both in
+the Docker image and in the artifact at `Results/prerun/`, and can be
+used directly for figure generation and
 visualisation without re-running the simulations. New simulation results
 are written to `Results/<config_name>/` and do not overwrite the
 precomputed data. We also provide an alternative to run shorter experiments in the next section.
@@ -119,14 +122,14 @@ event count to produce results in a shorter time with only 1 million events:
 
 ```sh
 docker run --rm \
-    -v "$(pwd)/results:/app/Results" \
+    -v "$(pwd)/Results:/app/Results" \
     mjqm-simulator \
     ./simulator tools_B_pol --events 1000000
 ```
 
 ```sh
 docker run --rm \
-    -v "$(pwd)/results:/app/Results" \
+    -v "$(pwd)/Results:/app/Results" \
     mjqm-simulator \
     ./simulator tools_B_dist --events 1000000
 ```
@@ -134,16 +137,29 @@ docker run --rm \
 On a Mac Mini M1, this reduced simulation takes approximately 45 minutes.
 The results will be noisier than the full run but sufficient to verify
 that the simulator operates correctly. To reproduce the exact paper
-figures, use the precomputed results in `results/prerun/`.
+figures, use the precomputed results in `Results/prerun/`.
 
 ### Figure generation scripts
 
 Two scripts in the `scripts/` directory generate figures matching those
-in the paper. Simply run `cd scripts` and run them using Python3:
+in the paper. These scripts run on the host (not inside Docker) and
+require Python 3 with `matplotlib` and `pandas`. From the artifact root:
 
-- `figure_B.py` — Figures 2a, 2b, and 3 (Cell B). Offers the option to
-  use precomputed results instead of freshly generated outputs.
-- `figure_4.py` — Figures 4a and 4b (smaller configurations).
+```sh
+cd scripts
+python3 figure_B.py
+```
+
+The script prompts whether to use precomputed results or freshly
+generated simulation outputs. Output: `figure_2a.pdf`, `figure_2b.pdf`,
+`figure_3.pdf`.
+
+```sh
+cd scripts
+python3 figure_4.py
+```
+
+Output: `figure_4a.pdf`, `figure_4b.pdf`.
 
 ## Explore results with the web UI
 
@@ -153,11 +169,12 @@ simulation first since we have already provided some precomputed results:
 
 ```
 docker run --rm -p 8050:8050 \
-    -v $(pwd)/results:/app/Results mjqm-simulator \
+    -v $(pwd)/Results:/app/Results mjqm-simulator \
     uv run --no-dev scripts/plotly_app.py
 ```
 
-Open http://localhost:8050 in your browser. The dashboard provides:
+Open http://localhost:8050 in your browser. Press Ctrl+C in the
+terminal to stop the server. The dashboard provides:
 
 - A **dropdown** to select an experiment from the available results.
 - **Tabs** for different metrics: response time, waiting time, throughput,
@@ -178,7 +195,7 @@ For example, to run on port 9000:
 ```
 docker run --rm -p 9000:9000 \
     -e DASH_PORT=9000 \
-    -v $(pwd)/results:/app/Results mjqm-simulator \
+    -v $(pwd)/Results:/app/Results mjqm-simulator \
     uv run --no-dev scripts/plotly_app.py
 ```
 
@@ -217,14 +234,15 @@ Mount your own config file into the `Inputs/` directory:
 ```sh
 docker run --rm \
     -v "$(pwd)/my_config.toml:/app/Inputs/my_config.toml" \
-    -v "$(pwd)/results:/app/Results" \
+    -v "$(pwd)/Results:/app/Results" \
     mjqm-simulator \
     ./simulator my_config
 ```
 
-The simulator looks for configs in the `Inputs/` directory and appends
-`.toml` automatically. Example configs are also available in the
-`configs/` directory of the artifact zip.
+The simulator looks for configs in the `Inputs/` directory (inside the
+Docker image) and appends `.toml` automatically. The same configs are
+also available in the `configs/` directory of the artifact zip for
+reference and editing.
 
 ## Bundled experiment configs
 

@@ -1,12 +1,6 @@
 name: ci
 on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
-      - master
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -56,7 +50,7 @@ jobs:
           toolset: gcc
           arch: x86
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
       - name: Run configure
         shell: bash
         env:
@@ -67,16 +61,24 @@ jobs:
           ./configure
 
   build-macos:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
+        runner:
+          - macos-14-large
+          - macos-15-intel
         gcc:
           - 11
           - 15
         boost:
           - 1.78.0
           - 1.88.0
+        exclude:
+          - runner: macos-15-intel
+            gcc: 11
+          - runner: macos-15-intel
+            boost: 1.78.0
     steps:
       - uses: actions/checkout@v6
       - name: Setup Cpp
@@ -92,7 +94,7 @@ jobs:
           toolset: clang
           arch: x86
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
       - name: Run configure
         shell: bash
         env:
@@ -108,6 +110,7 @@ jobs:
       fail-fast: false
       matrix:
         os_version:
+          - 14
           - 15
         gcc:
           - 15

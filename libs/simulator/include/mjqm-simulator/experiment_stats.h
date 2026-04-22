@@ -168,9 +168,9 @@ public:
     CollectedStat p0_res{"Phase 0 Residuals", true};
     CollectedStat p1_res{"Phase 1 Residuals", true};
     CollectedStat p2_res{"Phase 2 Residuals", true};
-    CollectedStat p3_res{"Phase 3 Residuals", true};*/
+    CollectedStat p3_res{"Phase 3 Residuals", true};
     CollectedStat small_seq_avg{"Small Sequence Length", true};
-    CollectedStat big_seq_avg{"Big Sequence Length", true};
+    CollectedStat big_seq_avg{"Big Sequence Length", true};*/
     Stat warnings{"Stability Check", false};
     Stat lambda{"lambda", false};
 
@@ -202,9 +202,9 @@ public:
         editor(p0_res);
         editor(p1_res);
         editor(p2_res);
-        editor(p3_res);*/
+        editor(p3_res);
         editor(small_seq_avg);
-        editor(big_seq_avg);
+        editor(big_seq_avg);*/
         editor(warnings);
         editor(lambda);
         for (auto& cs : class_stats) {
@@ -239,9 +239,9 @@ public:
         visitor(p0_res);
         visitor(p1_res);
         visitor(p2_res);
-        visitor(p3_res);*/
+        visitor(p3_res);
         visitor(small_seq_avg);
-        visitor(big_seq_avg);
+        visitor(big_seq_avg);*/
         visitor(warnings);
         visitor(lambda);
         for (auto& cs : class_stats) {

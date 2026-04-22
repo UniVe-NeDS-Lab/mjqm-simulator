@@ -78,21 +78,23 @@ def fix_policy(row, win):
 def row_label(row, win):
     if row["policy"] == "smash":
         if "policy.window" in row:
-            return policies[row["policy"]].format(row["policy.window"])
+            label = policies[row["policy"]].format(row["policy.window"])
         elif "smash.window" in row:
-            return policies[row["policy"]].format(row["smash.window"])
+            label = policies[row["policy"]].format(row["smash.window"])
         else:
-            return policies[row["policy"]].format(win)
+            label = policies[row["policy"]].format(win)
     elif row["policy"] == "quick swap":
         if "policy.threshold" in row:
-            return policies[row["policy"]].format(row["policy.threshold"])
+            label = policies[row["policy"]].format(row["policy.threshold"])
         else:
-            return policies[row["policy"]].format(1)
+            label = policies[row["policy"]].format(1)
     elif row["policy"] == "kill smart":
-        print(policies)
-        return policies[row["policy"]].format(row["policy.k"],row["policy.v"])
+        label = policies[row["policy"]].format(row["policy.k"], row["policy.v"])
     else:
-        return policies[row["policy"]]
+        label = policies[row["policy"]]
+    if "service.distribution" in row and pd.notna(row["service.distribution"]):
+        label += f" ({row['service.distribution']})"
+    return label
 
 
 required_columns = set(["arrival.rate", "Utilisation"])
@@ -164,6 +166,7 @@ def clean_dfs(dfs):
             and not column.endswith(".threshold")
             and not column.endswith(".k")
             and not column.endswith(".v")
+            and not column.endswith(".distribution")
         ):
             types[column] = float
         else:
@@ -336,33 +339,47 @@ def compute_fairness_cv(dfs, Ts):
     return dfs
 
 
-def load_experiments_list():
-    results = Path("Results")
+def load_experiments_list(results_dir=None):
+    results = Path(results_dir) if results_dir else Path("Results")
     return results, list(
         f for f in results.glob("**/") if f != results and list(f.glob("*.csv"))
     )
 
 
+def resolve_path(preselected: str):
+    """Resolve a path to a file or directory, trying absolute, cwd-relative, then under Results/."""
+    candidate = Path(preselected)
+    if candidate.is_absolute():
+        return candidate if candidate.exists() else None
+    if candidate.exists():
+        return candidate
+    relative = Path("Results") / candidate
+    if relative.exists():
+        return relative
+    return None
+
+
 def select_experiment(preselected: str):
     base, available = load_experiments_list()
     if preselected:
-        if preselected.startswith("/"):
-            selected = Path(preselected)
-            if selected.is_dir() and list(selected.glob("*.csv")):
-                print(selected)
-                return selected
+        selected = resolve_path(preselected)
+        if selected is None:
             print(
-                f"{Fore.YELLOW}{Style.BRIGHT}No CSV files found in: {preselected}",
+                f"{Fore.YELLOW}{Style.BRIGHT}Not found: {preselected}",
                 file=sys.stderr,
             )
             return None
-        if (selected := base / preselected) in available:
+        if selected.is_file() and selected.suffix == ".csv":
+            print(selected)
+            return selected
+        if selected.is_dir() and list(selected.glob("*.csv")):
             print(selected)
             return selected
         print(
-            f"{Fore.YELLOW}{Style.BRIGHT}Unknown folder: {preselected}",
+            f"{Fore.YELLOW}{Style.BRIGHT}No CSV files found in: {preselected}",
             file=sys.stderr,
         )
+        return None
     selected = None
     while selected not in available:
         print(f"Available folders in {base}:")
@@ -378,13 +395,12 @@ def select_experiment(preselected: str):
 
 def load_experiment_data(folder, n_cores=None):
     global progress
-    if isinstance(folder, Path):
-        pass
-    elif folder.startswith("/"):
-        folder = Path(folder)
+    if not isinstance(folder, Path):
+        folder = resolve_path(folder) or Path(folder)
+    if folder.is_file():
+        filenames = [folder]
     else:
-        folder = Path("Results") / folder
-    filenames = list(folder.glob("*.csv"))
+        filenames = list(folder.glob("*.csv"))
     if not filenames:
         print(
             f"{Fore.RED}{Style.BRIGHT}No CSV files found in {folder}",

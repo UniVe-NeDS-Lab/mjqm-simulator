@@ -37,12 +37,6 @@
     {
       "name": "debug",
       "configurePreset": "debug"
-    },
-    {
-      "name": "test",
-      "configurePreset": "default",
-      "jobs": 1,
-      "targets": ["test_all"]
     }
   ]
 }

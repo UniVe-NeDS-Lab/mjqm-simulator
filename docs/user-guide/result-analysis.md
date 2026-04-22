@@ -42,10 +42,14 @@ The `plot_experiment.py` script generates high-quality plots suitable for public
 To generate static plots for a simulation:
 
 ```sh
-uv run scripts/plot_experiment.py [simulation_folder]
+uv run scripts/plot_experiment.py [path]
 ```
 
-Where `[simulation_folder]` is the relative path to your simulation results under the `Results` directory. If you don't specify a simulation, the script will prompt you to select one from the available folders.
+Where `[path]` can be:
+
+- A **folder** (relative to `Results/` or absolute): loads all CSV files in that folder
+- A **file** (relative to `Results/` or absolute): loads that single CSV file
+- **Omitted**: the script will prompt you to select from the available folders
 
 ### Generated Plots
 
@@ -80,7 +84,7 @@ To launch the interactive dashboard:
 uv run scripts/plotly_app.py
 ```
 
-This will start a local web server (by default at http://127.0.0.1:8050/) where you can access the report.
+This will start a local web server (by default at http://127.0.0.1:8050/) where you can access the report. The dashboard scans the `Results/` directory for available experiments.
 
 ### Customizing the Dashboard
 

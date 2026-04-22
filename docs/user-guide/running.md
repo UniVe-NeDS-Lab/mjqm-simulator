@@ -278,7 +278,7 @@ You can override the `lambda` parameter from the command line:
 If you want to override the `lambda` parameter for a specific job class, you can use the class index to identify it:
 
 ```sh
-./simulator my_awesome_experiment --class.3.arrival.lambda 0.02
+./simulator my_awesome_experiment '--class[3].arrival.lambda' 0.02
 ```
 
 ## Multiple pivots from command line

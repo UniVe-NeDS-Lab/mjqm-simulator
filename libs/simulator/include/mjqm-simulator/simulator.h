@@ -187,12 +187,12 @@ public:
         stats->p2_res.collect((autocorr_residuals[4] * 1.0) / cycle_count);
         stats->p3_res.collect((autocorr_residuals[5] * 1.0) / cycle_count);*/
 
-        if (!tot_small_seq.empty()) {
+        /*if (!tot_small_seq.empty()) {
             stats->small_seq_avg.collect( std::accumulate(tot_small_seq.begin(), tot_small_seq.end(), 0.0) / tot_small_seq.size() );
         }
         if (!tot_big_seq.empty()) {
             stats->big_seq_avg.collect( std::accumulate(tot_big_seq.begin(), tot_big_seq.end(), 0.0) / tot_big_seq.size() );
-        }
+        }*/
         
     }
 

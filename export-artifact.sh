@@ -67,7 +67,6 @@ sed \
     -e 's|COPY simulator.cpp toml_loader_test.cpp \./|COPY src/simulator.cpp src/toml_loader_test.cpp ./|' \
     -e 's|COPY Inputs/ \./Inputs/|COPY configs/ ./Inputs/|' \
     -e 's|COPY docker-prerun/results/ \./Results/prerun/|COPY Results/prerun/ ./Results/prerun/|' \
-    -e 's|COPY INSTRUCTIONS.md \./README.md|COPY README.md ./README.md|' \
     Dockerfile > "${OUTDIR}/Dockerfile"
 
 # Generate .dockerignore for artifact layout

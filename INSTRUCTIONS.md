@@ -26,6 +26,8 @@ Expected output: `Loaded image: mjqm-simulator:latest`.
 Apple Silicon/ARM machines run the image transparently via
 Docker Desktop's Rosetta emulation.
 
+An alternative is to build the image natively from the source code that we also provide in the `src` directory. We explain this on the last section at the end of this README. This option requires more time than loading the image directly from the tarball
+
 ## Quick check (Phase I)
 
 Run the bundled example script to verify the simulator works correctly:
@@ -71,7 +73,16 @@ docker run --rm \
     ./simulator tools_oneOrT
 ```
 
-Results are written to the `Results/` directory on the host.
+Results are written to the `Results/` directory on the host. 
+
+Simulations can also run with a cap on the CPU usage with the options `--cpus=n` to help reduce the workload if running on a personal machine. For example this command will run on only 2 cores (a quarter of an 8-core machine presumably):
+
+```sh
+docker run --rm --cpus=2 \
+    -v "$(pwd)/Results:/app/Results" \
+    mjqm-simulator \
+    ./simulator tools_five_bpar
+```
 
 ### Reproducing the paper figures
 
@@ -86,7 +97,7 @@ The following configurations reproduce the figures in the paper:
 
 ### Runtime estimates
 
-<span style="color:red">IMPORTANT</span>
+<span style="color:red">[IMPORTANT] It is strongly recommended to not only use the options to limit the CPU usage, but also to run on reduced number of events for the bigger configurations (as explained below), in order to not put a lot of pressure especially if the artifact is running on a personal machine.</span>
 
 Configurations based on the Google Borg Cell B dataset (`tools_B_*`)
 require a large number of events (30–60 million) to produce reliable

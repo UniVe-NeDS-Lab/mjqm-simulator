@@ -58,7 +58,7 @@ To see the available options:
 docker run --rm mjqm-simulator ./simulator --help
 ```
 
-The simulator loads the configuration from `Inputs/`, runs the specified
+The simulator loads the configuration from `configs/`, runs the specified
 number of discrete events for each repetition, and writes aggregated CSV
 results to `Results/<config_name>/`.
 
@@ -251,13 +251,11 @@ docker run --rm \
 ```
 
 The simulator looks for configs in the `Inputs/` directory (inside the
-Docker image) and appends `.toml` automatically. The same configs are
-also available in the `configs/` directory of the artifact zip for
-reference and editing.
+Docker image) and appends `.toml` automatically. 
 
 ## Bundled experiment configs
 
-The image ships with several configs in `Inputs/`:
+The image ships with several configs in `configs/`:
 
 - `validation_mm1` — M/M/1 validation (~30 s)
 - `tools_B_pol` — Google Borg Cell B, multiple scheduling policies

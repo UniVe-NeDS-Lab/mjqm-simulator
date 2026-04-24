@@ -58,7 +58,7 @@ To see the available options:
 docker run --rm mjqm-simulator ./simulator --help
 ```
 
-The simulator loads the configuration from `Inputs/`, runs the specified
+The simulator loads the configuration from `Inputs/` (inside the Docker image), runs the specified
 number of discrete events for each repetition, and writes aggregated CSV
 results to `Results/<config_name>/`.
 
@@ -129,7 +129,7 @@ replaces those values entirely (the iteration continues, but over the
 CLI-provided values). Non-overlapping pivot keys are preserved.
 
 For the Cell B configurations that exceed 8 hours in full, override the
-event count to produce results in a shorter time with only 1 million events:
+event count to produce results in a shorter time with only, for example, 1 million events:
 
 ```sh
 docker run --rm \
@@ -256,7 +256,7 @@ Configs that were used in generating figures and examples are provided in the `c
 
 ## Bundled experiment configs
 
-The image ships with several configs in `Inputs/`:
+The image ships with several configs in `Inputs/` :
 
 - `validation_mm1` — M/M/1 validation (~30 s)
 - `tools_B_pol` — Google Borg Cell B, multiple scheduling policies

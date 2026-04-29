@@ -293,7 +293,7 @@ Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.cl
     //std::string autocorr = conf.toml.at_path("arrival.type").value<std::string>().value_or("standard");
     std::string arr_type = conf.toml.at_path("arrival.distribution").value<std::string>().value_or("exponential");
     std::string arr_use_prob = conf.toml.at_path("arrival.use_prob").value<std::string>().value_or("false");
-    if (arr_type == "deterministic" && arr_use_prob == "true") {
+    if (arr_type != "exponential" && arr_use_prob == "true") {
         arrival_det = true;
         class_prob_dist = std::discrete_distribution<>(
             class_prob.begin(), class_prob.end()

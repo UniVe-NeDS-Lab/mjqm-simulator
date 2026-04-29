@@ -22,6 +22,13 @@ bool load_bounded_pareto(const toml::table& data, const std::string_view& cls, c
     const std::optional<double> rate = distribution_parameter(data, cls, use, "rate");
     const std::optional<double> l = distribution_parameter(data, cls, use, "l", "L", "min");
     const std::optional<double> h = distribution_parameter(data, cls, use, "h", "H", "max");
+    const double prob = use == ARRIVAL ? distribution_parameter(data, cls, use, "prob").value_or(1.) : 100.;
+    if (use == ARRIVAL) {
+        if (prob < 2.) {
+            *distribution = BoundedPareto::with_rate_and_prob(name, rate.value(), alpha.value(), prob);
+            return true;
+        }
+    }
     if (!alpha.has_value() || !XOR(XOR(mean.has_value(), rate.has_value()), l.has_value() && h.has_value())) {
         print_error("Bounded pareto distribution at path "
                     << error_highlight(name) << " must have alpha defined, and either mean, rate or the l/h pair");

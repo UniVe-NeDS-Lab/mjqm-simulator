@@ -90,3 +90,9 @@ node_modules/
 *.ipynb
 
 p*.txt
+
+*.lock
+
+mjqm-simulator-docker-*/
+
+docker-artifact/*

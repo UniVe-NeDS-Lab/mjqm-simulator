@@ -24,7 +24,11 @@ bool load_bounded_pareto(const toml::table& data, const std::string_view& cls, c
     const std::optional<double> h = distribution_parameter(data, cls, use, "h", "H", "max");
     const double prob = use == ARRIVAL ? distribution_parameter(data, cls, use, "prob").value_or(1.) : 100.;
     if (use == ARRIVAL) {
-        if (prob < 2.) {
+        if (l.has_value() && h.has_value() && prob < 2.){
+            *distribution = BoundedPareto::with_range_and_prob(name, alpha.value(), l.value(), h.value(), prob);
+            return true;
+        }
+        else if (prob < 2.) {
             *distribution = BoundedPareto::with_rate_and_prob(name, rate.value(), alpha.value(), prob);
             return true;
         }

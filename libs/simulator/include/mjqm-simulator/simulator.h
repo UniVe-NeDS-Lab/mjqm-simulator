@@ -199,8 +199,7 @@ public:
         }
         if (!tot_big_seq.empty()) {
             stats->big_seq_avg.collect( std::accumulate(tot_big_seq.begin(), tot_big_seq.end(), 0.0) / tot_big_seq.size() );
-        }
-        
+        }        
     }
 
     void simulate(unsigned long nevents, unsigned int repetitions = 1) {
@@ -217,6 +216,9 @@ public:
             tot_lambda += lambda;
         }
         stats->lambda = tot_lambda;
+        if (arrival_det) {
+            stats->lambda = 1. / this->arr_time_samplers[0]->get_mean();
+        }
 
         std::random_device rd;                  // Seed (non-deterministic if available)
         std::mt19937 gen(rd());                 // Mersenne Twister generator
@@ -244,7 +246,7 @@ public:
                     //std::cout << pos << std::endl;
                 }
                 //std::cout << "ev " << pos << std::endl;
-                collect_statistics(pos);
+                collect_statistics(pos,rep,k);
                 // std::cout << "collect" << std::endl;
                 if (pos < nclasses) { // departure
                     // Remove jobs from in_service (they cannot be in preempted list)
@@ -392,6 +394,26 @@ public:
         }
 
         output_file_res_3.close();*/
+        /*std::ofstream output_file("seq_buffer.txt");
+
+        auto time_it  = autocorr_seq_times.begin();
+        auto small_it = autocorr_seq_list[0].begin();
+        auto big_it   = autocorr_seq_list[1].begin();
+
+        while (time_it != autocorr_seq_times.end() &&
+            small_it != autocorr_seq_list[0].end() &&
+            big_it != autocorr_seq_list[1].end()) {
+
+            output_file << *time_it << ' '
+                        << *small_it << ' '
+                        << *big_it << '\n';
+
+            ++time_it;
+            ++small_it;
+            ++big_it;
+        }
+
+        output_file.close();*/
     }
 
     void produce_statistics(ExperimentStats& stats, const double confidence = 0.05) const {
@@ -457,6 +479,9 @@ private:
     int big_switch;
     int cycle_count;
     double start_phase = 0.0;
+
+    std::vector<std::list<int>> autocorr_seq_list;
+    std::list<double> autocorr_seq_times;
 
     double small_seq = 0.0;
     double big_seq = 0.0;
@@ -586,6 +611,7 @@ private:
         } else { // exponential distro can use the faster memoryless blocks
             auto ongoing_jobs = policy->get_ongoing_jobs();
             int pooled_i;
+            double interarr_time = arr_time_samplers[0]->sample();
             for (int i = 0; i < nclasses; i++) {
                 if (i < nclasses - 1) {
                     pooled_i = 0;
@@ -598,10 +624,14 @@ private:
                         fel[i + nclasses] = arr_time_samplers[(last_arr*nclasses)+i]->sample() + simtime;
                     }
                 } else if (arrival_det) {
-                    if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
-                        fel[i + nclasses] = arr_time_samplers[i]->sample() + simtime;
-                    }
+                    //if (i == 0) {
+                        //std::cout << arr_time_samplers[i]->get_mean() << std::endl;
+                        if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
+                            fel[i + nclasses] = interarr_time + simtime;
+                        }
+                    //}
                 } else {
+                    std::cout << "red" << std::endl;
                     if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
                         fel[i + nclasses] = arr_time_samplers[i]->sample() + simtime;
                     }
@@ -645,10 +675,11 @@ private:
         }
     }
 
-    void collect_statistics(int pos) {
+    void collect_statistics(int pos, int rep, int k) {
 
         if (pos < nclasses) {
             completion[pos]++;
+            
             //std::cout << pos << std::endl;
             if (pos == 0) {
                 small_seq++;
@@ -680,6 +711,8 @@ private:
         if (jobs_tot == 0) {
             idle_period += delta;
         }
+
+
         
         // autocorr
         /*auto state_ser = policy->get_state_ser();
@@ -824,6 +857,14 @@ private:
         rep_free_servers_distro[policy->get_free_ser()] += delta;
 
         windowSize.push_back(policy->get_window_size() * delta);
+
+        /*if (rep == 1 && k < 100000) {
+            //std::cout << k << std::endl;
+            std::vector<int> seq_v = policy->get_sequence_buffer();
+            autocorr_seq_list[0].push_back(seq_v[0]);
+            autocorr_seq_list[1].push_back(seq_v[1]);
+            autocorr_seq_times.push_back(simtime);
+        }*/
     }
 };
 

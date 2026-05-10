@@ -25,12 +25,13 @@ public:
     const double h;
     const double alpha;
     const double prob;
-    const double mean = alpha == 1 ? h * l / (h - l) * log(h / l)
+    const double mean = alpha == 1.0 ? h * l / (h - l) * log(h / l)
                                    : (pow(l, alpha) / (1 - pow(l / h, alpha)) * alpha / (alpha - 1) *
                                       (1 / pow(l, alpha - 1) - 1 / pow(h, alpha - 1)));
-    const double variance = alpha == 2 ? 2 * pow(h, 2) * pow(l, 2) / (pow(h, 2) - pow(l, 2)) * log(h / l)
+    const double variance = alpha == 2.0 ? ((2 * pow(h, 2) * pow(l, 2)) / ((pow(h, 2) - pow(l, 2)))) * log(h / l)
                                        : (pow(l, alpha) / (1 - pow(l / h, alpha)) * alpha / (alpha - 2) *
                                           (1 / pow(l, alpha - 2) - 1 / pow(h, alpha - 2)));
+    const double cv = sqrt(variance) / mean;
 
 private:
     const double h_to_alpha = pow(h, alpha);
@@ -57,8 +58,19 @@ public:
         assert(alpha > 0.);
     }
 
+    explicit BoundedPareto(const std::string& name, double alpha, double l, double h, double prob) :
+        DistributionSampler(name), l(l), h(h), alpha(alpha), prob(prob) {
+        assert(l > 0.);
+        assert(h > l);
+        assert(alpha > 0.);
+    }
+
     static std::unique_ptr<DistributionSampler> with_rate(const std::string& name, double rate, double alpha) {
         return std::make_unique<BoundedPareto>(name, alpha, (12000.0 / 23999.0) / rate, 12000 / rate);
+    }
+
+    static std::unique_ptr<DistributionSampler> with_rate_and_prob(const std::string& name, double rate, double alpha, double prob) {
+        return std::make_unique<BoundedPareto>(name, alpha, (12000.0 / 23999.0) / rate, 12000 / rate, prob);
     }
 
     static std::unique_ptr<DistributionSampler> with_mean(const std::string& name, double mean, double alpha) {
@@ -69,6 +81,10 @@ public:
         return std::make_unique<BoundedPareto>(name, alpha, l, h);
     }
 
+    static std::unique_ptr<DistributionSampler> with_range_and_prob(const std::string& name, double alpha, double l, double h, double prob) {
+        return std::make_unique<BoundedPareto>(name, alpha, l, h, prob);
+    }
+
     std::unique_ptr<DistributionSampler> clone(const std::string& name) const override {
         return std::make_unique<BoundedPareto>(name, alpha, l, h);
     }
@@ -76,8 +92,8 @@ public:
     // string conversion
     explicit operator std::string() const override {
         std::ostringstream oss;
-        oss << "bounded pareto (alpha=" << alpha << " ; l=" << l << " ; h=" << h << " => mean=" << mean
-            << " ; variance=" << variance << ")";
+        oss << "bounded pareto (alpha=" << alpha << " ; l=" << l << " ; h=" << h << " => rate=" << 1.0/mean
+            << " ; cv=" << cv << ")";
         return oss.str();
     }
 };

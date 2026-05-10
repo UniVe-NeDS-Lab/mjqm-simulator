@@ -47,3 +47,30 @@ void Smash::flush_buffer() {
         }
     }
 }
+
+const std::vector<int> Smash::get_sequence_buffer() {
+    std::vector<int> v = {0, 0};
+    int curr_seq = 1;
+    int curr_seq_n = 0;
+
+    auto it = buffer.begin();
+    while (it != buffer.end()) {
+        int clas = std::get<0>(*it);
+        if(clas == curr_seq) {
+            curr_seq_n += 1;
+        } else if (curr_seq_n > 0) {
+            v[curr_seq] += 1;
+            curr_seq = clas;
+            curr_seq_n = 1;
+        } else if (curr_seq_n == 0 && it == buffer.begin()){
+            curr_seq = clas;
+            curr_seq_n = 1;
+        }
+        it++;
+    }
+    if (curr_seq_n > 0) {
+        v[curr_seq] += 1;
+    }
+
+    return v;
+}

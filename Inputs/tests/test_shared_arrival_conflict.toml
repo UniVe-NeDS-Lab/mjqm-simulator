@@ -1,0 +1,21 @@
+# Tests that the loader rejects an unknown arrival.mode value.
+# Expected: load error — "Unsupported arrival.mode"
+identifier  = "conflict_test"
+events      = 10000
+repetitions = 1
+cores       = 4
+policy      = "first fit"
+service.distribution = "exponential"
+
+arrival.mode         = "invalid_mode"   # unknown value — should cause a load error
+arrival.distribution = "exponential"
+
+[[class]]
+cores        = 1
+arrival.prob = 0.6
+service.mean = 0.5
+
+[[class]]
+cores        = 2
+arrival.prob = 0.4
+service.mean = 1.0

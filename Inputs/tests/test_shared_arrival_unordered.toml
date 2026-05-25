@@ -1,0 +1,23 @@
+identifier  = "ap_unordered_test"
+events      = 500000
+repetitions = 3
+cores       = 8
+policy      = "first fit"
+service.distribution = "exponential"
+
+arrival.mode         = "shared"
+arrival.distribution = "deterministic"
+arrival.value        = 1.0
+
+# Classes declared in reverse cores order (cores=2 first, cores=1 second).
+# After sorting, cores=1 becomes index 0 and must carry prob=0.7,
+# cores=2 becomes index 1 and must carry prob=0.3.
+[[class]]
+cores        = 2
+arrival.prob = 0.3
+service.mean = 0.8
+
+[[class]]
+cores        = 1
+arrival.prob = 0.7
+service.mean = 0.5

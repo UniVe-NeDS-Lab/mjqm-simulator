@@ -174,3 +174,10 @@ bool load_distribution(const toml::table& data, const std::string_view& cls, con
     }
     return distribution_loaders.at(distribution)(data, cls, use, sampler);
 }
+
+bool load_distribution_from_table(const toml::table& subtable, const distribution_use use,
+                                   std::unique_ptr<DistributionSampler>* out) {
+    toml::table wrapper;
+    wrapper.insert(distribution_use_to_key.at(use), subtable);
+    return load_distribution(wrapper, "", use, out);
+}

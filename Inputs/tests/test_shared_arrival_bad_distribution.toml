@@ -1,0 +1,21 @@
+# Tests that the loader rejects an unrecognised distribution name under arrival.mode = "shared".
+# Expected: load error about unsupported distribution
+identifier  = "ap_bad_distribution_test"
+events      = 1000
+repetitions = 1
+cores       = 4
+policy      = "first fit"
+service.distribution = "exponential"
+
+arrival.mode         = "shared"
+arrival.distribution = "unknown"   # unrecognised name — should cause a load error
+
+[[class]]
+cores        = 1
+arrival.prob = 0.6
+service.mean = 0.5
+
+[[class]]
+cores        = 2
+arrival.prob = 0.4
+service.mean = 0.8

@@ -26,7 +26,7 @@
             "prob": {
               "type": "number",
               "title": "Probability",
-              "description": "Only meaningful for arrival, all classes must define it. The probabilities will be normalised."
+              "description": "Routing probability for [shared_arrival] mode, or probability weight in per-class exponential arrival splitting. All classes must define it, or none (equal split). Values must be >= 0 and are normalised automatically."
             },
             "lambda": {
               "type": "number",
@@ -241,6 +241,11 @@
     },
     "arrival": {
       "title": "Default arrival distribution",
+      "$ref": "#/definitions/sampler"
+    },
+    "shared_arrival": {
+      "title": "Shared arrival process",
+      "description": "Single inter-arrival stream with probabilistic class routing. Supports all distribution types. Cannot be combined with top-level arrival.distribution or per-class arrival.distribution.",
       "$ref": "#/definitions/sampler"
     },
     "service": {

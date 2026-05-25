@@ -59,6 +59,8 @@ jobs:
         run: |
           set -e
           ./configure
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
 
   build-macos:
     runs-on: ${{ matrix.runner }}
@@ -103,6 +105,8 @@ jobs:
         run: |
           set -e
           ./configure
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
 
   build-macos-arm:
     runs-on: macos-${{matrix.os_version}}
@@ -129,3 +133,5 @@ jobs:
         run: |
           set -e
           ./configure
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure

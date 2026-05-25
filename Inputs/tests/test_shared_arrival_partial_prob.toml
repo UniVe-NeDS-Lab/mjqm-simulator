@@ -1,0 +1,22 @@
+# Tests that the loader rejects configs where some but not all classes define arrival.prob.
+# Expected: load error — "Not all classes have the prob property defined"
+identifier  = "ap_partial_prob_test"
+events      = 1000
+repetitions = 1
+cores       = 4
+policy      = "first fit"
+service.distribution = "exponential"
+
+arrival.mode         = "shared"
+arrival.distribution = "deterministic"
+arrival.value        = 1.0
+
+[[class]]
+cores        = 1
+arrival.prob = 0.7
+service.mean = 0.5
+
+[[class]]
+cores        = 2
+# arrival.prob intentionally omitted — should cause a load error
+service.mean = 0.8

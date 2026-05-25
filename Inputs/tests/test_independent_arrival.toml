@@ -1,0 +1,19 @@
+identifier  = "ind_arrival_test"
+events      = 500000
+repetitions = 5
+cores       = 8
+policy      = "first fit"
+service.distribution = "exponential"
+
+arrival.mode         = "independent"
+arrival.distribution = "exponential"
+
+[[class]]
+cores        = 1
+arrival.mean = 1.4
+service.mean = 0.5
+
+[[class]]
+cores        = 2
+arrival.mean = 2.5
+service.mean = 0.8

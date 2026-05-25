@@ -1,0 +1,18 @@
+identifier  = "ap_equal_test"
+events      = 100000
+repetitions = 1
+cores       = 8
+policy      = "first fit"
+service.distribution = "exponential"
+
+arrival.mode         = "shared"
+arrival.distribution = "deterministic"
+arrival.value        = 1.0
+
+[[class]]
+cores        = 1
+service.mean = 0.5
+
+[[class]]
+cores        = 2
+service.mean = 0.8

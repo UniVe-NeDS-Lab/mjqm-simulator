@@ -15,6 +15,7 @@
 #include <mjqm-samplers/sampler.h>
 #include <mjqm-settings/toml_overrides.h>
 #include <mjqm-settings/toml_utils.h>
+#include <mjqm-simulator/experiment_config.h>
 #include <mjqm-simulator/experiment_stats.h>
 
 namespace fs = std::filesystem;
@@ -28,7 +29,8 @@ struct ClassConfig {
     friend std::ostream& operator<<(std::ostream& os, const ClassConfig& cls) {
         os << "Class: " << cls.name << std::endl;
         os << "\tCores: " << cls.cores << std::endl;
-        os << "\tArrival: " << std::string(*cls.arrival_sampler) << std::endl;
+        // Probability omitted here — only ExperimentConfig::operator<< has access to class_probs.
+        os << "\tArrival: " << (cls.arrival_sampler ? std::string(*cls.arrival_sampler) : "merged process") << std::endl;
         os << "\tService: " << std::string(*cls.service_sampler) << std::endl;
         return os;
     }
@@ -43,6 +45,7 @@ struct ExperimentConfig {
     std::unique_ptr<Policy> policy;
     std::string generator;
     std::vector<ClassConfig> classes;
+    std::unique_ptr<SharedArrival> shared_arrival; // null in per-class mode
     toml::table toml;
     ExperimentStats stats{};
 
@@ -63,9 +66,20 @@ struct ExperimentConfig {
         os << "Cores: " << conf.cores << std::endl;
         os << "Policy (" << conf.policy_name << "): " << std::string(*conf.policy) << std::endl;
         os << "Generator: " << conf.generator << std::endl;
+        if (conf.shared_arrival) {
+            os << "Shared arrival: " << std::string(*conf.shared_arrival->sampler) << std::endl;
+        }
         os << "Classes: " << conf.classes.size() << std::endl;
-        for (const auto& cls : conf.classes) {
-            os << cls;
+        for (size_t i = 0; i < conf.classes.size(); ++i) {
+            const auto& cls = conf.classes[i];
+            os << "Class: " << cls.name << std::endl;
+            os << "\tCores: " << cls.cores << std::endl;
+            if (conf.shared_arrival) {
+                os << "\tArrival: merged process (prob=" << conf.shared_arrival->class_probs[i] << ")" << std::endl;
+            } else {
+                os << "\tArrival: " << std::string(*cls.arrival_sampler) << std::endl;
+            }
+            os << "\tService: " << std::string(*cls.service_sampler) << std::endl;
         }
         return os;
     }

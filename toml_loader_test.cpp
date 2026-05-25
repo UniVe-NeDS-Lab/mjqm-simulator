@@ -21,9 +21,11 @@ int main(int argc, char* argv[]) {
     fs::path input_file = fs::current_path() / "Inputs" / filename;
     auto experiments = from_toml(input_file, overrides);
 
+    bool any_failure = false;
     for (const auto& [success, config] : *experiments) {
         if (!success) {
-            std::cerr << "Error reading a pivot" << std::endl << std::endl;
+            std::cerr << "Error reading experiment config" << std::endl << std::endl;
+            any_failure = true;
             continue;
         }
         std::cout << config << std::endl;
@@ -32,4 +34,5 @@ int main(int argc, char* argv[]) {
         const std::vector<std::string> headers = config.stats.get_headers();
         std::cout << "Headers" << std::endl << join(headers.begin(), headers.end()) << std::endl;
     }
+    return any_failure ? 1 : 0;
 }

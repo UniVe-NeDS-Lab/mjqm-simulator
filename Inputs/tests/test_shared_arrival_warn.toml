@@ -1,0 +1,21 @@
+# Intentional: probs sum to 0.8 (0.5 + 0.3) to exercise the normalisation warning path.
+identifier  = "ap_warn_test"
+events      = 100000
+repetitions = 1
+cores       = 8
+policy      = "first fit"
+service.distribution = "exponential"
+
+arrival.mode         = "shared"
+arrival.distribution = "deterministic"
+arrival.value        = 1.0
+
+[[class]]
+cores        = 1
+arrival.prob = 0.5
+service.mean = 0.5
+
+[[class]]
+cores        = 2
+arrival.prob = 0.3
+service.mean = 0.8

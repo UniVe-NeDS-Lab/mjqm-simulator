@@ -1,0 +1,20 @@
+identifier  = "ap_det_test"
+events      = 500000
+repetitions = 5
+cores       = 8
+policy      = "first fit"
+service.distribution = "exponential"
+
+arrival.mode         = "shared"
+arrival.distribution = "deterministic"
+arrival.value        = 1.0
+
+[[class]]
+cores        = 1
+arrival.prob = 0.7
+service.mean = 0.5
+
+[[class]]
+cores        = 2
+arrival.prob = 0.3
+service.mean = 0.8

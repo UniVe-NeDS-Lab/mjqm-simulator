@@ -86,4 +86,10 @@ bool load_distribution(const toml::table& data, const std::string_view& cls, con
                        std::unique_ptr<DistributionSampler>* sampler // out
 );
 
+// Load a distribution directly from a subtable that already contains the distribution parameters.
+// Equivalent to load_distribution with cls="" and the subtable nested under the use key —
+// makes the wrapper-table contract explicit rather than inline at every call site.
+bool load_distribution_from_table(const toml::table& subtable, distribution_use use,
+                                   std::unique_ptr<DistributionSampler>* out);
+
 #endif // TOML_DISTRIBUTIONS_LOADERS_H

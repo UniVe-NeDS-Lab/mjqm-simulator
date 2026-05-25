@@ -96,3 +96,27 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMAND mkdir -p Results/simulator
 )
+
+enable_testing()
+
+set(TOML_TEST_CMD $<TARGET_FILE:toml_loader_test>)
+set(TOML_TEST_DIR ${CMAKE_SOURCE_DIR})
+
+foreach(name sa_det sa_equal sa_warn sa_unordered)
+    string(REPLACE "sa_" "test_shared_arrival_" toml_name ${name})
+    add_test(NAME ${name} COMMAND ${TOML_TEST_CMD} tests/${toml_name} WORKING_DIRECTORY ${TOML_TEST_DIR})
+    set_tests_properties(${name} PROPERTIES FAIL_REGULAR_EXPRESSION "Error reading experiment config")
+endforeach()
+
+add_test(NAME sa_neg_prob    COMMAND ${TOML_TEST_CMD} tests/test_shared_arrival_negative_prob    WORKING_DIRECTORY ${TOML_TEST_DIR})
+add_test(NAME sa_partial     COMMAND ${TOML_TEST_CMD} tests/test_shared_arrival_partial_prob     WORKING_DIRECTORY ${TOML_TEST_DIR})
+add_test(NAME sa_bad_dist    COMMAND ${TOML_TEST_CMD} tests/test_shared_arrival_bad_distribution WORKING_DIRECTORY ${TOML_TEST_DIR})
+add_test(NAME sa_conflict    COMMAND ${TOML_TEST_CMD} tests/test_shared_arrival_conflict         WORKING_DIRECTORY ${TOML_TEST_DIR})
+
+set_tests_properties(sa_neg_prob PROPERTIES PASS_REGULAR_EXPRESSION "arrival.prob for class 0 is negative")
+set_tests_properties(sa_partial  PROPERTIES PASS_REGULAR_EXPRESSION "Not all classes have the prob property defined")
+set_tests_properties(sa_bad_dist PROPERTIES PASS_REGULAR_EXPRESSION "Unsupported distribution")
+set_tests_properties(sa_conflict PROPERTIES PASS_REGULAR_EXPRESSION "Unsupported arrival.mode")
+
+add_test(NAME ind_mode COMMAND ${TOML_TEST_CMD} tests/test_independent_arrival WORKING_DIRECTORY ${TOML_TEST_DIR})
+set_tests_properties(ind_mode PROPERTIES FAIL_REGULAR_EXPRESSION "Error reading experiment config")

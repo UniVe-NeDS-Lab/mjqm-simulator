@@ -12,6 +12,7 @@
 #include <limits>
 #include <list>
 #include <numeric>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -23,6 +24,7 @@
 #include <mjqm-math/mean_var.h>
 #include <mjqm-policies/policy.h>
 #include <mjqm-samplers/sampler.h>
+#include <mjqm-simulator/experiment_config.h>
 #include <mjqm-simulator/experiment_stats.h>
 
 #include <mjqm-settings/toml_loader.h>
@@ -198,15 +200,21 @@ public:
 
     void simulate(unsigned long nevents, unsigned int repetitions = 1) {
         stats->edit_computed_stats([](Stat& s) { s.clear(); });
-        double tot_lambda = 0.0;
-        for (int i = 0; i < nclasses; ++i) {
-            ClassStats& res = stats->class_stats.at(i);
-            double lambda = 1. / this->arr_time_samplers[i]->get_mean();
-            lambda = l[i];
-            res.lambda = lambda;
-            tot_lambda += lambda;
+        if (is_arrival_shared) {
+            const double total_rate = 1.0 / shared_arrival_sampler->get_mean();
+            stats->lambda = total_rate;
+            for (int i = 0; i < nclasses; ++i) {
+                stats->class_stats.at(i).lambda = total_rate * shared_arrival_probs[i];
+            }
+        } else {
+            double tot_lambda = 0.0;
+            for (int i = 0; i < nclasses; ++i) {
+                ClassStats& res = stats->class_stats.at(i);
+                res.lambda = l[i];
+                tot_lambda += l[i];
+            }
+            stats->lambda = tot_lambda;
         }
-        stats->lambda = tot_lambda;
 
         std::random_device rd;                  // Seed (non-deterministic if available)
         std::mt19937 gen(rd());                 // Mersenne Twister generator
@@ -246,15 +254,18 @@ public:
                     last_ev_arr = false;
                     // std::cout << "dep" << std::endl;
                 } else {
+                    const int i_class = is_arrival_shared
+                                            ? draw_arrival_class()
+                                            : (pos - nclasses);
                     auto job_id = k + (nevents * rep);
                     if (this->w == -3) {
-                        holdTime[job_id] = ser_time_samplers[pos - nclasses]->sample();
+                        holdTime[job_id] = ser_time_samplers[i_class]->sample();
                         // std::cout << holdTime[job_id] << std::endl;
                     } else if (this->w == -13) {
-                        double hold = ser_time_samplers[pos - nclasses]->sample();
+                        double hold = ser_time_samplers[i_class]->sample();
                         //std::cout << hold << std::endl;
                         holdTime[job_id] = hold;
-                        double overest = (ser_time_samplers[pos - nclasses]->sample())*policy->get_overest_max();
+                        double overest = (ser_time_samplers[i_class]->sample())*policy->get_overest_max();
                         //double overest = hold*policy->get_overest_max();
                         //std::cout << overest << std::endl;
                         holdTimeDeclared[job_id] = hold + overest;
@@ -262,9 +273,9 @@ public:
                         //std::cout << "-------------------" << std::endl;
                         //std::cout << holdTime[job_id] << " " << holdTimeDeclared[job_id] << std::endl;
                     }
-                    policy->arrival(pos - nclasses, sizes[pos - nclasses], job_id);
+                    policy->arrival(i_class, sizes[i_class], job_id);
                     arrTime[job_id] = *itmin;
-                    last_arr = pos-nclasses;
+                    last_arr = i_class;
                     last_ev_arr = true;
                     // std::cout << "arr" << std::endl;
                 }
@@ -377,10 +388,15 @@ public:
 
     void produce_statistics(ExperimentStats& stats, const double confidence = 0.05) const {
         stats.edit_all_stats([](Stat& s) { s.finalise(); });
+        const double total_rate = is_arrival_shared ? 1.0 / shared_arrival_sampler->get_mean() : 0.0;
         bool any_warning = false;
         for (int i = 0; i < nclasses; ++i) {
             ClassStats& res = stats.class_stats.at(i);
-            bool warning = 1.0 - std::get<Confidence_inter>(res.throughput.value).mean / l[i] > 0.05;
+            const double expected = is_arrival_shared
+                ? total_rate * shared_arrival_probs[i]
+                : l[i];
+            const double mean_tp = std::get<Confidence_inter>(res.throughput.value).mean;
+            const bool warning = expected == 0.0 ? mean_tp > 0.05 : 1.0 - mean_tp / expected > 0.05;
             res.warnings = warning;
             any_warning = any_warning || warning;
         }
@@ -447,7 +463,10 @@ private:
     bool last_ev_arr;
 
     bool autocorr;
-    bool arrival_det;
+    const bool is_arrival_shared;
+    std::unique_ptr<DistributionSampler> shared_arrival_sampler; // non-null only if is_arrival_shared
+    std::vector<double> shared_arrival_probs;                     // size == nclasses if is_arrival_shared
+    std::optional<RngStream> class_selection_stream;              // constructed only if is_arrival_shared
 
     double waste = 0.0;
     double viol = 0.0;
@@ -475,21 +494,40 @@ private:
 
     std::string logfile_name;
 
+    int draw_arrival_class() {
+        const double u = class_selection_stream->RandU01();
+        double cumul = 0.0;
+        for (int i = 0; i < nclasses - 1; ++i) {
+            cumul += shared_arrival_probs[i];
+            if (u < cumul) return i;
+        }
+        return nclasses - 1;
+    }
+
+    void update_arrival_fel(int i) {
+        if (is_arrival_shared) {
+            if (fel[nclasses] <= simtime) {
+                fel[nclasses] = shared_arrival_sampler->sample() + simtime;
+            }
+            // slots [nclasses+1..2*nclasses-1] stay at max (set in constructor); never selected, never modified
+        } else if (autocorr) {
+            if (last_ev_arr) {
+                fel[i + nclasses] = arr_time_samplers[(last_arr*nclasses)+i]->sample() + simtime;
+            }
+        } else {
+            if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
+                fel[i + nclasses] = arr_time_samplers[i]->sample() + simtime;
+            }
+        }
+    }
+
     void resample() {
         // add arrivals and departures
         if (this->w == -2 || this->w == -16 || this->w == -17) { // special blocks for serverFilling (memoryful)
             auto stopped_jobs = policy->get_stopped_jobs();
             auto ongoing_jobs = policy->get_ongoing_jobs();
             for (int i = 0; i < nclasses; i++) {
-                if (autocorr) {
-                    if (last_ev_arr) {
-                        fel[i + nclasses] = arr_time_samplers[(last_arr*nclasses)+i]->sample() + simtime;
-                    }
-                } else {
-                    if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
-                        fel[i + nclasses] = arr_time_samplers[i]->sample() + simtime;
-                    }
-                }
+                update_arrival_fel(i);
 
                 for (auto job_id : stopped_jobs[i]) {
                     if (jobs_inservice[i].contains(job_id)) { // If they are currently being served: stop them
@@ -569,15 +607,7 @@ private:
                     pooled_i = 1;
                 }
 
-                if (autocorr) {
-                    if (last_ev_arr) {
-                        fel[i + nclasses] = arr_time_samplers[(last_arr*nclasses)+i]->sample() + simtime;
-                    }
-                } else {
-                    if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
-                        fel[i + nclasses] = arr_time_samplers[i]->sample() + simtime;
-                    }
-                }
+                update_arrival_fel(i);
 
                 // std::cout << ongoing_jobs[i].size() << std::endl;
                 for (long int job_id : ongoing_jobs[i]) {

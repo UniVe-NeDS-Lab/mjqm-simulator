@@ -115,6 +115,48 @@ distribution = "exponential"
 lambda = 0.01
 ```
 
+## Shared arrival process
+
+As an alternative to defining independent per-class arrival distributions, you can define a single shared inter-arrival stream using the `[shared_arrival]` section.
+Each arriving job is routed to a class probabilistically.
+
+Use `[shared_arrival]` when the inter-arrival distribution is non-exponential (e.g. deterministic or heavy-tailed).
+For exponential inter-arrivals, per-class rates at `total_rate × prob_i` are mathematically equivalent and simpler to configure.
+
+```toml
+[shared_arrival]
+distribution = "deterministic"
+value        = 1.0
+
+[[class]]
+cores        = 1
+arrival.prob = 0.7
+service.mean = 0.5
+
+[[class]]
+cores        = 2
+arrival.prob = 0.3
+service.mean = 0.8
+```
+
+`[shared_arrival]` supports all distributions listed in [Available distributions](#available-distributions).
+
+### `arrival.prob` routing weights
+
+`arrival.prob` sets the routing probability for each class:
+
+- Either every class defines `arrival.prob`, or none does (equal split: `1/N` per class).
+- Values must be ≥ 0 and are normalised automatically if they do not sum to 1.
+  A deviation greater than 0.1% triggers a warning on `stderr` suggesting a class may have been omitted or duplicated.
+
+### Conflict rules
+
+`[shared_arrival]` cannot be combined with:
+
+- A top-level `arrival.distribution` key (which defines per-class mode).
+- Per-class `arrival.*` fields other than `prob`.
+- `arrival.autocorr` (not yet supported).
+
 ## Pivot values
 
 To allow for testing multiple values of a parameter, you can define a set of pivot values.
@@ -163,6 +205,7 @@ In addition, if used in the arrival distribution, you can define per each job cl
 - `prob`: the probability of the job class.
   If defined for one class, it needs to be defined for every class.
   If their sum is not 1, they will be normalised.
+  Values must be ≥ 0; negative values and an all-zero sum are rejected as errors.
 
 ### Fréchet
 

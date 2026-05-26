@@ -6,7 +6,7 @@
 !*/
 ### Above combination will ignore all files without extension ###
 !configure
-!simula
+!rebuild
 
 # Compiled object files
 Results/
@@ -83,6 +83,7 @@ docs/generated/
 .venv/
 .ruff_cache/
 .spyproject/
+__pycache__/
 
 # NodeJS
 node_modules/
@@ -96,3 +97,4 @@ p*.txt
 mjqm-simulator-docker-*/
 
 docker-artifact/*
+uv.lock

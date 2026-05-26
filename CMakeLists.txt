@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(mjqm-simulator
     VERSION 0.1.0
     DESCRIPTION "Simulator for Multiserver Job Queuing Model (MJQM)"
-    HOMEPAGE_URL "https://github.com/NeDS-Lab/mjqm-simulator"
+    HOMEPAGE_URL "https://github.com/UniVe-NeDS-Lab/mjqm-simulator"
     LANGUAGES CXX
 )
 
@@ -72,19 +72,15 @@ add_subdirectory(libs/samplers)
 add_subdirectory(libs/simulator)
 add_subdirectory(libs/utils)
 
-add_executable(simulator_smash simulator_smash.cpp)
-target_compile_options(simulator_smash PRIVATE -fwhole-program)
-target_link_libraries(simulator_smash math policies stats RngStreams::RngStreams)
-
-add_executable(simulator_toml simulator_toml.cpp)
-target_compile_options(simulator_toml PRIVATE -fwhole-program)
-target_link_libraries(simulator_toml toml_loader)
+add_executable(simulator simulator.cpp)
+target_compile_options(simulator PRIVATE -fwhole-program)
+target_link_libraries(simulator toml_loader)
 
 add_executable(toml_loader_test toml_loader_test.cpp)
 target_compile_options(toml_loader_test PRIVATE -fwhole-program)
 target_link_libraries(toml_loader_test toml_loader)
 
-foreach (target simulator_smash simulator_toml toml_loader_test)
+foreach (target simulator toml_loader_test)
     add_custom_command(
         TARGET ${target} POST_BUILD
         BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/${target}
@@ -94,11 +90,9 @@ foreach (target simulator_smash simulator_toml toml_loader_test)
     )
 endforeach ()
 
-foreach (target simulator_toml)
-    add_custom_command(
-        TARGET ${target} POST_BUILD
-        BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/Results/${target}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMAND mkdir -p Results/${target}
-    )
-endforeach ()
+add_custom_command(
+    TARGET simulator POST_BUILD
+    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/Results/simulator
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND mkdir -p Results/simulator
+)

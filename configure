@@ -5,19 +5,17 @@ cd "$(dirname "$0")"
 preset=default
 clean=0
 build=1
-test=0
 configure=1
 setup_uv=1
 
-for ARG in $(getopt -l clean,debug,build,help,no-build,only-build,test,no-uv -o 'cdbht' -- "$@"); do
+for ARG in $(getopt -l clean,debug,build,help,no-build,only-build,no-uv -o 'cdbh' -- "$@"); do
     case "$ARG" in
         --clean|-c) clean=1 ; rm -rf build build-debug ;;
         --debug|-d) preset=debug ;;
         --build|-b) build=1 ;;
-        --test|-t) test=1 ; build=1 ;;
-        --no-build) build=0 ; test=0 ;;
+        --no-build) build=0 ;;
         --only-build) build=1 ; configure=0 ;;
-        --help|-h) echo "Usage: $0 [--clean] [--debug] [--(|only-|no-)build] [--no-uv] [--test] [--help]"; exit 0 ;;
+        --help|-h) echo "Usage: $0 [--clean] [--debug] [--(|only-|no-)build] [--no-uv] [--help]"; exit 0 ;;
         --no-uv) setup_uv=0 ;;
         --) break;;
         *) echo "Unknown option: $ARG"; exit 1 ;;
@@ -75,11 +73,4 @@ if [ ${build} -eq 1 ]; then
         ( set -x; cmake --build --preset ${preset} -j ${AVAILABLE_PROC} "${flags[@]}"; ) ;
     fi ;
 
-    if [ ${test} -eq 1 ]; then
-        if [ ${CMAKE_VER} \< "3.19" ]; then
-            ( set -x; make -j 1 -C $folder --no-print-directory test_all; ) ;
-        else
-            ( set -x; cmake --build --preset test -j 1; ) ;
-        fi ;
-    fi ;
 fi

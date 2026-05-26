@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from load_experiment_data import load_experiment_data, select_experiment
-from scipy.signal import savgol_filter
+from plot_config import policy_colors, smooth
 from tqdm import tqdm
 
 ################################ PANDAS AND PLOT CONFIGS ################################
@@ -29,17 +29,8 @@ tick_size = 180
 l_pad = 40
 asym_size = 20
 
-cols = [
-    "black",
-    "peru",
-    "darkorange",
-    "royalblue",
-    "crimson",
-    "purple",
-    "darkgreen",
-    "pink",
-]
-markers = ["P", "o", "v", "s", "X", "D", "H", "<", ">"]
+cols = policy_colors
+markers = ["P", "o", "v", "s", "X", "D", "H", "<", ">", "x", "p", "^"]
 markers_plotly = [
     "cross",
     "circle",
@@ -50,14 +41,17 @@ markers_plotly = [
     "triangle-up",
     "triangle-left",
     "triangle-right",
+    "star",
+    "star-triangle-up",
+    "hexagon",
 ]
 styles = ["solid", "dashdot", "dotted", "dashed", (0, (3, 5, 1, 5, 1, 5))]
 
 cell = "cellA"
 n_cores = 4096
 
-cell = "cellB"
-n_cores = 2048
+# cell = "cellB"
+# n_cores = 2048
 # -3 : backfilling
 # -2 : server filling
 # 0: Most Server First
@@ -72,7 +66,7 @@ if cell == "cellB":
     ys_bigResp = [700, 6000, 4700, 1000, 3000]
     ys_resp = [800, 550, 350, 7, 40]"""
 
-    xs = [5.4, 5.4, 5.4, 5.4, 5.4, 5.4, 5.4, 5.4, 5.4]
+    xs = [5.4, 5.4, 5.4, 5.4, 5.4, 5.4, 5.4, 5.4, 5.4, 5.4, 5.4]
     legend_locs = [
         "upper left",
         "upper left",
@@ -108,7 +102,7 @@ elif cell == "cellA":
         ys_resp = [100, 70, 50, 4, 8]
         """
 
-        xs = [725 for w in range(20)]
+        xs = [725 for w in range(29)]
         # xs = [602, 739, 561, 614, 667, 711]
 
         ylims_totResp = [1, 100]
@@ -284,7 +278,7 @@ def plot_total_response_time(
     for idx, df_select in policy_groups:
         x_data = df_select["arrival.rate"][df_select["stable"]]
         y_data = df_select["RespTime Total"][df_select["stable"]]
-        y_interp = savgol_filter(y_data, 3, 2)
+        y_interp = smooth(y_data.values, window=3)
 
         ax.scatter(
             x_data, y_data, color=colors[idx], marker=marks[idx], s=marker_size
@@ -343,7 +337,7 @@ def plot_class_response_time(
     for idx, df_select in policy_groups:
         x_data = df_select["arrival.rate"][df_select["stable"]]
         y_data = df_select[f"T{T} RespTime"][df_select["stable"]]
-        y_interp = savgol_filter(y_data, 3, 2)
+        y_interp = smooth(y_data.values, window=3)
 
         ax.scatter(
             x_data, y_data, color=colors[idx], marker=marks[idx], s=marker_size
@@ -406,7 +400,7 @@ def plot_total_waiting_time(
     for idx, df_select in policy_groups:
         x_data = df_select["arrival.rate"][df_select["stable"]]
         y_data = df_select["WaitTime Total"][df_select["stable"]]
-        y_interp = savgol_filter(y_data, 3, 2)
+        y_interp = smooth(y_data.values, window=3)
 
         ax.scatter(
             x_data, y_data, color=colors[idx], marker=marks[idx], s=marker_size
@@ -465,7 +459,7 @@ def plot_class_waiting_time(
     for idx, df_select in policy_groups:
         x_data = df_select["arrival.rate"][df_select["stable"]]
         y_data = df_select[f"T{T} Waiting"][df_select["stable"]]
-        y_interp = savgol_filter(y_data, 3, 2)
+        y_interp = smooth(y_data.values, window=3)
 
         ax.scatter(
             x_data, y_data, color=colors[idx], marker=marks[idx], s=marker_size

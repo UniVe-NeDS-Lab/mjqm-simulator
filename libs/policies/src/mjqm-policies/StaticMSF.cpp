@@ -32,7 +32,7 @@ void StaticMSF::flush_buffer() {
 
     ongoing_jobs.clear();
     ongoing_jobs.resize(state_buf.size());
-    
+
     //if (this->prev_class != this->current_class && state_ser[this->prev_class] > 0) {
     //    return;
     //}
@@ -43,6 +43,12 @@ void StaticMSF::flush_buffer() {
         int i = this->current_class;
         auto it = stopped_jobs[i].begin();
         while (state_buf[i] != 0 && sizes[i] <= freeservers) {
+            // Track FIFO violations: count waiting jobs in other classes
+            for (int j = 0; j < static_cast<int>(state_buf.size()); ++j) {
+                if (j != i && state_buf[j] > 0) {
+                    violations_counter += state_buf[j];
+                }
+            }
             state_buf[i]--;
             state_ser[i]++;
             ongoing_jobs[i].push_back(*it);
@@ -50,7 +56,7 @@ void StaticMSF::flush_buffer() {
             freeservers -= sizes[i];
             modified = true;
         }
-        
+
     }
 
     if (check_condition() == true) {

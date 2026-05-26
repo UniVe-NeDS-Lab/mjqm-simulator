@@ -98,3 +98,13 @@ mjqm-simulator-docker-*/
 
 docker-artifact/*
 uv.lock
+*.lock
+
+mjqm-simulator-docker-*/
+
+docker-artifact/*
+
+aa-bounds-main/*
+
+pesa_*
+bounds_results_*

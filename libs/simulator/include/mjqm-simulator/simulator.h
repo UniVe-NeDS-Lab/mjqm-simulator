@@ -631,7 +631,6 @@ private:
                         }
                     //}
                 } else {
-                    std::cout << "red" << std::endl;
                     if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
                         fel[i + nclasses] = arr_time_samplers[i]->sample() + simtime;
                     }

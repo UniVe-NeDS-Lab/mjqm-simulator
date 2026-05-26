@@ -27,6 +27,7 @@ public:
     double get_overest_max() override { return 1.0; }
     bool prio_big() override { return false; }
     int get_state_ser_small() override { return -1; }
+    const std::vector<int> get_sequence_buffer() override;
     void reset_completion(double simtime) override {}
     ~Smash() override = default;
     std::unique_ptr<Policy> clone() const override { return std::make_unique<Smash>(w, servers, state_buf.size()); }

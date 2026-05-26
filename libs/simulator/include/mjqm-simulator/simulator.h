@@ -204,13 +204,19 @@ public:
             double lambda = 1. / this->arr_time_samplers[i]->get_mean();
             lambda = l[i];
             res.lambda = lambda;
+            if (arrival_det) {
+                res.lambda = lambda*class_prob[i];
+            }
             tot_lambda += lambda;
         }
         stats->lambda = tot_lambda;
+        if (arrival_det) {
+            stats->lambda = 1. / this->arr_time_samplers[0]->get_mean();
+        }
 
         std::random_device rd;                  // Seed (non-deterministic if available)
         std::mt19937 gen(rd());                 // Mersenne Twister generator
-        auto dist = std::uniform_real_distribution<double>(0.0, policy->get_overest_max());
+        //auto dist = std::uniform_real_distribution<double>(0.0, policy->get_overest_max());
 
         for (unsigned int rep = 0; rep < repetitions; rep++) {
             /*int buf_size = std::reduce(policy->get_state_buf().begin(), policy->get_state_buf().end());
@@ -225,7 +231,16 @@ public:
                 auto itmin = std::min_element(fel.begin(), fel.end());
                 // std::cout << *itmin << std::endl;
                 int pos = std::distance(fel.begin(), itmin);
-                collect_statistics(pos);
+                /*if (pos >= nclasses) {
+                    std::cout << fel[2] << " " << fel[3] << std::endl;
+                    
+                }*/
+                if (arrival_det && pos >= nclasses) {
+                    pos = class_prob_dist(gen) + nclasses;   
+                    //std::cout << pos << std::endl;
+                }
+                //std::cout << "ev " << pos << std::endl;
+                collect_statistics(pos,rep,k);
                 // std::cout << "collect" << std::endl;
                 if (pos < nclasses) { // departure
                     // Remove jobs from in_service (they cannot be in preempted list)
@@ -373,6 +388,26 @@ public:
         }
 
         output_file_res_3.close();*/
+        /*std::ofstream output_file("seq_buffer.txt");
+
+        auto time_it  = autocorr_seq_times.begin();
+        auto small_it = autocorr_seq_list[0].begin();
+        auto big_it   = autocorr_seq_list[1].begin();
+
+        while (time_it != autocorr_seq_times.end() &&
+            small_it != autocorr_seq_list[0].end() &&
+            big_it != autocorr_seq_list[1].end()) {
+
+            output_file << *time_it << ' '
+                        << *small_it << ' '
+                        << *big_it << '\n';
+
+            ++time_it;
+            ++small_it;
+            ++big_it;
+        }
+
+        output_file.close();*/
     }
 
     void produce_statistics(ExperimentStats& stats, const double confidence = 0.05) const {
@@ -381,6 +416,9 @@ public:
         for (int i = 0; i < nclasses; ++i) {
             ClassStats& res = stats.class_stats.at(i);
             bool warning = 1.0 - std::get<Confidence_inter>(res.throughput.value).mean / l[i] > 0.05;
+            if (arrival_det) {
+                warning = 1.0 - std::get<Confidence_inter>(res.throughput.value).mean / (l[i]*class_prob[i]) > 0.05;
+            }
             res.warnings = warning;
             any_warning = any_warning || warning;
         }
@@ -436,6 +474,9 @@ private:
     int cycle_count;
     double start_phase = 0.0;
 
+    std::vector<std::list<int>> autocorr_seq_list;
+    std::list<double> autocorr_seq_times;
+
     double small_seq = 0.0;
     double big_seq = 0.0;
     std::vector<double> tot_small_seq;
@@ -448,6 +489,8 @@ private:
 
     bool autocorr;
     bool arrival_det;
+    std::vector<double> class_prob;
+    std::discrete_distribution<> class_prob_dist;
 
     double waste = 0.0;
     double viol = 0.0;
@@ -562,6 +605,7 @@ private:
         } else { // exponential distro can use the faster memoryless blocks
             auto ongoing_jobs = policy->get_ongoing_jobs();
             int pooled_i;
+            double interarr_time = arr_time_samplers[0]->sample();
             for (int i = 0; i < nclasses; i++) {
                 if (i < nclasses - 1) {
                     pooled_i = 0;
@@ -573,6 +617,13 @@ private:
                     if (last_ev_arr) {
                         fel[i + nclasses] = arr_time_samplers[(last_arr*nclasses)+i]->sample() + simtime;
                     }
+                } else if (arrival_det) {
+                    //if (i == 0) {
+                        //std::cout << arr_time_samplers[i]->get_mean() << std::endl;
+                        if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
+                            fel[i + nclasses] = interarr_time + simtime;
+                        }
+                    //}
                 } else {
                     if (fel[i + nclasses] <= simtime) { // only update arrival that is executed at the time
                         fel[i + nclasses] = arr_time_samplers[i]->sample() + simtime;
@@ -617,10 +668,11 @@ private:
         }
     }
 
-    void collect_statistics(int pos) {
+    void collect_statistics(int pos, int rep, int k) {
 
         if (pos < nclasses) {
             completion[pos]++;
+            
             //std::cout << pos << std::endl;
             if (pos == 0) {
                 small_seq++;
@@ -652,6 +704,8 @@ private:
         if (jobs_tot == 0) {
             idle_period += delta;
         }
+
+
         
         // autocorr
         /*auto state_ser = policy->get_state_ser();
@@ -792,9 +846,18 @@ private:
         }
         waste += (n - occ) * delta;
         viol += policy->get_violations_counter() * delta;
+        //std::cout << policy->get_free_ser() << std::endl;
         rep_free_servers_distro[policy->get_free_ser()] += delta;
 
         windowSize.push_back(policy->get_window_size() * delta);
+
+        /*if (rep == 1 && k < 100000) {
+            //std::cout << k << std::endl;
+            std::vector<int> seq_v = policy->get_sequence_buffer();
+            autocorr_seq_list[0].push_back(seq_v[0]);
+            autocorr_seq_list[1].push_back(seq_v[1]);
+            autocorr_seq_times.push_back(simtime);
+        }*/
     }
 };
 

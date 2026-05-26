@@ -19,6 +19,7 @@ public:
     virtual const std::vector<int>& get_state_buf() = 0;
     virtual const std::vector<std::list<long int>>& get_stopped_jobs() = 0;
     virtual const std::vector<std::list<long int>>& get_ongoing_jobs() = 0;
+    virtual const std::vector<int> get_sequence_buffer() = 0;
     virtual int get_free_ser() = 0;
     virtual int get_window_size() = 0;
     virtual int get_w() const = 0;

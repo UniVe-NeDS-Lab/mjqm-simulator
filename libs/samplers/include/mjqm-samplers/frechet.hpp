@@ -29,6 +29,7 @@ public:
     const double alpha;
     const double s;
     const double m;
+    const double prob;
     const double mean = alpha > 1 ? m + (s * tgamma(1 - 1 / alpha)) : std::numeric_limits<double>::max();
     const double variance = alpha > 2 ? pow(s, 2) * (tgamma(1 - 2 / alpha) - pow(tgamma(1 - 1 / alpha), 2))
                                       : std::numeric_limits<double>::max();
@@ -40,15 +41,16 @@ public:
     // operative methods
     inline double get_mean() const override { return mean; }
     inline double get_variance() const override { return variance; }
+    inline double get_prob() const override { return prob; }
     inline double sample() override { return s * pow(-log(randU01()), exponent); }
 
     // factory methods
     explicit Frechet(const std::string& name, const double alpha, const double s = 1., const double m = 0.,
-                     bool = true) : DistributionSampler(name), alpha(alpha), s(s), m(m) {
+                     bool = true) : DistributionSampler(name), alpha(alpha), s(s), m(m), prob(1.) {
         assert(alpha > 1); // alpha must be greater than 1 for the mean to be finite
     }
     explicit Frechet(const std::string& name, const double s_ratio, const double alpha, const double rate,
-                     const double m = 0.) : DistributionSampler(name), alpha(alpha), s(s_ratio / rate), m(m) {
+                     const double m = 0.) : DistributionSampler(name), alpha(alpha), s(s_ratio / rate), m(m), prob(1.) {
         assert(alpha > 1); // alpha must be greater than 1 for the mean to be finite
     }
 

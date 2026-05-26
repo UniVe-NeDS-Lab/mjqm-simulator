@@ -27,6 +27,7 @@ public:
     const std::vector<std::list<long int>>& get_ongoing_jobs() override { return ongoing_jobs; }
     int get_free_ser() override { return freeservers + std::accumulate(freeservers_rsv.begin(), freeservers_rsv.end(), 0);; }
     int get_window_size() override { return 0; }
+    const std::vector<int> get_sequence_buffer() override { return {0, 0}; }
     int get_w() const override { return w; }
     int get_violations_counter() override { return violations_counter; }
     double get_overest_max() override { return 1.0; }

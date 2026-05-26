@@ -92,4 +92,9 @@ node_modules/
 
 p*.txt
 
+*.lock
+
+mjqm-simulator-docker-*/
+
+docker-artifact/*
 uv.lock

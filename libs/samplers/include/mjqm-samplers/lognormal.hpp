@@ -15,7 +15,7 @@
 class Lognormal : public DistributionSampler {
 public:
     explicit Lognormal(const std::string& name, const double mean, const double variance) :
-        DistributionSampler(name), mean(mean), variance(variance) {
+        DistributionSampler(name), mean(mean), variance(variance), prob(1.) {
         std::pair<double, double> res = compute_normal_params(mean);
         this->mu = res.first;
         this->sigma = res.second;
@@ -36,10 +36,12 @@ public: // descriptive parameters and statistics
     const double variance;
     double mu;
     double sigma;
+    const double prob;
 
 public:
     inline double get_mean() const override { return mean; }
     inline double get_variance() const override { return variance; }
+    inline double get_prob() const override { return prob; }
     inline double sample() override {
         double u, v, s;
         do {

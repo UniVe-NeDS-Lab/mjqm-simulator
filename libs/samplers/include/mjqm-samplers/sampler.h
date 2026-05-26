@@ -26,6 +26,7 @@ public:
     virtual double sample() = 0;
     virtual double get_mean() const = 0;
     virtual double get_variance() const = 0;
+    virtual double get_prob() const = 0;
 
     // factory methods
     virtual std::unique_ptr<DistributionSampler> clone(const std::string& name) const = 0;

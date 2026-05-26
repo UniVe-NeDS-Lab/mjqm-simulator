@@ -18,14 +18,16 @@ public:
     const double lambda;
     const double mean = 1. / lambda;
     const double variance = 1. / pow(lambda, 2);
+    const double prob;
 
     // operative methods
     inline double get_mean() const override { return mean; }
     inline double get_variance() const override { return variance; }
+    inline double get_prob() const override { return prob; }
     inline double sample() override { return -log(randU01()) / lambda; }
 
     // direct and indirect constructors
-    explicit Exponential(const std::string& name, double lambda) : DistributionSampler(name), lambda(lambda) {}
+    explicit Exponential(const std::string& name, double lambda) : DistributionSampler(name), lambda(lambda), prob(1.) {}
 
     static std::unique_ptr<DistributionSampler> with_rate(const std::string& name, const double rate) {
         return std::make_unique<Exponential>(name, rate);

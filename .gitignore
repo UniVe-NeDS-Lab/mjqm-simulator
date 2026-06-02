@@ -89,7 +89,6 @@ __pycache__/
 node_modules/
 
 *.ipynb
-
 p*.txt
-
-uv.lock
+*.lock
+*docker*/

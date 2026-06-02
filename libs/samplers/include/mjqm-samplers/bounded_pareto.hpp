@@ -24,22 +24,35 @@ public:
     const double l;
     const double h;
     const double alpha;
-    const double mean = alpha == 1 ? h * l / (h - l) * log(h / l)
-                                   : (pow(l, alpha) / (1 - pow(l / h, alpha)) * alpha / (alpha - 1) *
-                                      (1 / pow(l, alpha - 1) - 1 / pow(h, alpha - 1)));
-    const double variance = alpha == 2 ? 2 * pow(h, 2) * pow(l, 2) / (pow(h, 2) - pow(l, 2)) * log(h / l)
-                                       : (pow(l, alpha) / (1 - pow(l / h, alpha)) * alpha / (alpha - 2) *
-                                          (1 / pow(l, alpha - 2) - 1 / pow(h, alpha - 2)));
+    const double mean = raw_moment(alpha, l, h, 1);
+    const double second_moment = raw_moment(alpha, l, h, 2);
+    const double variance = second_moment - mean * mean;
+    const double cv = sqrt(variance) / mean;
 
 private:
     const double h_to_alpha = pow(h, alpha);
     const double l_to_alpha = pow(l, alpha);
     const double den = h_to_alpha * l_to_alpha;
 
+    // E[X^k] = (L^α / D) · (α / (α−k)) · (L^{k−α} − H^{k−α}),  special case α = k
+    [[nodiscard]] static double raw_moment(const double alpha, const double l, const double h, const int k) noexcept {
+        const double kd = static_cast<double>(k);
+        const double d = 1.0 - pow(l / h, alpha); // 1 − (L/H)^α
+        const double norm = pow(l, alpha) / d; // L^α / D
+        if (alpha == kd) {
+            const double log_range = log(h / l); // ln(H/L)
+            return kd * norm * log_range; // k · Lᵏ/D · ln(H/L)
+        }
+        const double moment_scale = alpha / (alpha - kd); // α / (α−k)
+        const double range_term = pow(l, kd - alpha) - pow(h, kd - alpha); // L^{k−α} − H^{k−α}
+        return norm * moment_scale * range_term;
+    }
+
 public:
     // operative methods
     inline double get_mean() const override { return mean; }
     inline double get_variance() const override { return variance; }
+
     inline double sample() override {
         double u = randU01();
         double num = u * h_to_alpha - u * l_to_alpha - h_to_alpha;
@@ -74,8 +87,8 @@ public:
     // string conversion
     explicit operator std::string() const override {
         std::ostringstream oss;
-        oss << "bounded pareto (alpha=" << alpha << " ; l=" << l << " ; h=" << h << " => mean=" << mean
-            << " ; variance=" << variance << ")";
+        oss << "bounded pareto (alpha=" << alpha << " ; l=" << l << " ; h=" << h
+            << " => mean=" << mean << " ; variance=" << variance << " ; cv=" << cv << ")";
         return oss.str();
     }
 };

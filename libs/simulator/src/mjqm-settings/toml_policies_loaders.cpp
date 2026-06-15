@@ -115,6 +115,13 @@ std::unique_ptr<Policy> quick_swap_builder(toml::table& data, ExperimentConfig& 
     return std::make_unique<QuickSwap>(-4, conf.cores, n_classes, sizes, threshold);
 }
 
+std::unique_ptr<Policy> orbit_builder(toml::table& data, ExperimentConfig& conf) {
+    std::vector<unsigned int> sizes;
+    unsigned int n_classes = conf.get_sizes(sizes);
+    const auto r_max = data.at_path("policy.orbit_max").value<int>().value_or(0);
+    return std::make_unique<Orbit>(-5, conf.cores, n_classes, sizes, r_max);
+}
+
 std::unique_ptr<Policy> first_fit_builder(toml::table&, ExperimentConfig& conf) {
     std::vector<unsigned int> sizes;
     unsigned int n_classes = conf.get_sizes(sizes);

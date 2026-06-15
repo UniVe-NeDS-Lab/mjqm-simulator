@@ -252,6 +252,9 @@ First-Fit scans the queue from the head and admits the first job whose server re
 ### LCFS
 - `policy = "lcfs"`
 
+### FIFO with oribit
+- `policy = "orbit"`
+
 # Overriding parameters from command line
 
 You can override any parameter defined in the configuration file from the command line.

@@ -202,7 +202,8 @@
         "first fit",
         "adaptive msf",
         "static msf",
-        "lcfs"
+        "lcfs",
+        "orbit"
       ],
       "options": {
         "enum_titles": [
@@ -219,7 +220,8 @@
           "First-Fit",
           "Adaptive MSF",
           "Static MSF",
-          "LCFS"
+          "LCFS",
+          "FIFO with Orbit"
         ]
       }
     },

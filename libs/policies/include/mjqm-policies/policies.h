@@ -13,6 +13,7 @@
 #include <mjqm-policies/FirstFit.h>
 #include <mjqm-policies/KillSmart.h>
 #include <mjqm-policies/LCFS.h>
+#include <mjqm-policies/Orbit.h>
 #include <mjqm-policies/MostServerFirst.h>
 #include <mjqm-policies/ServerFilling.h>
 #include <mjqm-policies/ServerFillingMem.h>

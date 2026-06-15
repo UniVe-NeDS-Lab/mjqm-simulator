@@ -37,6 +37,8 @@ std::unique_ptr<Policy> first_fit_builder(toml::table&, ExperimentConfig& conf);
 
 std::unique_ptr<Policy> lcfs_builder(toml::table&, ExperimentConfig& conf);
 
+std::unique_ptr<Policy> orbit_builder(toml::table&, ExperimentConfig& conf);
+
 std::unique_ptr<Policy> adaptive_msf_builder(toml::table&, ExperimentConfig& conf);
 
 std::unique_ptr<Policy> static_msf_builder(toml::table&, ExperimentConfig& conf);
@@ -59,6 +61,7 @@ inline static std::unordered_map<std::string_view, policy_builder> policy_builde
     {"static msf", static_msf_builder},
     {"most server first", most_server_first_builder},
     {"lcfs", lcfs_builder},
+    {"orbit", orbit_builder},
 };
 
 #endif // TOML_POLICIES_LOADERS_H

@@ -7,9 +7,12 @@
 ### Above combination will ignore all files without extension ###
 !configure
 !rebuild
+!Dockerfile
 
 # Compiled object files
 Results/
+docker-artifact/
+*.zip
 out
 *.o
 *.obj

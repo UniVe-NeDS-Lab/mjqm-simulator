@@ -1,0 +1,125 @@
+name: artifact
+
+on:
+  push:
+    branches: [main, feat/artifact]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: docker/setup-buildx-action@v3
+      - name: Build artifact
+        run: bash export-artifact.sh
+      - name: Verify artifact contents
+        run: |
+          cd docker-artifact
+          test -f README.md
+          test ! -f INSTRUCTIONS.md
+          test -d src
+          test -f Dockerfile
+          test -f .dockerignore
+          test -f mjqm-simulator.tar.gz
+          ! grep -q 'IMAGE_ID_PLACEHOLDER' README.md
+      - name: Verify SHA-256 checksum
+        run: test -f mjqm-simulator-docker-*.sha256
+      - name: Upload artifact zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-zip
+          path: mjqm-simulator-docker-*.zip
+          retention-days: 3
+
+  test-linux:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact-zip
+      - name: Extract artifact
+        run: |
+          unzip mjqm-simulator-docker-*.zip -d artifact
+          ls -la artifact/
+      - name: Load Docker image
+        working-directory: artifact
+        run: docker load -i mjqm-simulator.tar.gz
+      - name: Test --help
+        run: docker run --rm mjqm-simulator ./simulator --help
+      - name: Verify README inside image
+        run: |
+          docker run --rm mjqm-simulator cat README.md > /tmp/readme.md
+          ! grep -q 'artifact-only-begin' /tmp/readme.md
+          ! grep -q 'IMAGE_ID_PLACEHOLDER' /tmp/readme.md
+      - name: Test quick check
+        run: |
+          mkdir -p Results
+          docker run --rm --cpus=2 \
+            -v "$(pwd)/Results:/app/Results" \
+            mjqm-simulator \
+            ./run-examples.sh
+          test -d Results/validation_mm1
+          ls Results/validation_mm1/*.csv
+      - name: Test web UI
+        run: |
+          id=$(docker run -d --rm -p 8050:8050 \
+            mjqm-simulator \
+            uv run --no-dev scripts/plotly_app.py)
+          sleep 15
+          curl -sf http://localhost:8050 > /dev/null
+          docker stop "$id"
+
+  test-windows:
+    needs: build
+    runs-on: windows-latest
+    steps:
+      # GitHub-hosted Windows runners only support Windows containers.
+      # This action installs Docker Engine with Linux container support.
+      - name: Set up Docker (Linux containers)
+        uses: crazy-max/ghaction-setup-docker@v4
+        with:
+          daemon-config: |
+            { "features": { "containerd-snapshotter": true } }
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact-zip
+      - name: Extract artifact
+        shell: pwsh
+        run: |
+          Expand-Archive -Path (Get-Item mjqm-simulator-docker-*.zip) -DestinationPath artifact
+          Get-ChildItem artifact/
+      - name: Load Docker image
+        working-directory: artifact
+        run: docker load -i mjqm-simulator.tar.gz
+      - name: Test --help
+        run: docker run --rm mjqm-simulator ./simulator --help
+      - name: Test quick check (PowerShell)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path Results
+          docker run --rm --cpus=2 `
+            -v "${PWD}/Results:/app/Results" `
+            mjqm-simulator `
+            ./run-examples.sh
+          Get-ChildItem -Path Results -Recurse
+      - name: Test web UI
+        shell: pwsh
+        run: |
+          $id = docker run -d --rm -p 8050:8050 `
+            mjqm-simulator `
+            uv run --no-dev scripts/plotly_app.py
+          Start-Sleep -Seconds 15
+          try {
+            Invoke-WebRequest -Uri http://localhost:8050 -UseBasicParsing -ErrorAction Stop
+          } finally {
+            docker stop $id
+          }

@@ -122,6 +122,15 @@ std::unique_ptr<Policy> orbit_builder(toml::table& data, ExperimentConfig& conf)
     return std::make_unique<Orbit>(-5, conf.cores, n_classes, sizes, r_max);
 }
 
+std::unique_ptr<Policy> orbit_retrial_builder(toml::table& data, ExperimentConfig& conf) {
+    std::vector<unsigned int> sizes;
+    unsigned int n_classes = conf.get_sizes(sizes);
+    const auto r_max = data.at_path("policy.orbit_max").value<int>().value_or(0);
+    const auto sigma = data.at_path("policy.sigma").value<double>().value_or(1.0);
+    const auto retry_ind = data.at_path("policy.retry_ind").value<int>().value_or(0);
+    return std::make_unique<OrbitRetrial>(-6, conf.cores, n_classes, sizes, r_max, sigma, retry_ind);
+}
+
 std::unique_ptr<Policy> first_fit_builder(toml::table&, ExperimentConfig& conf) {
     std::vector<unsigned int> sizes;
     unsigned int n_classes = conf.get_sizes(sizes);

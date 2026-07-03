@@ -241,12 +241,12 @@ std::vector<std::vector<double>> buildP(std::vector<double> p, double rho) {
     return P;
 }
 
-Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.classes.size())) {
+Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.classes.size())), gen(rd()) {
     this->n = static_cast<int>(conf.cores);
     this->w = conf.policy->get_w(); // TODO should transform all branches that need it here into methods of the policies
     this->rep_free_servers_distro.resize(conf.cores + 1);
-    this->fel.resize(nclasses * 2);
-    this->job_fel.resize(nclasses * 2);
+    this->fel.resize((nclasses * 2)+1);
+    this->job_fel.resize((nclasses * 2)+1);
     this->jobs_inservice.resize(nclasses);
     this->jobs_preempted.resize(nclasses);
     this->curr_job_seq.resize(nclasses);

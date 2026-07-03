@@ -17,6 +17,8 @@ public:
         servers(servers), w(w), sizes(sizes), violations_counter(0) {}
     void arrival(int c, int size, long int id) override;
     void departure(int c, int size, long int id) override;
+    void retry() override {};
+    double get_sigma() override {return 0.0;};
     bool fit_jobs(std::unordered_map<long int, double> holdTime, double simTime) override { return false; };
     double get_overest_max() override { return 1.0; }
     const std::vector<int>& get_state_ser() override { return state_ser; }

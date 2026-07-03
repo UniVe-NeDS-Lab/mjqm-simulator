@@ -252,8 +252,11 @@ First-Fit scans the queue from the head and admits the first job whose server re
 ### LCFS
 - `policy = "lcfs"`
 
-### FIFO with oribit
+### FIFO with orbit
 - `policy = "orbit"`
+
+### FIFO with orbit and retrial
+- `policy = "orbit retrial"`
 
 # Overriding parameters from command line
 

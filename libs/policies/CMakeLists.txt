@@ -9,6 +9,7 @@ add_library(policies
         src/mjqm-policies/LCFS.cpp
         src/mjqm-policies/MostServerFirst.cpp
         src/mjqm-policies/Orbit.cpp
+        src/mjqm-policies/OrbitRetrial.cpp
         src/mjqm-policies/QuickSwap.cpp
         src/mjqm-policies/ServerFilling.cpp
         src/mjqm-policies/ServerFillingMem.cpp

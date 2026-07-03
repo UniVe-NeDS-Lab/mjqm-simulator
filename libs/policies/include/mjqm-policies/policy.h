@@ -15,6 +15,8 @@ class Policy {
 public:
     virtual void arrival(int c, int size, long int id) = 0;
     virtual void departure(int c, int size, long int id) = 0;
+    virtual void retry() = 0;
+    virtual double get_sigma() = 0;
     virtual const std::vector<int>& get_state_ser() = 0;
     virtual const std::vector<int>& get_state_buf() = 0;
     virtual const std::vector<std::list<long int>>& get_stopped_jobs() = 0;

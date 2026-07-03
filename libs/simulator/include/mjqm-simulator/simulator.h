@@ -167,33 +167,6 @@ public:
         auto rt_mean_var = mean_var(totRawResponseTime);
         stats->resp_tot.collect(rt_mean_var.first);
         stats->resp_var_tot.collect(rt_mean_var.second);
-
-        /*stats->phase_two_dur.collect((phase_two_duration * 1.0) / simtime);
-        stats->phase_three_dur.collect((phase_three_duration * 1.0) / job_seq_amount[1]);
-        stats->idle_period_prob.collect((idle_period * 1.0) / simtime);
-
-        stats->p0.collect((autocorr_phase_times[0] * 1.0) / cycle_count);
-        stats->p1.collect((autocorr_phase_times[1] * 1.0) / cycle_count);
-        stats->p2.collect((autocorr_phase_times[4] * 1.0) / cycle_count);
-        stats->p3.collect((autocorr_phase_times[5] * 1.0) / cycle_count);
-        stats->p0a.collect((autocorr_phase_times[2] * 1.0) / cycle_count);
-        stats->p1a.collect((autocorr_phase_times[3] * 1.0) / cycle_count);
-        stats->p2a.collect((autocorr_phase_times[6] * 1.0) / cycle_count);
-        stats->p3a.collect((autocorr_phase_times[7] * 1.0) / cycle_count);
-        stats->small_srv_switch.collect((small_switch*1.0)/cycle_count);
-        stats->big_srv_switch.collect((big_switch*1.0)/cycle_count);
-        stats->p0_res.collect((autocorr_residuals[0] * 1.0) / cycle_count);
-        stats->p1_res.collect((autocorr_residuals[1] * 1.0) / cycle_count);
-        stats->p2_res.collect((autocorr_residuals[4] * 1.0) / cycle_count);
-        stats->p3_res.collect((autocorr_residuals[5] * 1.0) / cycle_count);*/
-
-        /*if (!tot_small_seq.empty()) {
-            stats->small_seq_avg.collect( std::accumulate(tot_small_seq.begin(), tot_small_seq.end(), 0.0) / tot_small_seq.size() );
-        }
-        if (!tot_big_seq.empty()) {
-            stats->big_seq_avg.collect( std::accumulate(tot_big_seq.begin(), tot_big_seq.end(), 0.0) / tot_big_seq.size() );
-        }*/
-        
     }
 
     void simulate(unsigned long nevents, unsigned int repetitions = 1) {
@@ -213,9 +186,7 @@ public:
         if (arrival_det) {
             stats->lambda = 1. / this->arr_time_samplers[0]->get_mean();
         }
-
-        std::random_device rd;                  // Seed (non-deterministic if available)
-        std::mt19937 gen(rd());                 // Mersenne Twister generator
+        //gen(std::random_device{}());                 // Mersenne Twister generator
         //auto dist = std::uniform_real_distribution<double>(0.0, policy->get_overest_max());
 
         for (unsigned int rep = 0; rep < repetitions; rep++) {
@@ -260,6 +231,8 @@ public:
                     policy->departure(pos, sizes[pos], job_fel[pos]);
                     last_ev_arr = false;
                     // std::cout << "dep" << std::endl;
+                } else if (pos == (nclasses*2)) {
+                    policy->retry();
                 } else {
                     auto job_id = k + (nevents * rep);
                     if (this->w == -3) {
@@ -324,90 +297,6 @@ public:
         for (auto& x : rep_free_servers_distro) {
             x /= simtime;
         }
-
-        /*std::ofstream output_file("autocorr/p0_"+std::to_string(l[0])+".txt");
-        
-        for (double x : autocorr_phase_time_list[0]) {
-            output_file << x << '\n';
-        }
-
-        output_file.close();
-
-        std::ofstream output_file_1("autocorr/p1_"+std::to_string(l[0])+".txt");
-        
-        for (double x : autocorr_phase_time_list[1]) {
-            output_file_1 << x << '\n';
-        }
-
-        output_file_1.close();
-
-        std::ofstream output_file_2("autocorr/p2_"+std::to_string(l[0])+".txt");
-        
-        for (double x : autocorr_phase_time_list[4]) {
-            output_file_2 << x << '\n';
-        }
-
-        output_file_2.close();
-
-        std::ofstream output_file_3("autocorr/p3_"+std::to_string(l[0])+".txt");
-        
-        for (double x : autocorr_phase_time_list[5]) {
-            output_file_3 << x << '\n';
-        }
-
-        output_file_3.close();
-
-        std::ofstream output_file_res("autocorr/p0_res_"+std::to_string(l[0])+".txt");
-        
-        for (double x : autocorr_residual_list[0]) {
-            output_file_res << x << '\n';
-        }
-
-        output_file_res.close();
-
-        std::ofstream output_file_res_1("autocorr/p1_res_"+std::to_string(l[0])+".txt");
-        
-        for (double x : autocorr_residual_list[1]) {
-            output_file_res_1 << x << '\n';
-        }
-
-        output_file_res_1.close();
-
-        std::ofstream output_file_res_2("autocorr/p2_res_"+std::to_string(l[0])+".txt");
-        
-        for (double x : autocorr_residual_list[4]) {
-            output_file_res_2 << x << '\n';
-        }
-
-        output_file_res_2.close();
-
-        std::ofstream output_file_res_3("autocorr/p3_res_"+std::to_string(l[0])+".txt");
-        
-        for (double x : autocorr_residual_list[5]) {
-            output_file_res_3 << x << '\n';
-        }
-
-        output_file_res_3.close();*/
-        /*std::ofstream output_file("seq_buffer.txt");
-
-        auto time_it  = autocorr_seq_times.begin();
-        auto small_it = autocorr_seq_list[0].begin();
-        auto big_it   = autocorr_seq_list[1].begin();
-
-        while (time_it != autocorr_seq_times.end() &&
-            small_it != autocorr_seq_list[0].end() &&
-            big_it != autocorr_seq_list[1].end()) {
-
-            output_file << *time_it << ' '
-                        << *small_it << ' '
-                        << *big_it << '\n';
-
-            ++time_it;
-            ++small_it;
-            ++big_it;
-        }
-
-        output_file.close();*/
     }
 
     void produce_statistics(ExperimentStats& stats, const double confidence = 0.05) const {
@@ -517,6 +406,9 @@ private:
     std::vector<std::unordered_map<long int, double>> jobs_preempted; //[id, time_left]
 
     std::string logfile_name;
+
+    std::random_device rd;
+    std::mt19937 gen;
 
     void resample() {
         // add arrivals and departures
@@ -665,6 +557,20 @@ private:
                     }
                 }
             }
+            if (this->w == -6) {
+                double sigma = policy->get_sigma();
+                if (sigma > 0.0) {
+                    //gen(std::random_device{}());                 // Mersenne Twister generator
+                    std::exponential_distribution<double> exp_dist(sigma);
+                    if (fel[nclasses*2] <= simtime || fel[nclasses*2] == std::numeric_limits<double>::max()) {
+                        fel[nclasses*2] = exp_dist(gen) + simtime;
+                    }
+                } else {
+                    fel[nclasses*2] = std::numeric_limits<double>::max();
+                }
+            } else{
+                fel[nclasses*2] = std::numeric_limits<double>::max();
+            }
         }
     }
 
@@ -705,141 +611,6 @@ private:
             idle_period += delta;
         }
 
-
-        
-        // autocorr
-        /*auto state_ser = policy->get_state_ser();
-        int state_ser_small = state_ser[0];
-        int state_ser_big = state_ser[1];
-        auto state_buf = policy->get_state_buf();
-        int state_buf_small = state_buf[0];
-        int state_buf_big = state_buf[1];
-        if (state_ser_small > 0) {
-            //reset cycle
-            if (last_srv == 1) {
-                for (int i = 0; i < 8; i++) {
-                    autocorr_phases[i] = false;
-                }
-                cycle_count += 1;
-            }
-
-            if (pos < nclasses) {
-                autocorr_phase_times[autocorr_last_phase] += delta;
-            } else {
-                if (pos-nclasses == 0) { // small arrival
-                    if (autocorr_phases[1] == false) {
-                        autocorr_phases[0] = true;
-                        autocorr_phase_times[0] += delta;
-                        if (autocorr_last_phase != 0){
-                            small_switch += 1;
-                            if (autocorr_last_phase == 5) {
-                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
-                                autocorr_residual_list[autocorr_last_phase].push_back(state_ser_small);
-                                autocorr_residuals[autocorr_last_phase] += state_ser_small;
-                            }
-                            start_phase = fel[pos];
-                        }
-                        autocorr_last_phase = 0;
-                    } else if (autocorr_phases[1] == true) {
-                        autocorr_phases[2] = true;
-                        autocorr_phase_times[2] += delta;
-                        if (autocorr_last_phase != 2){
-                            small_switch += 1;
-                            if (autocorr_last_phase == 1) {
-                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
-                            }
-                            start_phase = fel[pos];
-                        }
-                        autocorr_last_phase = 2;
-                    }
-                } else if (pos-nclasses == 1) { // big arrival
-                    if (autocorr_phases[2] == false) {
-                        autocorr_phases[0] = true;
-                        autocorr_phases[1] = true;
-                        autocorr_phase_times[1] += delta;
-                        if (autocorr_last_phase != 1){
-                            small_switch += 1;
-                            if (autocorr_last_phase == 0) {
-                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
-                                autocorr_residual_list[autocorr_last_phase].push_back(state_ser_small);
-                                autocorr_residuals[autocorr_last_phase] += state_ser_small;
-                            }
-                            start_phase = fel[pos];
-                        }
-                        autocorr_last_phase = 1;
-                    } else if (autocorr_phases[2] == true) {
-                        autocorr_phases[3] = true;
-                        autocorr_phase_times[3] += delta;
-                         if (autocorr_last_phase != 3){
-                            small_switch += 1;
-                            start_phase = fel[pos];
-                        }
-                        autocorr_last_phase = 3;
-                    }
-                }
-            }
-            last_srv = 0;
-        } else if (state_ser_big > 0) {
-            if (pos < nclasses) {
-                autocorr_phase_times[autocorr_last_phase] += delta;
-            } else {
-                if (pos-nclasses == 1) { // big arrival
-                    if (autocorr_phases[5] == false) {
-                        autocorr_phases[4] = true;
-                        autocorr_phase_times[4] += delta;
-                        if (autocorr_last_phase != 4){
-                            big_switch += 1;
-                            if (autocorr_last_phase == 1) {
-                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
-                                autocorr_residual_list[autocorr_last_phase].push_back(state_buf_big);
-                                autocorr_residuals[autocorr_last_phase] += state_buf_big;
-                            }
-                            start_phase = fel[pos];
-                        }
-                        autocorr_last_phase = 4;
-                    } else if (autocorr_phases[5] == true) {
-                        autocorr_phases[6] = true;
-                        autocorr_phase_times[6] += delta;
-                        if (autocorr_last_phase != 6){
-                            big_switch += 1;
-                            if (autocorr_last_phase == 5) {
-                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
-                            }
-                            start_phase = fel[pos];
-                        }
-                        autocorr_last_phase = 6;
-                    }
-                } else if (pos-nclasses == 0) { // small arrival
-                    if (autocorr_phases[6] == false) {
-                        autocorr_phases[4] = true;
-                        autocorr_phases[5] = true;
-                        autocorr_phase_times[5] += delta;
-                        if (autocorr_last_phase != 5){
-                            big_switch += 1;
-                            if (autocorr_last_phase == 4) {
-                                autocorr_phase_time_list[autocorr_last_phase].push_back(fel[pos]-start_phase);
-                                autocorr_residual_list[autocorr_last_phase].push_back(state_buf_big);
-                                autocorr_residuals[autocorr_last_phase] += state_buf_big;
-                            }
-                            start_phase = fel[pos];
-                        }
-                        autocorr_last_phase = 5;
-                    } else if (autocorr_phases[6] == true) {
-                        autocorr_phases[7] = true;
-                        autocorr_phase_times[7] += delta;
-                         if (autocorr_last_phase != 7){
-                            big_switch += 1;
-                            start_phase = fel[pos];
-                        }
-                        autocorr_last_phase = 7;
-                    }
-                }
-            }
-            last_srv = 1;
-        } else { // idle period include?
-            autocorr_phase_times[autocorr_last_phase] += delta;
-        }*/
-        //
         unsigned int occ = 0;
         for (int i = 0; i < nclasses; i++) {
             occ += policy->get_state_ser()[i] * sizes[i];

@@ -14,6 +14,8 @@ public:
         freeservers(servers), servers(servers), w(w) {}
     void arrival(int c, int size, long int id) override;
     void departure(int c, int size, long int id) override;
+    void retry() override {};
+    double get_sigma() override {return 0.0;};
     const std::vector<int>& get_state_ser() override { return state_ser; }
     const std::vector<int>& get_state_buf() override { return state_buf; }
     const std::vector<std::list<long int>>& get_stopped_jobs() override { return stopped_jobs; }

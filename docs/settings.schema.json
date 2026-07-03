@@ -203,7 +203,8 @@
         "adaptive msf",
         "static msf",
         "lcfs",
-        "orbit"
+        "orbit",
+        "orbit retrial"
       ],
       "options": {
         "enum_titles": [
@@ -221,7 +222,8 @@
           "Adaptive MSF",
           "Static MSF",
           "LCFS",
-          "FIFO with Orbit"
+          "FIFO with Orbit",
+          "FIFO with Orbit and Retrial"
         ]
       }
     },

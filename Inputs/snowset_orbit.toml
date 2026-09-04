@@ -1,0 +1,205 @@
+identifier = "snowset_orbit"
+repetitions = 20
+cores = 128
+
+arrival.distribution = "exponential"
+
+service.distribution = "exponential"
+
+
+[[class]]
+cores = 1
+arrival.prob = 0.4958456137802089
+service.mean = 3.1576036567955516
+
+[[class]]
+cores = 2
+arrival.prob = 0.2072514571652704
+service.mean = 7.390588505647243
+
+[[class]]
+cores = 3
+arrival.prob = 0.012384868419181
+service.mean = 2.381137340442721
+
+[[class]]
+cores = 4
+arrival.prob = 0.061860342628337
+service.mean = 12.474008976805875
+
+[[class]]
+cores = 5
+arrival.prob = 0.002294774010224
+service.mean = 1.5577894048397645
+
+[[class]]
+cores = 6
+arrival.prob = 0.002117176711259
+service.mean = 1.9449886578449905
+
+[[class]]
+cores = 7
+arrival.prob = 0.003105724146009
+service.mean = 1.8244958118556702
+
+[[class]]
+cores = 8
+arrival.prob = 0.080275031523045
+service.mean = 13.372072023731624
+
+[[class]]
+cores = 9
+arrival.prob = 0.000776931431382
+service.mean = 1.2836516419832583
+
+[[class]]
+cores = 10
+arrival.prob = 0.000890994447972
+service.mean = 1.05278270634475
+
+[[class]]
+cores = 11
+arrival.prob = 0.000881989804072
+service.mean = 1.1932665910380033
+
+[[class]]
+cores = 12
+arrival.prob = 0.000887015341689
+service.mean = 1.33948730964467
+
+[[class]]
+cores = 13
+arrival.prob = 0.000890493001939
+service.mean = 1.3180775280898877
+
+[[class]]
+cores = 14
+arrival.prob = 0.001109116209923
+service.mean = 1.237214253495715
+
+[[class]]
+cores = 15
+arrival.prob = 0.001444801932869
+service.mean = 1.730139889196676
+
+[[class]]
+cores = 16
+arrival.prob = 0.116978419614679
+service.mean = 3.5979422692845565
+
+[[class]]
+cores = 17
+arrival.prob = 0.000181600832012
+service.mean = 2.320564738292011
+
+[[class]]
+cores = 18
+arrival.prob = 0.000175097346883
+service.mean = 2.562054285714286
+
+[[class]]
+cores = 19
+arrival.prob = 0.000136575017466
+service.mean = 2.859710622710623
+
+[[class]]
+cores = 21
+arrival.prob = 0.000110061042726
+service.mean = 3.830840909090909
+
+[[class]]
+cores = 22
+arrival.prob = 0.000124068359544
+service.mean = 3.4065201612903224
+
+[[class]]
+cores = 23
+arrival.prob = 0.000156586617068
+service.mean = 3.0065686900958467
+
+[[class]]
+cores = 24
+arrival.prob = 0.000174096280038
+service.mean = 3.3113706896551726
+
+[[class]]
+cores = 25
+arrival.prob = 0.000187604609656
+service.mean = 3.660725333333333
+
+[[class]]
+cores = 26
+arrival.prob = 0.000194108782889
+service.mean = 3.509056701030928
+
+[[class]]
+cores = 27
+arrival.prob = 0.000176597068865
+service.mean = 3.8557308781869688
+
+[[class]]
+cores = 28
+arrival.prob = 0.000142078587719
+service.mean = 5.322038732394366
+
+[[class]]
+cores = 29
+arrival.prob = 0.000150083281691
+service.mean = 5.338333333333333
+
+[[class]]
+cores = 30
+arrival.prob = 0.000168093280187
+service.mean = 14.65039880952381
+
+[[class]]
+cores = 31
+arrival.prob = 0.000245136107066
+service.mean = 7.299551934826884
+
+[[class]]
+cores = 32
+arrival.prob = 0.005232404399062
+service.mean = 35.06697189023807
+
+[[class]]
+cores = 63
+arrival.prob = 0.000128571644098
+service.mean = 3.575669260700389
+
+[[class]]
+cores = 64
+arrival.prob = 0.003183415991534
+service.mean = 12.012319610307983
+
+[[class]]
+cores = 128
+arrival.prob = 0.000138577549275
+service.mean = 365.7523718411552
+
+
+[[pivot]]
+events = 10000000
+policy = [
+#    "fifo",
+    {name = "orbit", orbit_max = 2},
+    {name = "orbit retrial", orbit_max = 2, sigma = 1, retry_ind = 0},
+    {name = "orbit retrial", orbit_max = 2, sigma = 10, retry_ind = 0},
+    {name = "orbit retrial", orbit_max = 10, sigma = 1, retry_ind = 0},
+    {name = "orbit retrial", orbit_max = 2, sigma = 1, retry_ind = 1},
+    {name = "orbit", orbit_max = 10},
+    {name = "orbit retrial", orbit_max = 10, sigma = 1, retry_ind = 1},
+#    "back filling",
+#    "most server first",
+#    "server filling memoryful",
+#    { name ="quick swap", threshold = 1 },
+#    { name ="quick swap", threshold = 32 },
+#    "first fit",
+#    "adaptive msf",
+#    "static msf",
+#    { name = "smash", window = 2 },
+#    { name = "smash", window = 5 },
+#    { name = "smash", window = 10 },
+]
+#arrival.rate = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]
+arrival.rate = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0]

@@ -18,6 +18,7 @@ public:
     double get_sigma() override {return 0.0;};
     const std::vector<int>& get_state_ser() override { return state_ser; }
     const std::vector<int>& get_state_buf() override { return state_buf; }
+    const std::vector<int>& get_state_orb() override { return state_buf; }
     const std::vector<std::list<long int>>& get_stopped_jobs() override { return stopped_jobs; }
     const std::vector<std::list<long int>>& get_ongoing_jobs() override { return ongoing_jobs; }
     int get_free_ser() override { return freeservers; }

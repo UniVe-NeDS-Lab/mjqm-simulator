@@ -75,6 +75,7 @@ public:
     const std::string name;
     CollectedStat occupancy_buf{"Queue", true};
     CollectedStat occupancy_ser{"Service", true};
+    CollectedStat occupancy_orb{"Orbit", true};
     CollectedStat occupancy_system{"System", true};
     CollectedStat wait_time{"Waiting", true};
     CollectedStat wait_time_var{"Waiting Variance", true};
@@ -96,6 +97,7 @@ public:
     void edit_stats(const std::function<void(Stat&)>& editor) {
         editor(occupancy_buf);
         editor(occupancy_ser);
+        editor(occupancy_orb);
         editor(occupancy_system);
         editor(wait_time);
         editor(wait_time_var);
@@ -113,6 +115,7 @@ public:
     void visit_stats(const std::function<void(const Stat&)>& visitor) const {
         visitor(occupancy_buf);
         visitor(occupancy_ser);
+        visitor(occupancy_orb);
         visitor(occupancy_system);
         visitor(wait_time);
         visitor(wait_time_var);
@@ -145,6 +148,7 @@ public:
     CollectedStat wasted{"Wasted Servers", true};
     CollectedStat utilisation{"Utilisation", true};
     CollectedStat occupancy_tot{"Queue Total", true};
+    CollectedStat occupancy_orbtot{"Orbit Total", true};
     CollectedStat wait_tot{"WaitTime Total", true};
     CollectedStat wait_var_tot{"WaitTime Variance", true};
     CollectedStat resp_tot{"RespTime Total", true};
@@ -179,6 +183,7 @@ public:
         editor(wasted);
         editor(utilisation);
         editor(occupancy_tot);
+        editor(occupancy_orbtot);
         editor(wait_tot);
         editor(wait_var_tot);
         editor(resp_tot);
@@ -216,6 +221,7 @@ public:
         visitor(wasted);
         visitor(utilisation);
         visitor(occupancy_tot);
+        visitor(occupancy_orbtot);
         visitor(wait_tot);
         visitor(wait_var_tot);
         visitor(resp_tot);

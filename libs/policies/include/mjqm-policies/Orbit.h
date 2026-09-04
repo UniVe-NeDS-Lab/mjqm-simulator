@@ -13,7 +13,7 @@
 class Orbit final : public Policy {
 public:
     Orbit(const int w, const int servers, const int classes, const std::vector<unsigned int>& sizes, const int r_max) :
-        state_buf(classes), state_ser(classes), stopped_jobs(classes), ongoing_jobs(classes), freeservers(servers),
+        state_buf(classes), state_ser(classes), state_orb(classes), stopped_jobs(classes), ongoing_jobs(classes), freeservers(servers),
         servers(servers), w(w), sizes(sizes), violations_counter(0), r_max(r_max), freeorbits(r_max) {}
     void arrival(int c, int size, long int id) override;
     void departure(int c, int size, long int id) override;
@@ -23,6 +23,7 @@ public:
     double get_overest_max() override { return 1.0; }
     const std::vector<int>& get_state_ser() override { return state_ser; }
     const std::vector<int>& get_state_buf() override { return state_buf; }
+    const std::vector<int>& get_state_orb() override { return state_orb; }
     const std::vector<std::list<long int>>& get_stopped_jobs() override { return stopped_jobs; }
     const std::vector<std::list<long int>>& get_ongoing_jobs() override { return ongoing_jobs; }
     int get_free_ser() override { return freeservers; }
@@ -48,6 +49,7 @@ private:
     std::list<std::tuple<int, int, long int>> orbit;
     std::vector<int> state_buf;
     std::vector<int> state_ser;
+    std::vector<int> state_orb;
     std::vector<std::list<long int>> stopped_jobs; // vector of list of ids
     std::vector<std::list<long int>> ongoing_jobs; // vector of list of ids
     int freeservers;

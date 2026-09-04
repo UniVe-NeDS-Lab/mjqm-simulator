@@ -263,6 +263,7 @@ Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.cl
 
     occupancy_buf.resize(nclasses);
     occupancy_ser.resize(nclasses);
+    occupancy_orb.resize(nclasses);
     completion.resize(nclasses);
     preemption.resize(nclasses);
     rawWaitingTime.resize(nclasses);

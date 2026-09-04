@@ -156,6 +156,10 @@ public:
     CollectedStat window_size{"Window Size", true};
     CollectedStat violations{"FIFO Violations", true};
     CollectedStat timings_tot{"Run Duration", true};
+    CollectedStat lock_time{"Average Lock Time", true};
+    CollectedStat big_0{"0 Big Prob.", true};
+    CollectedStat big_1{"1 Big Prob.", true};
+    CollectedStat big_2{"2 Big Prob.", true};
     /*CollectedStat phase_two_dur{"Phase Two Duration", true};
     CollectedStat phase_three_dur{"Phase Three Duration", true};
     CollectedStat idle_period_prob{"Idle Period Probability", true};
@@ -191,6 +195,10 @@ public:
         editor(window_size);
         editor(violations);
         editor(timings_tot);
+        editor(lock_time);
+        editor(big_0);
+        editor(big_1);
+        editor(big_2);
         /*editor(phase_two_dur);
         editor(phase_three_dur);
         editor(idle_period_prob);
@@ -229,6 +237,10 @@ public:
         visitor(window_size);
         visitor(violations);
         visitor(timings_tot);
+        visitor(lock_time);
+        visitor(big_0);
+        visitor(big_1);
+        visitor(big_2);
         /*visitor(phase_two_dur);
         visitor(phase_three_dur);
         visitor(idle_period_prob);

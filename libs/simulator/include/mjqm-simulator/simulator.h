@@ -45,6 +45,8 @@ public:
             e = 0;
         for (auto& e : occupancy_orb)
             e = 0;
+        //for (auto& e : occupancy_big)
+        //    e = 0;
         for (auto& e : autocorr_phase_times)
             e = 0;
         for (auto& e : autocorr_residuals)
@@ -80,6 +82,13 @@ public:
             e = 0;
         for (auto& e : fel)
             e -= simtime;
+
+        /*for (auto& e : lockStart) {
+            e -= simtime;
+        }
+
+        rawLockTimeTot = 0;
+        rawLockTimeCount = 0;*/
 
         for (size_t i = 0; i < jobs_inservice.size(); ++i) {
             for (auto job = jobs_inservice[i].begin(); job != jobs_inservice[i].end(); ++job) {
@@ -177,6 +186,11 @@ public:
         auto rt_mean_var = mean_var(totRawResponseTime);
         stats->resp_tot.collect(rt_mean_var.first);
         stats->resp_var_tot.collect(rt_mean_var.second);
+
+        /*stats->lock_time.collect(rawLockTimeTot / rawLockTimeCount);
+        stats->big_0.collect(occupancy_big[0] / simtime);
+        stats->big_1.collect(occupancy_big[1] / simtime);
+        stats->big_2.collect(occupancy_big[2] / simtime);*/
     }
 
     void simulate(unsigned long nevents, unsigned int repetitions = 1) {
@@ -358,6 +372,14 @@ private:
     std::unordered_map<long int, double> holdTimeDeclared;
     std::vector<std::list<double>> rawWaitingTime;
     std::vector<std::list<double>> rawResponseTime;
+
+    std::vector<double> lockStart;
+    //std::list<double> rawLockTime;
+    long int currBigHol;
+    int currFreeSer;
+    double rawLockTimeTot;
+    long int rawLockTimeCount;
+    std::vector<double> occupancy_big;
 
     std::list<double> windowSize;
     double idle_period;
@@ -582,6 +604,57 @@ private:
             } else{
                 fel[nclasses*2] = std::numeric_limits<double>::max();
             }
+
+            /*long int big_hol_id = policy->get_big_hol();
+            if (big_hol_id > 0) {
+                if (big_hol_id == currBigHol) {
+                    //set new lockStart
+                    int new_free_ser = policy->get_free_ser();
+                    if (new_free_ser > currFreeSer) {
+                        //std::cout << "set " << new_free_ser << std::endl;
+                        lockStart[new_free_ser-1] = simtime;
+                        currFreeSer = new_free_ser;
+                    }
+                } else{
+                    //flush
+                    if (lockStart.size() > 0) {
+                        //std::cout << "flush big " << simtime << std::endl;
+                        for (int i = 0; i < lockStart.size(); i++) {
+                            if (lockStart[i] > 0) {
+                                //std::cout << lockStart[i] << std::endl;
+                                rawLockTimeTot += (simtime-lockStart[i]);
+                                rawLockTimeCount += 1;
+                            }
+                        }
+                        lockStart.resize(0,0); 
+                        //std::cout << rawLockTimeTot << std::endl;
+                    }    
+
+                    //init new lockStart
+                    lockStart.resize(sizes[1]-1,0);
+                    currFreeSer = policy->get_free_ser();
+                    currBigHol = big_hol_id;
+                    //std::cout << "init " << currFreeSer << std::endl;
+                    for (int i = 0; i < currFreeSer; i++) {
+                        lockStart[i] = simtime;
+                    }
+                    //
+                }
+            } else {
+                //flush
+                if (lockStart.size() > 0) {
+                    //std::cout << "flush small " << simtime << std::endl;
+                    for (int i = 0; i < lockStart.size(); i++) {
+                        if (lockStart[i] > 0) {
+                            //std::cout << lockStart[i] << std::endl;
+                            rawLockTimeTot += (simtime-lockStart[i]);
+                            rawLockTimeCount += 1;
+                        }
+                    }
+                    rawLockTimeCount += 1;
+                    lockStart.resize(0,0);
+                }
+            }*/
         }
     }
 
@@ -623,6 +696,10 @@ private:
         if (jobs_tot == 0) {
             idle_period += delta;
         }
+        //occupancy big
+        //int state_ser_big = policy->get_state_ser()[1];
+        //occupancy_big[state_ser_big] += delta;
+        //
 
         unsigned int occ = 0;
         for (int i = 0; i < nclasses; i++) {

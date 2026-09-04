@@ -33,6 +33,7 @@ public:
     virtual bool fit_jobs(std::unordered_map<long int, double> holdTime, double simTime) = 0;
     virtual double get_overest_max() = 0;
     virtual bool prio_big() = 0;
+    virtual long int get_big_hol() = 0;
     virtual int get_state_ser_small() = 0;
     virtual ~Policy() = default;
     virtual std::unique_ptr<Policy> clone() const = 0;

@@ -6,7 +6,7 @@ cores = 2048
 arrival.distribution = "exponential"
 
 service.distribution = "bounded pareto"
-service.alpha = 2.1
+service.alpha = 2.0
 
 
 [[class]]
@@ -143,12 +143,6 @@ service.mean = 570.2348033171434
 [[pivot]]
 policy = [
     "fifo",
-     { name = "kill smart", k = 3, v = 1024},
-     { name = "kill smart", k = 3, v = 512},
-     { name = "kill smart", k = 5, v = 512},
-     { name = "kill smart", k = 5, v = 256},
-     { name = "kill smart", k = 9, v = 256},
-     { name = "kill smart", k = 17, v = 128},
 ]
 
 arrival.rate = [

@@ -37,6 +37,7 @@ public:
     void insert_completion(int size, double completion, long int id) override {};
     void reset_completion(double simtime) override {};
     bool prio_big() override { return false; }
+    long int get_big_hol() override { return 0; };
     int get_state_ser_small() override { return -1; }
     ~DualKill() override = default;
     std::unique_ptr<Policy> clone() const override {

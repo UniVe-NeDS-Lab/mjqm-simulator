@@ -19,6 +19,10 @@ void Orbit::departure(int c, int size, long int id) {
     flush_buffer();
 }
 
+int Orbit::get_window_size() {
+    return orbit.size();
+}
+
 void Orbit::flush_buffer() {
 
     ongoing_jobs.clear();

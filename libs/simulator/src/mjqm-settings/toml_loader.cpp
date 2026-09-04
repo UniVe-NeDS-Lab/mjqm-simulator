@@ -260,6 +260,9 @@ Simulator::Simulator(ExperimentConfig& conf) : nclasses(static_cast<int>(conf.cl
     this->autocorr = false;
     this->arrival_det = false;
     this->autocorr_seq_list.resize(2);
+    this->currBigHol = -1;
+    this->lockStart.resize(0);
+    occupancy_big.resize(3);
 
     occupancy_buf.resize(nclasses);
     occupancy_ser.resize(nclasses);

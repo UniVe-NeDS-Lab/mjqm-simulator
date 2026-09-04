@@ -31,6 +31,7 @@ public:
     bool fit_jobs(std::unordered_map<long int, double> holdTime, double simTime) override { return false; }
     double get_overest_max() override { return 1.0; }
     bool prio_big() override { return false; }
+    long int get_big_hol() override { return 0; };
     int get_state_ser_small() override;
     void reset_completion(double simtime) override {}
     ~MostServerFirst() override = default;

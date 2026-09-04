@@ -15,6 +15,24 @@ void Smash::departure(int c, int size, long int id) {
     freeservers += size;
     flush_buffer();
 }
+
+long int Smash::get_big_hol() {
+    if (!buffer.empty()) {
+        auto first = buffer.front();
+
+        int size = std::get<1>(first);
+        long int id = std::get<2>(first);
+
+        if (size > freeservers && freeservers > 0) {
+            return id;
+        } else {
+            return 0;
+        }
+    } else {
+        return 0;
+    }
+}
+
 void Smash::flush_buffer() {
     ongoing_jobs.clear();
     ongoing_jobs.resize(state_buf.size());

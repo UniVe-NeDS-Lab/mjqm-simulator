@@ -34,6 +34,7 @@ void Orbit::flush_buffer() {
                 state_ser[std::get<0>(*it)]++;
                 state_buf[std::get<0>(*it)]--;
                 ongoing_jobs[std::get<0>(*it)].push_back(std::get<2>(*it));
+                state_orb[std::get<0>(*it)]--;
                 it = orbit.erase(it);
             } else {
                 it++;
@@ -42,19 +43,39 @@ void Orbit::flush_buffer() {
 
         it = buffer.begin();
         //std::cout << freeservers << std::endl;
-        while (freeservers > 0 && it != buffer.end()) {
-            if (freeservers >= std::get<1>(*it)) {
-                freeservers -= std::get<1>(*it);
-                state_ser[std::get<0>(*it)]++;
-                state_buf[std::get<0>(*it)]--;
-                ongoing_jobs[std::get<0>(*it)].push_back(std::get<2>(*it));
-                it = buffer.erase(it);
-            } else if (freeorbits > 0) {
-                this->orbit.push_back(*it);
-                freeorbits -= 1;
-                it = buffer.erase(it);
-            } else {
-                break;
+        if (state_buf.size() == 2) {
+            while (freeservers >= 0 && it != buffer.end()) {
+                if (freeservers >= std::get<1>(*it)) {
+                    freeservers -= std::get<1>(*it);
+                    state_ser[std::get<0>(*it)]++;
+                    state_buf[std::get<0>(*it)]--;
+                    ongoing_jobs[std::get<0>(*it)].push_back(std::get<2>(*it));
+                    it = buffer.erase(it);
+                } else if (freeorbits > 0 && std::get<1>(*it) > 1) {
+                    this->orbit.push_back(*it);
+                    freeorbits -= 1;
+                    state_orb[std::get<0>(*it)]++;
+                    it = buffer.erase(it);
+                } else {
+                    break;
+                }
+            }
+        } else {
+            while (freeservers > 0 && it != buffer.end()) {
+                if (freeservers >= std::get<1>(*it)) {
+                    freeservers -= std::get<1>(*it);
+                    state_ser[std::get<0>(*it)]++;
+                    state_buf[std::get<0>(*it)]--;
+                    ongoing_jobs[std::get<0>(*it)].push_back(std::get<2>(*it));
+                    it = buffer.erase(it);
+                } else if (freeorbits > 0) {
+                    this->orbit.push_back(*it);
+                    freeorbits -= 1;
+                    state_orb[std::get<0>(*it)]++;
+                    it = buffer.erase(it);
+                } else {
+                    break;
+                }
             }
         }
     }

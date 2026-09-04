@@ -19,6 +19,7 @@ public:
     virtual double get_sigma() = 0;
     virtual const std::vector<int>& get_state_ser() = 0;
     virtual const std::vector<int>& get_state_buf() = 0;
+    virtual const std::vector<int>& get_state_orb() = 0;
     virtual const std::vector<std::list<long int>>& get_stopped_jobs() = 0;
     virtual const std::vector<std::list<long int>>& get_ongoing_jobs() = 0;
     virtual const std::vector<int> get_sequence_buffer() = 0;

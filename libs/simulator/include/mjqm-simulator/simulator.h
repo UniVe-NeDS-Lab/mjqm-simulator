@@ -43,6 +43,8 @@ public:
             e = 0;
         for (auto& e : occupancy_buf)
             e = 0;
+        for (auto& e : occupancy_orb)
+            e = 0;
         for (auto& e : autocorr_phase_times)
             e = 0;
         for (auto& e : autocorr_residuals)
@@ -121,6 +123,12 @@ public:
             x /= simtime;
         }
 
+        double toto = 0.0;
+        for (auto& x : occupancy_orb) {
+            x /= simtime;
+            toto += x;
+        }
+
         double utilisation = 0.0;
         std::list<double> totRawWaitingTime;
         std::list<double> totRawResponseTime;
@@ -129,6 +137,7 @@ public:
 
             class_stats.occupancy_buf.collect(occupancy_buf[i]);
             class_stats.occupancy_ser.collect(occupancy_ser[i]);
+            class_stats.occupancy_orb.collect(occupancy_orb[i]);
             class_stats.occupancy_system.collect(occupancy_buf[i] + occupancy_ser[i]);
             class_stats.throughput.collect((double)completion[i] / simtime);
             utilisation += occupancy_ser[i] * sizes[i];
@@ -159,6 +168,7 @@ public:
         stats->violations.collect(policy->get_violations_counter()-viol_ctr);
         stats->utilisation.collect(utilisation / n);
         stats->occupancy_tot.collect(totq);
+        stats->occupancy_orbtot.collect(toto);
 
         auto wt_mean_var = mean_var(totRawWaitingTime);
         stats->wait_tot.collect(wt_mean_var.first);
@@ -337,6 +347,7 @@ private:
     // statistics for single run
     std::vector<double> occupancy_buf;
     std::vector<double> occupancy_ser;
+    std::vector<double> occupancy_orb;
     std::vector<unsigned long> completion;
     std::vector<unsigned long> preemption;
 
@@ -603,8 +614,10 @@ private:
         for (int i = 0; i < nclasses; i++) {
             int state_buf = policy->get_state_buf()[i];
             int state_ser = policy->get_state_ser()[i];
+            int state_orb = policy->get_state_orb()[i];
             occupancy_buf[i] += state_buf * delta;
             occupancy_ser[i] += state_ser * delta;
+            occupancy_orb[i] += state_orb * delta;
             jobs_tot += state_buf + state_ser;
         }
         if (jobs_tot == 0) {

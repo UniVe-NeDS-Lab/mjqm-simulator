@@ -24,6 +24,7 @@ void OrbitRetrial::retry() {
     std::tuple<int,int,long int> e(std::get<0>(job),std::get<1>(job),std::get<2>(job));
     this->buffer.push_front(e);
     orbit.pop_front();
+    state_orb[std::get<0>(e)]--;
     freeorbits += 1;
     flush_buffer();
 }
@@ -58,6 +59,7 @@ void OrbitRetrial::flush_buffer() {
             } else if (freeorbits > 0) {
                 this->orbit.push_back(*it);
                 freeorbits -= 1;
+                state_orb[std::get<0>(*it)]++;
                 it = buffer.erase(it);
             } else {
                 break;

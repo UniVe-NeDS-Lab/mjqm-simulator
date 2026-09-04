@@ -1,0 +1,169 @@
+identifier = "borg_B_orbit_v2"
+repetitions = 20
+cores = 2048
+
+arrival.distribution = "exponential"
+
+service.distribution = "exponential"
+
+
+[[class]]
+cores = 1
+arrival.prob = 0.8392993266737124
+service.mean = 6.670818209090094
+
+[[class]]
+cores = 2
+arrival.prob = 0.049979002091829525
+service.mean = 0.224450764692716
+
+[[class]]
+cores = 3
+arrival.prob = 0.006508356371322629
+service.mean = 5.15671379019361
+
+[[class]]
+cores = 4
+arrival.prob = 0.023577366842412194
+service.mean = 3.1955852362829025
+
+[[class]]
+cores = 5
+arrival.prob = 0.0008797227878056887
+service.mean = 102.19873790827272
+
+[[class]]
+cores = 6
+arrival.prob = 0.0014569164721125885
+service.mean = 120.72594130104356
+
+[[class]]
+cores = 9
+arrival.prob = 0.00008558389112136791
+service.mean = 5.849804523379304
+
+[[class]]
+cores = 10
+arrival.prob = 0.005690333598046299
+service.mean = 13.470126238432995
+
+[[class]]
+cores = 11
+arrival.prob = 0.000033835491838680335
+service.mean = 3869.978617668152
+
+[[class]]
+cores = 14
+arrival.prob = 0.00003980646098668275
+service.mean = 228.9730426311493
+
+[[class]]
+cores = 15
+arrival.prob = 0.0003901033176694909
+service.mean = 12.7212342680717
+
+[[class]]
+cores = 16
+arrival.prob = 0.00007762259892403135
+service.mean = 13966.232180644305
+
+[[class]]
+cores = 20
+arrival.prob = 0.0006926324211682798
+service.mean = 102.57075294680979
+
+[[class]]
+cores = 30
+arrival.prob = 0.0002348581198214282
+service.mean = 0.740345397238004
+
+[[class]]
+cores = 35
+arrival.prob = 0.00021893553542675511
+service.mean = 0.20537715391679243
+
+[[class]]
+cores = 38
+arrival.prob = 0.00005771936843068999
+service.mean = 73.37070080329632
+
+[[class]]
+cores = 50
+arrival.prob = 0.0007145259747109553
+service.mean = 52.465917109114876
+
+[[class]]
+cores = 98
+arrival.prob = 0.00008757421417070205
+service.mean = 0.8119266900149259
+
+[[class]]
+cores = 99
+arrival.prob = 0.0007583130817963064
+service.mean = 5.161066228010523
+
+[[class]]
+cores = 100
+arrival.prob = 0.0685885226031037
+service.mean = 3.0955465282235286
+
+[[class]]
+cores = 120
+arrival.prob = 0.00003582581488801447
+service.mean = 0.2790125211079915
+
+[[class]]
+cores = 200
+arrival.prob = 0.0000796129219733655
+service.mean = 5227.133928918838
+
+[[class]]
+cores = 256
+arrival.prob = 0.00013534196735472134
+service.mean = 3582.756444790784
+
+[[class]]
+cores = 500
+arrival.prob = 0.00021097424322941857
+service.mean = 51.97127277446243
+
+[[class]]
+cores = 795
+arrival.prob = 0.000037816137937348614
+service.mean = 3.3203725814819336
+
+[[class]]
+cores = 2000
+arrival.prob = 0.00012937099820671893
+service.mean = 570.2348033171434
+
+
+[[pivot]]
+events = 100000
+policy = [
+#    "fifo",
+    {name = "orbit", orbit_max = 2},
+    {name = "orbit retrial", orbit_max = 2, sigma = 1, retry_ind = 0},
+    {name = "orbit retrial", orbit_max = 2, sigma = 10, retry_ind = 0},
+    {name = "orbit retrial", orbit_max = 10, sigma = 1, retry_ind = 0},
+    {name = "orbit retrial", orbit_max = 2, sigma = 1, retry_ind = 1},
+    {name = "orbit", orbit_max = 10},
+    {name = "orbit retrial", orbit_max = 10, sigma = 1, retry_ind = 1},
+#    "back filling",
+#    "most server first",
+#    "server filling memoryful",
+#    { name ="quick swap", threshold = 1 },
+#    { name ="quick swap", threshold = 32 },
+#    "first fit",
+#    "adaptive msf",
+#    "static msf",
+#    { name = "smash", window = 2 },
+#    { name = "smash", window = 5 },
+#    { name = "smash", window = 10 },
+]
+#arrival.rate = [0.10458715596330274, 0.2091743119266055, 0.3137614678899082, 0.4183486238532109, 0.5229357798165136, 0.6275229357798164, 0.7321100917431191, 0.8366972477064218, 0.9412844036697247, 1.0458715596330272, 1.1504587155963302, 1.2550458715596329, 1.3596330275229354, 1.4642201834862383, 1.5688073394495412, 1.673394495412844]
+#arrival.rate = [1,1.7,1.8]
+#arrival.rate = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0]
+#arrival.rate = [0.2276879425518927, 0.4553758851037854, 0.6830638276556781, 0.9107517702075707, 1.1384397127594632, 1.366127655311356, 1.5938155978632487, 1.8215035404151414, 2.049191482967034, 2.2768794255189264, 2.5045673680708194, 2.7322553106227123, 2.9599432531746044, 3.1876311957264973, 3.4153191382783903, 3.6430070808302832]
+#arrival.rate = [0.27196227283282426, 0.5439245456656485, 0.8158868184984729, 1.087849091331297, 1.3598113641641212, 1.6317736369969453, 1.9037359098297697, 2.175698182662594, 2.447660455495418, 2.7196227283282424, 2.991585001161067, 3.2635472739938916, 3.535509546826715, 3.8074718196595394, 4.079434092492364, 4.351396365325188]
+arrival.rate = [0.01, 0.0355813, 0.0611625, 0.0867438, 0.112325, 0.137906, 0.163488, 0.189069, 0.21465, 0.240231, 0.265813, 0.291394, 0.316975, 0.342556, 0.368138, 0.393719, 0.4193, 0.444881, 0.470463, 0.496044, 0.61153, 0.727016, 0.842502, 0.957988, 1.07347, 1.18896, 1.30445, 1.41993, 1.53542, 1.6509, 1.76639, 1.88188, 1.99736, 2.11285, 2.22833, 2.34382, 2.45931, 2.57479, 2.69028, 2.80577, 2.92125, 3.03674, 3.15222, 3.26771, 3.3832, 3.49868]
